@@ -7,9 +7,6 @@ let
     textfileDir = "/var/lib/node-exporter-textfile";
 in {
     nixos = { pkgs, config, ... }: let
-        promUid = (lib.findFirst (d: d.type == "prometheus") null
-            config.services.grafana.provision.datasources.settings.datasources).uid;
-
         # Egress drop counters from vm-networking.nix's `cube-vm-egress`
         # (counters, reset by a firewall reload -- `increase()` copes),
         # and refused lookups from vm-egress-dns.nix's query log over
@@ -34,40 +31,8 @@ in {
             chmod 0644 "$tmp"
             mv -f "$tmp" ${textfileDir}/forge_runner_egress.prom
         '';
-
-        # One Grafana rule: query A (instant), reduce B to its last
-        # value, threshold C on B.
-        rule = { uid, title, expr, op, threshold, for ? "0s", noData ? "OK", summary, description }: {
-            inherit uid title for;
-            condition    = "C";
-            noDataState  = noData;
-            execErrState = "Error";
-            labels       = { area = "forge-runner"; };
-            annotations  = { inherit summary description; };
-            data = [
-                {
-                    refId = "A";
-                    relativeTimeRange = { from = 600; to = 0; };
-                    datasourceUid = promUid;
-                    model = { refId = "A"; inherit expr; instant = true; intervalMs = 60000; maxDataPoints = 43200; };
-                }
-                {
-                    refId = "B";
-                    datasourceUid = "__expr__";
-                    model = { refId = "B"; type = "reduce"; expression = "A"; reducer = "last"; };
-                }
-                {
-                    refId = "C";
-                    datasourceUid = "__expr__";
-                    model = {
-                        refId = "C"; type = "threshold"; expression = "B";
-                        conditions = [ { evaluator = { type = op; params = [ threshold ]; }; } ];
-                    };
-                }
-            ];
-        };
     in {
-        # summary: metrics and Grafana alert rules for the Forgejo runner VM
+        # summary: metrics and Prometheus alert rules for the Forgejo runner VM
 
 
         services.prometheus.exporters.node = {
@@ -95,81 +60,88 @@ in {
             };
         };
 
-        # Evaluated by Grafana itself (no Alertmanager); state shows
-        # under Alerting -> Alert rules, folder "forge-runner". Where
-        # notifications go is Grafana's contact points / policy.
-        services.grafana.provision.alerting.rules.settings = {
-            apiVersion = 1;
-            groups = [ {
-                orgId    = 1;
-                name     = "forge-runner";
-                folder   = "forge-runner";
-                interval = "1m";
-                rules = [
-                    (rule {
-                        uid = "forge-runner-egress-not-allowlisted";
-                        title = "Runner guest: connection outside the egress allowlist";
-                        expr = ''sum(increase(forge_runner_egress_dropped_packets_total{reason="not_allowlisted"}[10m]))'';
-                        op = "gt"; threshold = 0;
-                        summary = "A runner job tried to reach an address it wasn't given by the allowlisting resolver.";
-                        description = "Usually a hard-coded IP or a domain missing from vm-egress-dns.nix's allowedDomains. See journalctl -u forge-runner-cycle for the job's time window.";
-                    })
-                    (rule {
-                        uid = "forge-runner-egress-private";
-                        title = "Runner guest: connection to a private or tailnet range";
-                        expr = ''sum(increase(forge_runner_egress_dropped_packets_total{reason="private_range"}[10m]))'';
-                        op = "gt"; threshold = 0;
-                        summary = "A runner job tried to reach the LAN or the tailnet; cube dropped it.";
-                        description = "No legitimate job does this. Check which workflow ran then (repo Actions tab).";
-                    })
-                    (rule {
-                        uid = "forge-runner-dns-refused";
-                        title = "Runner guest: DNS lookups refused";
-                        expr = "max_over_time(forge_runner_dns_refused_5m[10m])";
-                        op = "gt"; threshold = 0;
-                        summary = "A runner job looked up a name outside the allowlist.";
-                        description = "The names are in journalctl -u vm-egress-dns (\"config <name> is NXDOMAIN\"). Add a domain to vm-egress-dns.nix's allowedDomains if a job legitimately needs it.";
-                    })
-                    (rule {
-                        uid = "forge-runner-boot-loop";
-                        title = "Runner guest: failing to start";
-                        expr = "forge_runner_short_cycle_streak";
-                        op = "gt"; threshold = 1;
-                        summary = "Two or more runner cycles in a row ended within two minutes -- the guest is probably dying at boot.";
-                        description = "Check journalctl -u forge-runner-cycle, then ssh forge-runner on cube or sudo virsh console forge-runner.";
-                    })
-                    (rule {
-                        uid = "forge-runner-units-down";
-                        title = "Runner: cycle or allowlist resolver not running";
-                        expr = ''min(node_systemd_unit_state{name=~"forge-runner-cycle.service|vm-egress-dns.service",state="active"})'';
-                        op = "lt"; threshold = 1;
-                        for = "5m"; noData = "Alerting";
-                        summary = "forge-runner-cycle or vm-egress-dns has not been active for 5 minutes.";
-                        description = "systemctl status forge-runner-cycle vm-egress-dns on cube.";
-                    })
+        # Evaluated by Prometheus; notifications go through
+        # alertmanager.nix, state is visible in Grafana's Alerting UI via
+        # its Alertmanager datasource (grafana.nix). `absent()` terms keep
+        # the old Grafana rules' "no data is an alert" behaviour where they
+        # had it.
+        services.prometheus.rules = [
+            (builtins.toJSON {
+                groups = [
+                    {
+                        name     = "forge-runner";
+                        interval = "1m";
+                        rules = [
+                            {
+                                alert  = "ForgeRunnerEgressNotAllowlisted";
+                                expr   = ''sum(increase(forge_runner_egress_dropped_packets_total{reason="not_allowlisted"}[10m])) > 0'';
+                                labels = { area = "forge-runner"; };
+                                annotations = {
+                                    summary     = "Runner guest: connection outside the egress allowlist. A runner job tried to reach an address it wasn't given by the allowlisting resolver.";
+                                    description = "Usually a hard-coded IP or a domain missing from vm-egress-dns.nix's allowedDomains. See journalctl -u forge-runner-cycle for the job's time window.";
+                                };
+                            }
+                            {
+                                alert  = "ForgeRunnerEgressPrivateRange";
+                                expr   = ''sum(increase(forge_runner_egress_dropped_packets_total{reason="private_range"}[10m])) > 0'';
+                                labels = { area = "forge-runner"; };
+                                annotations = {
+                                    summary     = "Runner guest: connection to a private or tailnet range. A runner job tried to reach the LAN or the tailnet; cube dropped it.";
+                                    description = "No legitimate job does this. Check which workflow ran then (repo Actions tab).";
+                                };
+                            }
+                            {
+                                alert  = "ForgeRunnerDnsRefused";
+                                expr   = "max_over_time(forge_runner_dns_refused_5m[10m]) > 0";
+                                labels = { area = "forge-runner"; };
+                                annotations = {
+                                    summary     = "Runner guest: DNS lookups refused. A runner job looked up a name outside the allowlist.";
+                                    description = "The names are in journalctl -u vm-egress-dns (\"config <name> is NXDOMAIN\"). Add a domain to vm-egress-dns.nix's allowedDomains if a job legitimately needs it.";
+                                };
+                            }
+                            {
+                                alert  = "ForgeRunnerBootLoop";
+                                expr   = "forge_runner_short_cycle_streak > 1";
+                                labels = { area = "forge-runner"; };
+                                annotations = {
+                                    summary     = "Runner guest: failing to start. Two or more runner cycles in a row ended within two minutes; the guest is probably dying at boot.";
+                                    description = "Check journalctl -u forge-runner-cycle, then ssh forge-runner on cube or sudo virsh console forge-runner.";
+                                };
+                            }
+                            {
+                                alert  = "ForgeRunnerUnitsDown";
+                                expr   = ''min(node_systemd_unit_state{name=~"forge-runner-cycle.service|vm-egress-dns.service",state="active"}) < 1 or absent(node_systemd_unit_state{name="forge-runner-cycle.service",state="active"})'';
+                                "for"  = "5m";
+                                labels = { area = "forge-runner"; };
+                                annotations = {
+                                    summary     = "Runner: cycle or allowlist resolver not running. forge-runner-cycle or vm-egress-dns has not been active for 5 minutes.";
+                                    description = "systemctl status forge-runner-cycle vm-egress-dns on cube.";
+                                };
+                            }
+                        ];
+                    }
+                    # Host-wide, but here because the likeliest filler is the
+                    # forge: Actions artifacts and logs land in
+                    # /var/lib/forgejo on cube's root filesystem (forgejo.nix
+                    # caps them with a quota and retention).
+                    {
+                        name     = "cube";
+                        interval = "5m";
+                        rules = [
+                            {
+                                alert  = "CubeRootDiskLow";
+                                expr   = ''min(node_filesystem_avail_bytes{mountpoint="/",fstype!="tmpfs"} / node_filesystem_size_bytes{mountpoint="/",fstype!="tmpfs"}) < 0.10 or absent(node_filesystem_avail_bytes{mountpoint="/",fstype!="tmpfs"})'';
+                                "for"  = "15m";
+                                labels = { area = "cube"; };
+                                annotations = {
+                                    summary     = "cube: root filesystem under 10% free.";
+                                    description = "Check du -sh /var/lib/forgejo /var/lib/libvirt/images /nix/store on cube; nix-collect-garbage if the store is the cause.";
+                                };
+                            }
+                        ];
+                    }
                 ];
-              }
-              # Host-wide, but here because the likeliest filler is the
-              # forge: Actions artifacts and logs land in
-              # /var/lib/forgejo on cube's root filesystem (forgejo.nix
-              # caps them with a quota and retention).
-              {
-                orgId    = 1;
-                name     = "cube";
-                folder   = "cube";
-                interval = "5m";
-                rules = [
-                    (rule {
-                        uid = "cube-root-disk-low";
-                        title = "cube: root filesystem under 10% free";
-                        expr = ''min(node_filesystem_avail_bytes{mountpoint="/",fstype!="tmpfs"} / node_filesystem_size_bytes{mountpoint="/",fstype!="tmpfs"})'';
-                        op = "lt"; threshold = 0.10;
-                        for = "15m"; noData = "Alerting";
-                        summary = "cube's / has less than 10% free.";
-                        description = "Check du -sh /var/lib/forgejo /var/lib/libvirt/images /nix/store on cube; nix-collect-garbage if the store is the cause.";
-                    })
-                ];
-            } ];
-        };
+            })
+        ];
     };
 }

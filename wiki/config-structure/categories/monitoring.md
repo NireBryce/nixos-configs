@@ -1,8 +1,8 @@
 # `monitoring` — `homelab-config/homelab/monitoring/`
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-11-08_
 
-Prometheus + Grafana, scraping this host's own resource metrics. Cube-only so
+Prometheus + Alertmanager + Grafana, scraping this host's own resource metrics. Cube-only so
 far (added 2026-08-23; under the `homelab` umbrella since 2026-08-27).
 
 Since 2026-09-07 Grafana is at `https://grafana.moose-micro.ts.net/`, its own
@@ -82,14 +82,24 @@ All `nixos`-class:
   textfile collector (`/var/lib/node-exporter-textfile`) and its systemd
   collector, limited to the runner's units. A one-minute timer writes the
   guest egress drop counters and the resolver's refused-lookup count; the
-  runner's cycle loop writes its own gauges. Grafana alert rules are
-  provisioned: blocked connections outside the
-  allowlist or into private ranges, refused DNS, a guest failing to boot,
-  and the cycle or resolver not running (folder `forge-runner`), plus cube's
-  root filesystem running low on free space (folder `cube`) — there because Actions
-  artifacts and logs are the likeliest thing to fill it. They are
-  Grafana-evaluated (no Alertmanager); where notifications go is Grafana's
-  contact points.
+  runner's cycle loop writes its own gauges. Prometheus alert rules cover
+  blocked connections outside the allowlist or into private ranges, refused
+  DNS, a guest failing to boot, and the cycle or resolver not running (area
+  `forge-runner`), plus cube's root filesystem running low on free space
+  (area `cube`) — there because Actions artifacts and logs are the likeliest
+  thing to fill it. Until 2026-11-08 these were Grafana-evaluated rules.
+- **`snmp-exporter/snmp-exporter.nix`** — polls the `ts-hive` QNAP over
+  SNMPv3 (SHA auth, DES privacy, the only privacy protocol the NAS offers).
+  Credentials come from `/persist/secrets/snmp-exporter.env`, not Nix; the
+  unit fails to start until that file exists. Standard MIBs only so far
+  (uptime, `hrStorage`, interface counters); QNAP's own disk and volume
+  tables need a module generated from the NAS's MIB file.
+- **`qnap-alerts/qnap-alerts.nix`** — Prometheus rules for the NAS:
+  unreachable, and a volume over 90% full. The volume rule's
+  `hrStorageDescr` regex is unverified against the NAS.
+- **`alertmanager/alertmanager.nix`** — receives the alerts from
+  `prometheus.nix`. Its `default` receiver has no notification channel yet,
+  so alerts show in Grafana (Alertmanager datasource) and go nowhere else.
 
 ## Tailnet-only access, not a new firewall mechanism
 

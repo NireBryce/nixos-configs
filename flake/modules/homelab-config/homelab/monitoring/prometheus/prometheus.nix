@@ -5,7 +5,9 @@
 
 # summary: Prometheus itself: scrapes the four loopback-only exporters
 # (node-exporter.nix, cadvisor.nix, libvirt-exporter.nix, smartctl-exporter.nix)
-# and stores the time series grafana.nix's dashboard reads from.
+# and the QNAP through snmp-exporter.nix, stores the time series
+# grafana.nix's dashboard reads from, and hands rule alerts to
+# alertmanager.nix.
 {
     nixos = { config, ... }:
     let
@@ -29,6 +31,10 @@
             # are fine for a single homelab host's worth of series; not
             # overridden here.
 
+            alertmanagers = [ {
+                static_configs = [ { targets = [ "${config.services.prometheus.alertmanager.listenAddress}:${toString config.services.prometheus.alertmanager.port}" ]; } ]; # alertmanager.nix
+            } ];
+
             scrapeConfigs = [
                 {
                     job_name        = "node";
@@ -45,6 +51,23 @@
                 {
                     job_name        = "smartctl";
                     static_configs  = [ { targets = [ "${loopback}:${toString exporters.smartctl.port}" ]; } ]; # smartctl-exporter.nix
+                }
+                {
+                    # The SNMP exporter's multi-target pattern: Prometheus
+                    # asks the local exporter to poll the NAS. The NAS name
+                    # becomes the `instance` label; the scrape itself goes
+                    # to the exporter on loopback.
+                    job_name        = "qnap";
+                    metrics_path    = "/snmp";
+                    params          = { module = [ "qnap" ]; auth = [ "qnap_v3" ]; };
+                    static_configs  = [ { targets = [ "ts-hive" ]; } ];
+                    scrape_interval = "1m";
+                    scrape_timeout  = "30s";
+                    relabel_configs = [
+                        { source_labels = [ "__address__" ]; target_label = "__param_target"; }
+                        { source_labels = [ "__param_target" ]; target_label = "instance"; }
+                        { target_label = "__address__"; replacement = "${loopback}:${toString exporters.snmp.port}"; } # snmp-exporter.nix
+                    ];
                 }
             ];
         };
