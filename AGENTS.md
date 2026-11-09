@@ -14,7 +14,8 @@
 > is what the harness's skill handling keys on, and it reports the skill's
 > base directory for its relative links. Read the file only to inspect a
 > skill without running it, or in a harness with no such tool (the files are
-> plain markdown, so any agent can follow them that way).
+> plain markdown, so any agent can follow them that way). Detail:
+> `wiki/llm-aided-dev/skill-locations.md`.
 >
 > This file holds what applies to every session. Path-specific detail lives
 > in `.agents/rules/*.md`. Claude Code loads a rule file only when a file
