@@ -68,7 +68,7 @@ shape.
 
 | Item | Where |
 |---|---|
-| 4 | `just age-key` → update `.sops.yaml` → `sops updatekeys secrets.yaml`; [../config-structure/impermanence-and-secrets.md](../config-structure/impermanence-and-secrets.md) |
+| 4 | `just init-age-key` → update `.sops.yaml` → `sops updatekeys secrets.yaml`; [../config-structure/impermanence-and-secrets.md](../config-structure/impermanence-and-secrets.md) |
 | 5, 6 | [../homelab/backup-runbook.md](../homelab/backup-runbook.md) |
 | 11 | `packages-config/shell-apps/history/atuin-key-rotation.md` |
 

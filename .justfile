@@ -299,6 +299,7 @@ preflight:
     @python3 flake/scripts/tests/test_parallel_unittest.py
     @python3 flake/scripts/tests/test_extracted_scripts.py
     @python3 flake/scripts/tests/test_comment_wrap.py
+    @python3 flake/scripts/tests/test_init_ssh_handle.py
     @just guards-test
     @just preflight-mirror-test
     @python3 flake/scripts/tests/test_offline_checks.py
@@ -474,7 +475,7 @@ read-sops-names *args:
 
 # A host's sops recipient key: bare for this machine, a hostname to scan it
 # remotely, --pubkey-file <path>, or --updatekeys to re-encrypt secrets.yaml
-age-key *args:
+init-age-key *args:
     # Only ever reads a public key and prints -- does not edit .sops.yaml.
     # See flake/scripts/host-age-key.sh for why, and for the enrollment steps
     # it prints after the key.
@@ -485,8 +486,21 @@ age-key *args:
 # identity at ~/.config/sops/age/keys.txt, the path sops actually reads
 # from. Default key: ~/.ssh/id_ed25519. -i <path> for a different one,
 # --force to overwrite an existing keys.txt.
-sops-user-identity *args:
+init-sops-user-identity *args:
     @{{scripts}}/sops-user-identity.sh {{args}}
+
+# New-machine step: recreate the YubiKey's FIDO2 SSH handle file at
+# ~/.ssh/id_ed25519_sk, installing only the credential ssh.nix authorizes
+# (not every resident key `ssh-keygen -K` finds). --force to overwrite,
+# --fingerprint SHA256:... to pick a different key.
+init-ssh-handle *args:
+    @{{scripts}}/init-ssh-handle.sh {{args}}
+
+# Fixtures with a stand-in ssh-keygen for the hardware download: only the
+# matching credential is installed, nothing is clobbered without --force.
+# Skips without ssh-keygen; runs in preflight and CI
+init-ssh-handle-test:
+    python3 {{scripts}}/tests/test_init_ssh_handle.py
 
 # Has this already been seen? GitHub issues + wiki/ + agent-lessons-learned.md
 # positional-arguments + "$@": arguments reach the script as-is, never

@@ -113,7 +113,7 @@ protect one row.
   `flake/modules/general-config/system/secrets/.sops.yaml` (`nire-durandal`,
   `nire-lysithea`, `nire-tenacity`, `nire-cube`; the rule for `secrets.yaml`)
   are each derived from that host's own `/etc/ssh/ssh_host_ed25519_key.pub`
-  via `just age-key` (`flake/scripts/host-age-key.sh`) — not standalone
+  via `just init-age-key` (`flake/scripts/host-age-key.sh`) — not standalone
   `age-keygen` keypairs. The file also holds user-key recipients
   (`elly`, `elly-lysithea`) for `low-side/secrets.yaml` only; those are SSH
   user keys, not host keys (skill `low-side-secrets`).
@@ -121,7 +121,7 @@ protect one row.
   timer. They **do** change whenever a host's SSH host key is regenerated
   (a reinstall, a `sshd` host-key rotation), which silently orphans that
   host's entry in `.sops.yaml` until re-enrolled.
-- **Action when it happens**: re-run `just age-key` for the affected host,
+- **Action when it happens**: re-run `just init-age-key` for the affected host,
   update `.sops.yaml`, then `sops updatekeys secrets.yaml` — see
   [../config-structure/impermanence-and-secrets.md](../config-structure/impermanence-and-secrets.md)'s Secrets
   section.
@@ -370,7 +370,7 @@ admin account with a publicly-known password, not an absence. Skill
   how to check or touch any of the underlying secrets without printing
   their plaintext.
 - [Impermanence, initrd & secrets](../config-structure/impermanence-and-secrets.md) — the sops
-  mechanism these age-key and rotation procedures build on.
+  mechanism these init-age-key and rotation procedures build on.
 - [../homelab/backup-runbook.md](../homelab/backup-runbook.md) — the actual
   rotation commands for the restic/`ts-hive` items.
 - [../homelab/pending-setup.md](../homelab/pending-setup.md) — one-time setup
