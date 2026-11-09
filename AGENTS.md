@@ -6,8 +6,15 @@
 > point.
 >
 > This file is canonical; `CLAUDE.md` is a symlink to it. Skills named below
-> are plain markdown at `.agents/skills/<name>/SKILL.md`; any agent can read
-> them as files.
+> live at `.agents/skills/<name>/SKILL.md`; `.claude/skills` is a symlink to
+> that directory, so both paths are the same files.
+>
+> **Where a harness has a skill-loading tool, load a named skill with it**
+> (Claude Code: the `Skill` tool, by name), not by reading the file. The tool
+> is what the harness's skill handling keys on, and it reports the skill's
+> base directory for its relative links. Read the file only to inspect a
+> skill without running it, or in a harness with no such tool (the files are
+> plain markdown, so any agent can follow them that way).
 >
 > This file holds what applies to every session. Path-specific detail lives
 > in `.agents/rules/*.md`. Claude Code loads a rule file only when a file
@@ -116,8 +123,8 @@ off: warn the user, and run commands through `just agent guard-check` (skill
 
 ## Traps
 
-One line per task. Read the rule (short) or skill (full mechanism) before the
-matching task. Under Claude Code and ZCode, the lesson-reminder hook adds each
+One line per task. Read the rule (short) or load the skill (full mechanism)
+before the matching task. Under Claude Code and ZCode, the lesson-reminder hook adds each
 area's one-line reminder to your context on the first edit or command that
 touches it, from `.agents/lessons-map.toml`.
 
