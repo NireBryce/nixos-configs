@@ -112,7 +112,7 @@ one with a subdirectory ([blesh](config-structure/categories/shell-config/blesh-
 [homelab/00-INDEX.md](homelab/00-INDEX.md) — reaching
 services, the forge
 ([practice loop](homelab/practice-environment.md) included),
-[Grafana](homelab/grafana.md), go/ links, and what's
+[Grafana](homelab/grafana.md), [QNAP monitoring](homelab/qnap-monitoring.md), go/ links, and what's
 running but unfinished.
 
 ## Experiments (open questions)
