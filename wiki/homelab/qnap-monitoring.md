@@ -59,7 +59,8 @@ snmp-exporter-env: |
 
 Edit it with `sops` on `secrets.yaml`. Do not quote the values, and avoid
 spaces, `#` and `$` in them: systemd parses the file. To change a password,
-change it on the NAS and in this key, then `just switch` on cube. Check the
+change it on the NAS and in this key, then `just switch` on cube; the switch
+restarts the exporter, which reads the file only at start. Check the
 key exists with `just read-sops-names`, which prints names only.
 
 ## First check after a switch
@@ -71,11 +72,28 @@ systemctl status prometheus-snmp-exporter
 curl -s '127.0.0.1:9116/snmp?module=qnap&auth=qnap_v3&target=ts-hive' | grep -c '^storagepoolStatus'
 ```
 
-- The exporter should be `active`. If it is not, read its journal: an
-  authentication error means the user, hash or passwords differ from the
-  NAS's.
-- A timeout with `tailscale ping ts-hive` working is the tailnet policy:
-  check the `udp:161` grant above before anything on the NAS.
+- The exporter should be `active`. If it is not, read its journal
+  (`journalctl -u prometheus-snmp-exporter`). The scrape error says where it
+  stopped:
+  - `request timeout (after 3 retries)`: nothing came back. With
+    `tailscale ping ts-hive` working, this is the tailnet policy: check the
+    `udp:161` grant above before anything on the NAS.
+  - `incoming packet is not authentic, discarding`: the NAS answered, but its
+    reply fails the exporter's authentication check. The auth protocol (SHA)
+    or the auth password differs from the NAS's, or the value the exporter
+    got is not the one entered on the NAS.
+- To tell a NAS-side mismatch from a problem in the secret, query the NAS
+  directly from cube with the passwords typed at a prompt, which skips sops
+  and the env file:
+
+  ```sh
+  read -rs A; echo; read -rs X; echo
+  nix shell nixpkgs#net-snmp -c snmpget -v3 -l authPriv -u <user> -a SHA -A "$A" -x DES -X "$X" ts-hive 1.3.6.1.2.1.1.3.0
+  ```
+
+  An uptime means the NAS accepts those credentials, so look at what the
+  secret holds. An authentication failure means the NAS side needs fixing.
+  Run it on cube: only cube has the `udp:161` grant.
 - The count should be at least 1. A reply with `sysUpTime` but no
   `storagepoolStatus` means the NAS answers but not under the `QTS-MIB` tree
   (`1.3.6.1.4.1.55062`). The `QnapMetricsMissing` alert fires after 15

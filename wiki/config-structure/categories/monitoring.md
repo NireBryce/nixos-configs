@@ -92,10 +92,12 @@ All `nixos`-class:
   SNMPv3 (SHA auth, DES privacy, the only privacy protocol the NAS offers).
   Credentials come from the sops key `snmp-exporter-env` (an env file as
   a multi-line string), not Nix; cube fails activation until the key is in
-  `secrets.yaml`. It collects the standard MIBs (uptime, `hrStorage`,
-  interface counters) and QNAP's own disk, RAID, storage-pool, fan, power and
-  temperature objects. Those OIDs come from the NAS's QTS-MIB (enterprise
-  55062, branch `.2`), not the older 24681 tree.
+  `secrets.yaml`. A change to the key restarts the exporter on the next
+  switch (`restartUnits`), because it reads the file only at start. It
+  collects the standard MIBs (uptime, `hrStorage`, interface counters) and
+  QNAP's own disk, RAID, storage-pool, fan, power and temperature objects.
+  Those OIDs come from the NAS's QTS-MIB (enterprise 55062, branch `.2`), not
+  the older 24681 tree.
 - **`qnap-alerts/qnap-alerts.nix`** — Prometheus rules for the NAS:
   unreachable, QNAP's own metrics missing, a storage pool in an error state or
   over 90% full, a disk over 55 C, and a power failure. There is no rule on

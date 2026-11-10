@@ -66,7 +66,12 @@
         fan  = column { idx = "sysFanIndex"; lookup = { name = "sysFanDescr"; oid = "${system}.9.1.2"; }; };
     in {
         # Root-owned (the default): the unit reads it as root.
-        sops.secrets.snmp-exporter-env = { };
+        # restartUnits: the exporter reads its EnvironmentFile once, at start.
+        # A switch that changes the secret rewrites the file but does not
+        # restart the unit, so the old credentials kept being used until a
+        # manual restart (2026-11-09: four restarts while the NAS credentials
+        # were being set).
+        sops.secrets.snmp-exporter-env.restartUnits = [ "prometheus-snmp-exporter.service" ];
 
         services.prometheus.exporters.snmp = {
             enable = true;
