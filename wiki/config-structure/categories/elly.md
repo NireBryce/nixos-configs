@@ -1,6 +1,6 @@
 # `elly` — `users-config/elly/`
 
-_Last modified: 2026-11-07_
+_Last modified: 2026-11-09_
 
 The one category under `users-config/`, the per-user area (as opposed to
 `general-config/` for shared system or `packages-config/` for packages). Not to
@@ -99,6 +99,12 @@ fatal: failed to write commit object
 - A failed signing commit inside `just agent recurring export` left
   `.git/index.lock` in the command-log repo. Delete it once `pgrep -a git`
   shows nothing running.
+- `nire-cube` has no Bitwarden app and no agent. Its commits sign with the
+  key file `~/.ssh/id_ed25519` and ask for its passphrase on the terminal:
+  `host-config/cube/configuration/git-signing-cube.nix` overrides
+  `signing.key` with that path. It is cube's own key, not the one Bitwarden
+  serves, so its commits show as verified on GitHub only after its public
+  half is added there as a signing key.
 
 ## `elly` as the experimental user
 

@@ -112,7 +112,7 @@ flowchart LR
         n27("<b>test-harnesses-for-polymorph/</b><br/><i>n · 4</i>")
     end
     subgraph g2["host-config"]
-        n16("<b>cube/</b><br/><i>n · 10</i>")
+        n16("<b>cube/</b><br/><i>n · 11</i>")
         n17("<b>durandal/</b><br/><i>n · 9</i>")
         n18("<b>lysithea/</b><br/><i>d · 2</i>")
         n19("<b>tenacity/</b><br/><i>n h · 10</i>")
