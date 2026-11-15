@@ -109,7 +109,7 @@ flowchart LR
         n24("<b>nix-utils/</b><br/><i>n h · 4</i>")
         n25("<b>shell-apps/</b><br/><i>n h · 40</i>")
         n26("<b>terminals/</b><br/><i>h · 3</i>")
-        n27("<b>test-harnesses-for-polymorph/</b><br/><i>n · 4</i>")
+        n27("<b>test-harnesses-for-polymorph/</b><br/><i>n · 3</i>")
     end
     subgraph g2["host-config"]
         n16("<b>cube/</b><br/><i>n · 11</i>")
