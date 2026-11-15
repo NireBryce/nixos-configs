@@ -29,30 +29,30 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import recurring as r  # noqa: E402
+import recurring  # noqa: E402
 
 KNOWN = {'git', 'gh', 'nix', 'grep', 'sed', 'cat', 'head', 'tail', 'echo',
          'ls', 'find', 'ssh', 'curl', 'jq', 'sops', 'cut', 'wc', 'python3',
          'host', 'id', 'dir', 'printf', 'sort', 'uniq', 'stat', 'test',
          'mkdir', 'rm', 'du', 'xargs', 'sh', 'bash', 'eval', 'just'}
-r.is_command = lambda name: name in KNOWN
+recurring.is_command = lambda name: name in KNOWN
 # Pinned too: the real vocabulary comes from `just --summary` in the repo.
 RECIPES = {'preflight': set(), 'build': set(),
            'agent': {'show', 'recurring', 'where'}}
-r.just_recipes = lambda: RECIPES
+recurring.just_recipes = lambda: RECIPES
 
 
 def vocabulary():
-    words = (set(KNOWN) | r.FIND_OPTS
+    words = (set(KNOWN) | recurring.FIND_OPTS
              | {'<cmd>', '-N', '--', '-', '<loop>', '<func>', '<heredoc>'}
-             | {f'<{t}>' for t in TYPES})
+             | {f'<{type_name}>' for type_name in TYPES})
     def walk(subs):
-        for k, v in (subs.items() if isinstance(subs, dict) else
-                     ((w, None) for w in subs)):
-            words.add(k)
-            if v:
-                walk(v)
-    for tool, subs in r.SUBCOMMANDS.items():
+        for word, children in (subs.items() if isinstance(subs, dict) else
+                     ((word, None) for word in subs)):
+            words.add(word)
+            if children:
+                walk(children)
+    for tool, subs in recurring.SUBCOMMANDS.items():
         walk(subs)
     walk(RECIPES)
     return words
@@ -166,13 +166,13 @@ PIPELINES = [
 
 
 def all_cases():
-    return [c for c, _ in LEAKS] + [c for c, _ in SHAPES] + [c for c, _ in PIPELINES]
+    return [case for case, _ in LEAKS] + [case for case, _ in SHAPES] + [case for case, _ in PIPELINES]
 
 
 class ShapeLeaks(unittest.TestCase):
     def test_closed_vocabulary(self):
         for cmd in all_cases():
-            for seg in r.shape(cmd):
+            for seg in recurring.shape(cmd):
                 for tok in seg.split():
                     with self.subTest(cmd=cmd, token=tok):
                         self.assertTrue(tok in VOCAB or FLAG_FORMS.match(tok),
@@ -180,7 +180,7 @@ class ShapeLeaks(unittest.TestCase):
 
     def test_no_named_literal(self):
         for cmd, literals in LEAKS:
-            out = ' '.join(r.shape(cmd))
+            out = ' '.join(recurring.shape(cmd))
             for lit in literals:
                 with self.subTest(cmd=cmd, literal=lit):
                     self.assertNotIn(lit, out)
@@ -188,12 +188,12 @@ class ShapeLeaks(unittest.TestCase):
     def test_shapes(self):
         for cmd, want in SHAPES:
             with self.subTest(cmd=cmd):
-                self.assertEqual(r.shape(cmd), want)
+                self.assertEqual(recurring.shape(cmd), want)
 
     def test_pipelines(self):
         for cmd, want in PIPELINES:
             with self.subTest(cmd=cmd):
-                self.assertEqual(r.pipelines(cmd), want)
+                self.assertEqual(recurring.pipelines(cmd), want)
 
 
 
@@ -202,13 +202,13 @@ class Export(unittest.TestCase):
     the shapes, session ids hashed, nothing else."""
 
     def rows(self):
-        return [(f'sess-{i % 3}', c) for i, c in enumerate(all_cases())]
+        return [(f'sess-{index % 3}', case) for index, case in enumerate(all_cases())]
 
     def test_export_is_vocabulary_only(self):
-        doc = r.to_json(r.collect(self.rows(), 'claude'))
-        for h in doc['sessions']:
-            self.assertRegex(h, r'^[0-9a-f]{12}$')
-        for kind in r.KINDS:
+        doc = recurring.to_json(recurring.collect(self.rows(), 'claude'))
+        for session_id in doc['sessions']:
+            self.assertRegex(session_id, r'^[0-9a-f]{12}$')
+        for kind in recurring.KINDS:
             for key, hashes in doc[kind].items():
                 for tok in key.replace('\t', ' ').split():
                     with self.subTest(kind=kind, token=tok):
@@ -217,23 +217,23 @@ class Export(unittest.TestCase):
                 self.assertTrue(set(hashes) <= set(doc['sessions']))
         self.assertNotIn('sess-', json.dumps(doc))   # raw session ids stay home
         for cmd, literals in LEAKS:    # each case alone: literals are per case
-            blob = json.dumps(r.to_json(r.collect([('s', cmd)], 'claude')))
+            blob = json.dumps(recurring.to_json(recurring.collect([('s', cmd)], 'claude')))
             for lit in literals:
                 with self.subTest(cmd=cmd, literal=lit):
                     self.assertNotIn(lit, blob)
 
     def test_json_roundtrip_and_merge(self):
-        a = r.collect(self.rows()[:10], 'claude')
-        b = r.collect(self.rows()[5:], 'claude')
-        merged = r.merge(r.from_json(json.loads(json.dumps(r.to_json(a)))), b)
-        whole = r.collect(self.rows(), 'claude')
-        self.assertEqual(r.to_json(merged)['chains'], r.to_json(whole)['chains'])
+        first = recurring.collect(self.rows()[:10], 'claude')
+        second = recurring.collect(self.rows()[5:], 'claude')
+        merged = recurring.merge(recurring.from_json(json.loads(json.dumps(recurring.to_json(first)))), second)
+        whole = recurring.collect(self.rows(), 'claude')
+        self.assertEqual(recurring.to_json(merged)['chains'], recurring.to_json(whole)['chains'])
         self.assertEqual(set(merged['sessions']), set(whole['sessions']))
 
     def test_rank_counts_sessions_not_uses(self):
         rows = [('s1', 'git fetch origin && git status -sb')] * 5 + \
                [('s2', 'git fetch up && git status -sb')]
-        seq = r.rank(r.collect(rows, 'claude'), 1, 5, 4)['sequences']
+        seq = recurring.rank(recurring.collect(rows, 'claude'), 1, 5, 4)['sequences']
         self.assertEqual(seq, [{'sessions': 2,
                                 'chain': ['git fetch <word>', 'git status -sb']}])
 
@@ -242,7 +242,7 @@ class Export(unittest.TestCase):
                 ('s2', 'just agent show x.nix:1-9'),
                 ('s2', 'just host=y build'),
                 ('s3', 'just mystery thing')]
-        got = r.rank(r.collect(rows, 'claude'), 1, 5, 4)['just']
+        got = recurring.rank(recurring.collect(rows, 'claude'), 1, 5, 4)['just']
         self.assertEqual(got, [{'sessions': 2, 'recipe': 'agent show'},
                                {'sessions': 1, 'recipe': '<word>'},
                                {'sessions': 1, 'recipe': 'build'}])
@@ -257,19 +257,19 @@ class ClaudeReader(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.projects = Path(self.tmp.name)
-        saved = r.PROJECTS, r.checkout_root
-        self.addCleanup(lambda: setattr(r, 'PROJECTS', saved[0]))
-        self.addCleanup(lambda: setattr(r, 'checkout_root', saved[1]))
-        r.PROJECTS = self.projects
-        r.checkout_root = lambda: Path('/home/u/my.checkout')
+        saved = recurring.PROJECTS, recurring.checkout_root
+        self.addCleanup(lambda: setattr(recurring, 'PROJECTS', saved[0]))
+        self.addCleanup(lambda: setattr(recurring, 'checkout_root', saved[1]))
+        recurring.PROJECTS = self.projects
+        recurring.checkout_root = lambda: Path('/home/u/my.checkout')
 
     def session(self, directory, cmd, call_id):
-        d = self.projects / directory
-        d.mkdir(exist_ok=True)
+        project_dir = self.projects / directory
+        project_dir.mkdir(exist_ok=True)
         line = json.dumps({'sessionId': directory, 'message': {'content': [
             {'type': 'tool_use', 'name': 'Bash', 'id': call_id,
              'input': {'command': cmd}}]}})
-        (d / 'a.jsonl').write_text(line + '\n')
+        (project_dir / 'a.jsonl').write_text(line + '\n')
 
     def test_reads_this_checkouts_directory_whatever_it_is_called(self):
         self.session('-home-u-my-checkout', 'git status', 'c1')
@@ -277,7 +277,7 @@ class ClaudeReader(unittest.TestCase):
         self.session('-home-u-projects-nixos-nixos-configs', 'pwd', 'c3')
         self.session('-home-u-elsewhere', 'other repo', 'c4')
         self.session('-home-u-my-checkoutish', 'not a sibling', 'c5')
-        self.assertEqual(sorted(cmd for _, cmd in r.claude_rows()),
+        self.assertEqual(sorted(cmd for _, cmd in recurring.claude_rows()),
                          ['git status', 'ls', 'pwd'])
 
 
@@ -286,8 +286,8 @@ class SqliteReader(unittest.TestCase):
     filtered to this repo by directory."""
 
     def test_reads_bash_parts_in_this_repo_only(self):
-        with tempfile.TemporaryDirectory() as d:
-            path = Path(d) / 'db.sqlite'
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / 'db.sqlite'
             db = sqlite3.connect(path)
             db.execute('create table session (id text, directory text)')
             db.execute('create table part (id text, session_id text, data text)')
@@ -305,15 +305,15 @@ class SqliteReader(unittest.TestCase):
             ])
             db.commit()
             db.close()
-            self.assertEqual(list(r.sqlite_rows(path)),
+            self.assertEqual(list(recurring.sqlite_rows(path)),
                              [('s1', 'git status'), ('s1', 'ls')])
 
     def test_reads_sessions_by_checkout_directory(self):
-        saved = r.checkout_root
-        self.addCleanup(lambda: setattr(r, 'checkout_root', saved))
-        r.checkout_root = lambda: Path('/home/u/nixos')
-        with tempfile.TemporaryDirectory() as d:
-            path = Path(d) / 'db.sqlite'
+        saved = recurring.checkout_root
+        self.addCleanup(lambda: setattr(recurring, 'checkout_root', saved))
+        recurring.checkout_root = lambda: Path('/home/u/nixos')
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / 'db.sqlite'
             db = sqlite3.connect(path)
             db.execute('create table session (id text, directory text)')
             db.execute('create table part (id text, session_id text, data text)')
@@ -328,14 +328,14 @@ class SqliteReader(unittest.TestCase):
                 ('p3', 's3', part('other'))])
             db.commit()
             db.close()
-            self.assertEqual(list(r.sqlite_rows(path)),
+            self.assertEqual(list(recurring.sqlite_rows(path)),
                              [('s1', 'main'), ('s2', 'sibling')])
 
     def test_unreadable_db_yields_nothing(self):
-        with tempfile.TemporaryDirectory() as d:
-            path = Path(d) / 'empty.sqlite'
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / 'empty.sqlite'
             sqlite3.connect(path).close()      # no tables
-            self.assertEqual(list(r.sqlite_rows(path)), [])
+            self.assertEqual(list(recurring.sqlite_rows(path)), [])
 
 
 
@@ -345,34 +345,34 @@ class ExportFlow(unittest.TestCase):
 
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
-        d = Path(self.tmp.name)
-        self.saved = (r.REMOTE, r.LOG_DIR, r.GIT_ENV, r.HARNESSES)
+        base_dir = Path(self.tmp.name)
+        self.saved = (recurring.REMOTE, recurring.LOG_DIR, recurring.GIT_ENV, recurring.HARNESSES)
         env = {**os.environ, 'GIT_CONFIG_GLOBAL': os.devnull,
                'GIT_AUTHOR_NAME': 't', 'GIT_AUTHOR_EMAIL': 't@t',
                'GIT_COMMITTER_NAME': 't', 'GIT_COMMITTER_EMAIL': 't@t'}
-        run = lambda *a, cwd=None: subprocess.run(a, cwd=cwd, env=env, check=True,
+        run = lambda *args, cwd=None: subprocess.run(args, cwd=cwd, env=env, check=True,
                                                   capture_output=True)
-        run('git', 'init', '-q', '--bare', '-b', 'main', str(d / 'forge.git'))
-        run('git', 'init', '-q', '-b', 'main', str(d / 'seed'))
-        (d / 'seed' / 'README.md').write_text('log\n')
-        run('git', 'add', 'README.md', cwd=d / 'seed')
-        run('git', 'commit', '-qm', 'init', cwd=d / 'seed')
-        run('git', 'push', '-q', str(d / 'forge.git'), 'main', cwd=d / 'seed')
-        r.REMOTE, r.LOG_DIR, r.GIT_ENV = str(d / 'forge.git'), d / 'clone', env
-        self.forge = d / 'forge.git'
-        self.rows = [(f's{i}', 'git fetch origin && git status -sb') for i in range(4)]
-        r.HARNESSES = {'claude': lambda: iter(self.rows)}
+        run('git', 'init', '-q', '--bare', '-b', 'main', str(base_dir / 'forge.git'))
+        run('git', 'init', '-q', '-b', 'main', str(base_dir / 'seed'))
+        (base_dir / 'seed' / 'README.md').write_text('log\n')
+        run('git', 'add', 'README.md', cwd=base_dir / 'seed')
+        run('git', 'commit', '-qm', 'init', cwd=base_dir / 'seed')
+        run('git', 'push', '-q', str(base_dir / 'forge.git'), 'main', cwd=base_dir / 'seed')
+        recurring.REMOTE, recurring.LOG_DIR, recurring.GIT_ENV = str(base_dir / 'forge.git'), base_dir / 'clone', env
+        self.forge = base_dir / 'forge.git'
+        self.rows = [(f's{index}', 'git fetch origin && git status -sb') for index in range(4)]
+        recurring.HARNESSES = {'claude': lambda: iter(self.rows)}
         with contextlib.redirect_stdout(io.StringIO()):
-            self.assertEqual(r.setup(), 0)
+            self.assertEqual(recurring.setup(), 0)
 
     def tearDown(self):
-        r.REMOTE, r.LOG_DIR, r.GIT_ENV, r.HARNESSES = self.saved
+        recurring.REMOTE, recurring.LOG_DIR, recurring.GIT_ENV, recurring.HARNESSES = self.saved
         self.tmp.cleanup()
 
     def export(self):
         out = io.StringIO()
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(io.StringIO()):
-            rc = r.export()
+            rc = recurring.export()
         return rc, out.getvalue()
 
     def test_export_file_and_push(self):
@@ -380,41 +380,41 @@ class ExportFlow(unittest.TestCase):
         self.assertEqual(rc, 0, out)
         self.assertIn('exported claude 4', out)
         self.assertNotIn('failed', out)
-        doc = json.loads((r.LOG_DIR / f'{r.host()}.claude.json').read_text())
+        doc = json.loads((recurring.LOG_DIR / f'{recurring.host()}.claude.json').read_text())
         self.assertEqual(set(doc), {'format', 'host', 'harness', 'updated',
                                     'sessions', 'chains', 'pipes', 'just'})
-        self.assertEqual(doc['format'], r.FORMAT)
+        self.assertEqual(doc['format'], recurring.FORMAT)
         log = subprocess.run(['git', '--git-dir', str(self.forge), 'log', '--oneline'],
                              capture_output=True, text=True).stdout
-        self.assertIn(f'{r.host()}: export', log)
+        self.assertIn(f'{recurring.host()}: export', log)
 
     def test_history_outlives_live_rows(self):
         self.export()
         self.rows = self.rows[:1]              # harness pruned three sessions
         self.export()
-        doc = json.loads((r.LOG_DIR / f'{r.host()}.claude.json').read_text())
+        doc = json.loads((recurring.LOG_DIR / f'{recurring.host()}.claude.json').read_text())
         self.assertEqual(len(doc['sessions']), 4)
         with contextlib.redirect_stderr(io.StringIO()):
-            a = r.analyze(1, 5, 4, sync=True)
-        self.assertEqual(a['sessions'], 4)     # own export counted, not skipped
+            analysis = recurring.analyze(1, 5, 4, sync=True)
+        self.assertEqual(analysis['sessions'], 4)     # own export counted, not skipped
 
     def test_bad_files_are_skipped_not_fatal(self):
         self.export()
-        (r.LOG_DIR / 'junk.json').write_text('[]')
-        (r.LOG_DIR / 'half.json').write_text('{"format": %d, "sessions": null}' % r.FORMAT)
-        (r.LOG_DIR / 'old.json').write_text(json.dumps(
+        (recurring.LOG_DIR / 'junk.json').write_text('[]')
+        (recurring.LOG_DIR / 'half.json').write_text('{"format": %d, "sessions": null}' % recurring.FORMAT)
+        (recurring.LOG_DIR / 'old.json').write_text(json.dumps(
             {'host': 'x', 'harness': 'claude', 'updated': '2026-01-01',
              'sessions': {'abc': {'commands': 1, 'batch': False, 'headers': False}},
              'chains': {'leaky\tword': ['abc']}, 'pipes': {}}))   # no format
         err = io.StringIO()
         with contextlib.redirect_stderr(err):
-            a = r.analyze(1, 50, 4, sync=False)
-        self.assertEqual(a['sessions'], 4)
-        self.assertNotIn('leaky', json.dumps(a))
+            analysis = recurring.analyze(1, 50, 4, sync=False)
+        self.assertEqual(analysis['sessions'], 4)
+        self.assertNotIn('leaky', json.dumps(analysis))
         self.assertEqual(err.getvalue().count('skipped'), 3)
 
     def test_old_format_own_file_is_rebuilt_not_merged(self):
-        path = r.LOG_DIR / f'{r.host()}.claude.json'
+        path = recurring.LOG_DIR / f'{recurring.host()}.claude.json'
         path.write_text(json.dumps({'format': 1, 'sessions': {}, 'pipes': {},
                                     'chains': {'leaky\tword': ['abc']}}))
         rc, _ = self.export()
@@ -441,11 +441,11 @@ class PublishedRecipeParsing(unittest.TestCase):
     )
 
     def test_headers(self):
-        self.assertEqual(set(r.RECIPE_HEADER.findall(self.TEXT)),
+        self.assertEqual(set(recurring.RECIPE_HEADER.findall(self.TEXT)),
                          {"threads", "check", "quiet", "_default", "issue"})
 
     def test_mod_lines(self):
-        self.assertEqual(r.MOD_LINE.findall(self.TEXT),
+        self.assertEqual(recurring.MOD_LINE.findall(self.TEXT),
                          [("agent", ".agents/scripts/agent.just")])
 
 

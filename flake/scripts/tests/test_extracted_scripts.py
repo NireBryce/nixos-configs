@@ -68,17 +68,17 @@ class DiffFingerprint(unittest.TestCase):
         self.assertIn("IDENTICAL", out[0])
 
     def test_order_only_vs_real_list_change(self):
-        b = {"toplevel": "a", "pkgs": ["x", "y"], "kernel": ["p", "q"]}
-        a = {"toplevel": "b", "pkgs": ["y", "x"], "kernel": ["p", "r"]}
-        out = "\n".join(diff_fingerprint.report(b, a))
+        before = {"toplevel": "a", "pkgs": ["x", "y"], "kernel": ["p", "q"]}
+        after = {"toplevel": "b", "pkgs": ["y", "x"], "kernel": ["p", "r"]}
+        out = "\n".join(diff_fingerprint.report(before, after))
         self.assertIn("pkgs: SAME SET, ORDER ONLY (2 items)", out)
         self.assertIn("kernel: removed ['q']", out)
         self.assertIn("kernel: added   ['r']", out)
 
     def test_dict_reports_only_moved_keys(self):
-        b = {"toplevel": "a", "h": {"same": 1, "gone": 1, "chg": 1}}
-        a = {"toplevel": "b", "h": {"same": 1, "new": 1, "chg": 2}}
-        out = "\n".join(diff_fingerprint.report(b, a))
+        before = {"toplevel": "a", "h": {"same": 1, "gone": 1, "chg": 1}}
+        after = {"toplevel": "b", "h": {"same": 1, "new": 1, "chg": 2}}
+        out = "\n".join(diff_fingerprint.report(before, after))
         self.assertIn("h: removed 'gone'", out)
         self.assertIn("h: added   'new'", out)
         self.assertIn("h: changed 'chg'", out)
@@ -96,12 +96,12 @@ class HmCollisions(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
 
     def entries(self, **targets):
-        return {k: {"target": k, "recursive": v} for k, v in targets.items()}
+        return {target: {"target": target, "recursive": recursive} for target, recursive in targets.items()}
 
     def test_classification(self):
         os.makedirs(os.path.join(self.home, "recdir"))
-        with open(os.path.join(self.home, "plain"), "w") as f:
-            f.write("user's own file")
+        with open(os.path.join(self.home, "plain"), "w") as handle:
+            handle.write("user's own file")
         os.makedirs(os.path.join(self.home, "plaindir"))
         os.symlink("/nix/store/fake-hm-file", os.path.join(self.home, "owned"))
 
@@ -109,12 +109,12 @@ class HmCollisions(unittest.TestCase):
             self.entries(owned=False, missing=False, plain=False, recdir=True, plaindir=False),
             self.home)
 
-        j = lambda n: os.path.join(self.home, n)
-        self.assertEqual(owned, [j("owned")])
-        self.assertEqual(absent, [j("missing")])
-        self.assertEqual(rec, [j("recdir")])
+        in_home = lambda name: os.path.join(self.home, name)
+        self.assertEqual(owned, [in_home("owned")])
+        self.assertEqual(absent, [in_home("missing")])
+        self.assertEqual(rec, [in_home("recdir")])
         # a real directory is only expected when the entry is recursive
-        self.assertEqual(sorted(collisions), sorted([j("plain"), j("plaindir")]))
+        self.assertEqual(sorted(collisions), sorted([in_home("plain"), in_home("plaindir")]))
 
     def run_main(self, entries):
         env = dict(os.environ, HOME=self.home)
@@ -123,8 +123,8 @@ class HmCollisions(unittest.TestCase):
             env=env, capture_output=True, text=True)
 
     def test_exit_status_follows_collisions(self):
-        with open(os.path.join(self.home, "plain"), "w") as f:
-            f.write("x")
+        with open(os.path.join(self.home, "plain"), "w") as handle:
+            handle.write("x")
         bad = self.run_main(self.entries(plain=False))
         self.assertEqual(bad.returncode, 1)
         self.assertIn("COLLISIONS -- HM does not own", bad.stdout)
@@ -135,12 +135,12 @@ class HmCollisions(unittest.TestCase):
 
 class Cli(unittest.TestCase):
     def test_deployed_baseline_users_and_usage(self):
-        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
-            json.dump({"mutableUsers": False, "users": [{"name": "root", "uid": 0}]}, f)
-        self.addCleanup(os.unlink, f.name)
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as handle:
+            json.dump({"mutableUsers": False, "users": [{"name": "root", "uid": 0}]}, handle)
+        self.addCleanup(os.unlink, handle.name)
         buf = io.StringIO()
         with redirect_stdout(buf):
-            self.assertEqual(deployed_baseline.main(["x", "users", f.name]), 0)
+            self.assertEqual(deployed_baseline.main(["x", "users", handle.name]), 0)
         self.assertIn("mutableUsers: False", buf.getvalue())
         with redirect_stderr(io.StringIO()):
             self.assertEqual(deployed_baseline.main(["x"]), 2)

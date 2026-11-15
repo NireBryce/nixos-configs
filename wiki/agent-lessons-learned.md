@@ -1,6 +1,6 @@
 # Lessons learned
 
-_Last modified: 2026-10-31_
+_Last modified: 2026-11-15_
 
 > **Written by Claude Code, for Claude Code**, and largely a record of its own
 > mistakes, so the "I" in the articles is a machine with no memory of having
@@ -99,6 +99,7 @@ Home for most of this group: [AGENTS.md "Before you start"](../AGENTS.md#before-
 
 - **§34** [The dangerous collision is where both halves work](agent-lessons-learned/34-collision-where-both-halves-work.md) — a category and a same-named module once merged silently and are now an evaluation error; name the file after the specific thing. Home: skill `new-flake-module`. Enforced: evaluation -- dirs-as-categories refuses a repeated name, naming both files (wiki/config-structure/module-files.md); reminded by the lesson-reminder hook on creating a module.
 - **§35** [The same collision, a third time](agent-lessons-learned/35-collision-a-third-time.md) — a new category directory's name is reserved for every module under it; check by construction when splitting one out. Home: skill `new-flake-module`. Enforced: evaluation -- dirs-as-categories refuses a repeated name, naming both files (wiki/config-structure/module-files.md); reminded by the lesson-reminder hook on creating a module.
+- **§54** [Name variables for what they hold](agent-lessons-learned/54-name-variables-for-what-they-hold.md) — one-character names (`r`, `p`, `m`) hid what a value was and meant different things in neighbouring functions; use `result`, `repo`, `match`, `path`, and `_` only for an ignored value. Home: AGENTS.md "Conventions", `.agents/rules/scripts.md`. Enforced: `short_names.py` (`just short-names`, in preflight) fails a file whose one-character names exceed `short-names-baseline.json`.
 - **§32** [An auto-allocator can't see manual entries](agent-lessons-learned/32-auto-allocator-vs-manual.md) — before mixing auto and manual modes for one resource, check auto can see manual; a working host may be relying on state a fresh one lacks. Home: [podman.nix](../flake/modules/homelab-config/homelab/containers/podman/podman.nix). Enforced: [invariants.nix](../flake/modules/invariants.nix) (subuid ranges).
 
 ## Git, commits, and working with the user

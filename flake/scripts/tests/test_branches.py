@@ -61,7 +61,7 @@ class ClassifierTests(unittest.TestCase):
         # through branches.pr_state; nothing else touches gh.
         self.pr_records = {}
         patcher = mock.patch.object(branches, 'pr_state',
-                                    lambda b: self.pr_records.get(b, ''))
+                                    lambda branch: self.pr_records.get(branch, ''))
         patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -168,14 +168,14 @@ class ClassifierTests(unittest.TestCase):
                        capture_output=True, text=True)
 
     def commit_file(self, name, content, message):
-        with open(os.path.join(self.repo, name), 'w') as f:
-            f.write(content)
+        with open(os.path.join(self.repo, name), 'w') as handle:
+            handle.write(content)
         self.git('add', name)
         self.git('commit', '--no-verify', '-q', '-m', message)
 
     def rows(self):
-        return {b: (verdict, landed, total, unlanded)
-                for b, verdict, landed, total, unlanded
+        return {branch: (verdict, landed, total, unlanded)
+                for branch, verdict, landed, total, unlanded
                 in branches.classify(400)}
 
     def test_classify_verdicts(self):

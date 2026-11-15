@@ -14,9 +14,9 @@ def _total(root, cfg):
 
 @register_counter('nixos')
 def _nixos(root, cfg):
-    return sum(1 for c in tree.actual_hosts(root).values() if c == 'nixos')
+    return sum(1 for host_class in tree.actual_hosts(root).values() if host_class == 'nixos')
 
 
 @register_counter('darwin')
 def _darwin(root, cfg):
-    return sum(1 for c in tree.actual_hosts(root).values() if c == 'darwin')
+    return sum(1 for host_class in tree.actual_hosts(root).values() if host_class == 'darwin')

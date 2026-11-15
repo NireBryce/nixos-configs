@@ -28,25 +28,25 @@ ENTRY = re.compile(r'^- \*\*§(\d+)\*\* ')
 
 
 def git(root, *args):
-    r = subprocess.run(['git', '-C', str(root), *args],
+    result = subprocess.run(['git', '-C', str(root), *args],
                        capture_output=True, text=True)
-    return r.stdout if r.returncode == 0 else ''
+    return result.stdout if result.returncode == 0 else ''
 
 
 def branch_files(root):
     base = git(root, 'merge-base', 'HEAD', 'origin/experimental').strip()
     changed = git(root, 'diff', '--name-only', '-z', base) if base else ''
     untracked = git(root, 'ls-files', '--others', '--exclude-standard', '-z')
-    return sorted({f for f in (changed + untracked).split('\0') if f})
+    return sorted({file_name for file_name in (changed + untracked).split('\0') if file_name})
 
 
 def index_lines(root):
     page = root / 'wiki' / 'agent-lessons-learned.md'
     out = {}
     for line in page.read_text().splitlines():
-        m = ENTRY.match(line)
-        if m:
-            out[int(m.group(1))] = line[2:]
+        match = ENTRY.match(line)
+        if match:
+            out[int(match.group(1))] = line[2:]
     return out
 
 
@@ -54,13 +54,13 @@ def expand(root, cwd, arg):
     """A path argument as repo-relative files; a directory is every tracked
     file beneath it, so `lessons flake/modules/homelab-config/homelab`
     reports the area, not nothing."""
-    p = (cwd / arg).resolve()
-    if p != root and root not in p.parents:
+    resolved = (cwd / arg).resolve()
+    if resolved != root and root not in resolved.parents:
         print(f'lessons: {arg} is outside {root}; skipped', file=sys.stderr)
         return []
-    rel = p.relative_to(root).as_posix() if p != root else ''
-    if p.is_dir():
-        listed = [f for f in git(root, 'ls-files', '-z', '--', rel or '.').split('\0') if f]
+    rel = resolved.relative_to(root).as_posix() if resolved != root else ''
+    if resolved.is_dir():
+        listed = [file_name for file_name in git(root, 'ls-files', '-z', '--', rel or '.').split('\0') if file_name]
         return listed or [rel]
     return [rel]
 
@@ -81,36 +81,36 @@ def main():
 
     hits = {}  # topic id -> (topic, [what matched])
     files = []
-    for a in args.paths:
-        files += expand(root, cwd, a)
+    for arg in args.paths:
+        files += expand(root, cwd, arg)
     if not args.paths and not args.command:
         files = branch_files(root)
         if not files:
             print('lessons: no changed files against origin/experimental; '
                   'pass a path')
             return 0
-    for f in files:
-        for t in lessons_map.match_path(topics, f):
-            hits.setdefault(t['id'], (t, []))[1].append(f)
-    for c in args.command:
-        for t in lessons_map.match_command(topics, c):
-            hits.setdefault(t['id'], (t, []))[1].append(f'$ {c}')
+    for file_name in files:
+        for topic in lessons_map.match_path(topics, file_name):
+            hits.setdefault(topic['id'], (topic, []))[1].append(file_name)
+    for command in args.command:
+        for topic in lessons_map.match_command(topics, command):
+            hits.setdefault(topic['id'], (topic, []))[1].append(f'$ {command}')
 
     if not hits:
         print('lessons: no topic covers '
               + (', '.join(files + args.command) or 'that'))
         return 0
     index = index_lines(root)
-    for tid, (t, matched) in hits.items():
+    for tid, (topic, matched) in hits.items():
         shown = matched[:3] + ([f'... {len(matched) - 3} more']
                                if len(matched) > 3 else [])
         print(f"== {tid}  ({', '.join(shown)})")
-        if t.get('remind'):
-            when = ' (on creating a file)' if t.get('remind_on') == 'create' else ''
-            print(f"   {t['remind']}{when}")
-        print(f"   full rule: {lessons_map.pointers(t)}")
-        for n in t.get('lessons', []):
-            print(f"   {index.get(n, f'§{n} (no index entry)')}")
+        if topic.get('remind'):
+            when = ' (on creating a file)' if topic.get('remind_on') == 'create' else ''
+            print(f"   {topic['remind']}{when}")
+        print(f"   full rule: {lessons_map.pointers(topic)}")
+        for number in topic.get('lessons', []):
+            print(f"   {index.get(number, f'§{number} (no index entry)')}")
         print()
     return 0
 

@@ -69,18 +69,18 @@ def infer_dirs(ren, old_files):
     at HEAD was renamed to the same relative place under the new dir."""
     cands = set()
     for old, new in ren.items():
-        o, n = posixpath.dirname(old), posixpath.dirname(new)
-        while o and n:
-            cands.add((o, n))
-            o, n = posixpath.dirname(o), posixpath.dirname(n)
+        old_dir, new_dir = posixpath.dirname(old), posixpath.dirname(new)
+        while old_dir and new_dir:
+            cands.add((old_dir, new_dir))
+            old_dir, new_dir = posixpath.dirname(old_dir), posixpath.dirname(new_dir)
     dirs = {}
-    for o, n in cands:
-        under = [f for f in old_files if f.startswith(o + "/")]
-        if under and all(ren.get(f) == n + f[len(o):] for f in under):
-            dirs[o] = n
+    for old_dir, new_dir in cands:
+        under = [file_name for file_name in old_files if file_name.startswith(old_dir + "/")]
+        if under and all(ren.get(file_name) == new_dir + file_name[len(old_dir):] for file_name in under):
+            dirs[old_dir] = new_dir
     # keep only outermost: a dir inside an already-mapped dir adds nothing
-    return {o: n for o, n in dirs.items()
-            if not any(o != p and o.startswith(p + "/") for p in dirs)}
+    return {old_dir: new_dir for old_dir, new_dir in dirs.items()
+            if not any(old_dir != other_dir and old_dir.startswith(other_dir + "/") for other_dir in dirs)}
 
 
 class Mapper:
@@ -90,9 +90,9 @@ class Mapper:
     def new(self, path):
         if path in self.ren:
             return self.ren[path]
-        for o, n in self.dirs.items():
-            if path == o or path.startswith(o + "/"):
-                return n + path[len(o):]
+        for old_dir, new_dir in self.dirs.items():
+            if path == old_dir or path.startswith(old_dir + "/"):
+                return new_dir + path[len(old_dir):]
         return path
 
 
@@ -128,8 +128,8 @@ def fix_links(text, old_dir, new_dir, old_exists, mapper):
         if new != raw:
             changed[raw.strip("<>").partition("#")[0]] = new.strip("<>").partition("#")[0]
         return new
-    text = LINK.sub(lambda m: m.group(1) + one(m.group(2)) + m.group(3), text)
-    text = REFDEF.sub(lambda m: m.group(1) + one(m.group(2)), text)
+    text = LINK.sub(lambda match: match.group(1) + one(match.group(2)) + match.group(3), text)
+    text = REFDEF.sub(lambda match: match.group(1) + one(match.group(2)), text)
     return text, changed
 
 
@@ -138,16 +138,16 @@ def fix_visible(text, changed):
     if not changed:
         return text
 
-    def sub(m):
-        tick, vis, tgt, frag = m.group(1), m.group(2), m.group(3), m.group(4) or ""
+    def sub(match):
+        tick, vis, tgt, frag = match.group(1), match.group(2), match.group(3), match.group(4) or ""
         if changed.get(vis) == tgt.strip("<>"):
-            return f"[{tick}{tgt.strip('<>')}{tick}]({m.group(3)}{frag})"
-        return m.group(0)
+            return f"[{tick}{tgt.strip('<>')}{tick}]({match.group(3)}{frag})"
+        return match.group(0)
     return re.sub(r"\[(`?)([^\]\s`]+)\1\]\((<?[^)\s#>]+>?)(#[^)\s]*)?\)", sub, text)
 
 
 def bare_regex(keys):
-    alts = "|".join(re.escape(k) for k in sorted(keys, key=len, reverse=True))
+    alts = "|".join(re.escape(key) for key in sorted(keys, key=len, reverse=True))
     # Either a recognised prefix (`$root/`, `${root}/`, `../`, `./`) or the
     # start of a path: not preceded by a path character.
     return re.compile(
@@ -158,17 +158,17 @@ def bare_regex(keys):
 def fix_bare(text, rx, mapper):
     if not rx:
         return text
-    return rx.sub(lambda m: (m.group("pre") or "") + mapper.new(m.group("path")), text)
+    return rx.sub(lambda match: (match.group("pre") or "") + mapper.new(match.group("path")), text)
 
 
 def segment_review(text, name, segments):
     """Lines that build a moved path from quoted pieces."""
     out = []
-    for i, line in enumerate(text.splitlines(), 1):
+    for line_number, line in enumerate(text.splitlines(), 1):
         for seg in segments:
             if re.search(rf"""(?:/|join\(|,)\s*['"]{re.escape(seg)}['"]""", line) or \
                re.search(rf"""['"]{re.escape(seg)}['"]\s*(?:/|,)""", line):
-                out.append(f"REVIEW {name}:{i}: builds a moved path from '{seg}': {line.strip()[:110]}")
+                out.append(f"REVIEW {name}:{line_number}: builds a moved path from '{seg}': {line.strip()[:110]}")
                 break
     return out
 
@@ -182,68 +182,68 @@ def main(argv=None):
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--map", action="append", default=[], metavar="OLD=NEW")
     ap.add_argument("--exclude", action="append", default=[], metavar="GLOB")
-    a = ap.parse_args(argv)
-    root = os.path.abspath(a.root)
+    args = ap.parse_args(argv)
+    root = os.path.abspath(args.root)
 
     ren = staged_renames(root)
-    for pair in a.map:
-        o, _, n = pair.partition("=")
-        if not n:
+    for pair in args.map:
+        old_path, _, new_path = pair.partition("=")
+        if not new_path:
             ap.error(f"--map wants OLD=NEW, got {pair!r}")
-        ren[o] = n
+        ren[old_path] = new_path
     if not ren:
         print("move_refs: no staged renames (git mv first) and no --map", file=sys.stderr)
         return 2
 
     old_files = set(git(root, "ls-tree", "-r", "HEAD", "--name-only").splitlines())
     old_dirs = set()
-    for f in old_files:
-        d = posixpath.dirname(f)
-        while d:
-            old_dirs.add(d)
-            d = posixpath.dirname(d)
+    for file_name in old_files:
+        directory = posixpath.dirname(file_name)
+        while directory:
+            old_dirs.add(directory)
+            directory = posixpath.dirname(directory)
     dirs = infer_dirs(ren, old_files)
     mapper = Mapper(ren, dirs)
-    rev = {v: k for k, v in ren.items()}
+    rev = {value: key for key, value in ren.items()}
     keys = set(ren) | set(dirs)
     rx = bare_regex(keys) if keys else None
 
-    moved_segments = {posixpath.basename(k) for k in keys if len(posixpath.basename(k)) >= 4
-                      and not posixpath.basename(k).endswith((".md", ".py", ".sh", ".nix"))}
+    moved_segments = {posixpath.basename(key) for key in keys if len(posixpath.basename(key)) >= 4
+                      and not posixpath.basename(key).endswith((".md", ".py", ".sh", ".nix"))}
     changed_files, review = [], []
-    for f in git(root, "ls-files").splitlines():
-        if any(fnmatch.fnmatch(f, g) for g in a.exclude):
+    for file_name in git(root, "ls-files").splitlines():
+        if any(fnmatch.fnmatch(file_name, pattern) for pattern in args.exclude):
             continue
-        full = os.path.join(root, f)
+        full = os.path.join(root, file_name)
         if os.path.islink(full) or not os.path.isfile(full):
             continue
         try:
             text = pathlib.Path(full).read_text(encoding="utf-8")
         except UnicodeDecodeError:
             continue
-        old_f = rev.get(f, f)
-        out, changed = fix_links(text, posixpath.dirname(old_f), posixpath.dirname(f),
-                                 lambda p: p in old_files or p in old_dirs, mapper)
+        old_f = rev.get(file_name, file_name)
+        out, changed = fix_links(text, posixpath.dirname(old_f), posixpath.dirname(file_name),
+                                 lambda path: path in old_files or path in old_dirs, mapper)
         out = fix_visible(out, changed)
         out = fix_bare(out, rx, mapper)
         if out != text:
-            changed_files.append(f)
-            if not a.dry_run:
+            changed_files.append(file_name)
+            if not args.dry_run:
                 pathlib.Path(full).write_text(out, encoding="utf-8")
         scan = out
-        if f.endswith((".py", ".sh", ".bash", ".just", ".justfile", ".nix")):
-            review += segment_review(scan, f, moved_segments)
-        if f in rev and f.endswith((".py", ".sh", ".bash")):
-            for i, line in enumerate(scan.splitlines(), 1):
+        if file_name.endswith((".py", ".sh", ".bash", ".just", ".justfile", ".nix")):
+            review += segment_review(scan, file_name, moved_segments)
+        if file_name in rev and file_name.endswith((".py", ".sh", ".bash")):
+            for line_number, line in enumerate(scan.splitlines(), 1):
                 if DEPTH.search(line):
-                    review.append(f"REVIEW {f}:{i}: moved script, depth-sensitive? {line.strip()[:110]}")
+                    review.append(f"REVIEW {file_name}:{line_number}: moved script, depth-sensitive? {line.strip()[:110]}")
 
-    verb = "would rewrite" if a.dry_run else "rewrote"
+    verb = "would rewrite" if args.dry_run else "rewrote"
     print(f"move_refs: {verb} {len(changed_files)} file(s); "
           f"{len(ren)} renamed path(s), {len(dirs)} whole-directory move(s)")
-    if a.dry_run:
-        for f in changed_files:
-            print(f"  {f}")
+    if args.dry_run:
+        for file_name in changed_files:
+            print(f"  {file_name}")
     for line in review:
         print(line)
     if review:

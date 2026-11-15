@@ -113,8 +113,8 @@ def run(cmd, **kw):
 
 def out(cmd):
     """stdout of cmd, or None if it failed."""
-    p = run(cmd, capture_output=True)
-    return p.stdout.strip() if p.returncode == 0 else None
+    completed = run(cmd, capture_output=True)
+    return completed.stdout.strip() if completed.returncode == 0 else None
 
 
 def say(msg=""):
@@ -128,75 +128,75 @@ def view(pr, tries=6):
     read after a while says UNKNOWN and the next, seconds later, the real
     answer (seen 2026-09-29 on #411: UNKNOWN, then CLEAN 3s on), so an
     UNKNOWN is re-read a few times before the gate sees it."""
-    for i in range(tries):
-        p = run(["gh", "pr", "view", pr, "--json", FIELDS], capture_output=True)
-        if p.returncode != 0:
-            sys.exit(f"gh pr view {pr} failed: {p.stderr.strip()}")
-        d = json.loads(p.stdout)
-        if d["state"] != "OPEN" or d["mergeStateStatus"] != "UNKNOWN":
+    for attempt in range(tries):
+        completed = run(["gh", "pr", "view", pr, "--json", FIELDS], capture_output=True)
+        if completed.returncode != 0:
+            sys.exit(f"gh pr view {pr} failed: {completed.stderr.strip()}")
+        pr_data = json.loads(completed.stdout)
+        if pr_data["state"] != "OPEN" or pr_data["mergeStateStatus"] != "UNKNOWN":
             break
-        if i < tries - 1:
+        if attempt < tries - 1:
             time.sleep(RETRY_SECONDS)
-    return d
+    return pr_data
 
 
-def gate_problems(d):
+def gate_problems(pr_data):
     probs = []
-    if d["state"] != "OPEN":
-        return [f"state is {d['state']}, not OPEN"]
-    if d.get("isDraft"):
+    if pr_data["state"] != "OPEN":
+        return [f"state is {pr_data['state']}, not OPEN"]
+    if pr_data.get("isDraft"):
         probs.append("PR is a draft")
-    st = d["mergeStateStatus"]
-    if st != "CLEAN":
-        hint = STATUS_HINT.get(st, "")
-        probs.append(f"mergeStateStatus is {st}, not CLEAN"
+    merge_state = pr_data["mergeStateStatus"]
+    if merge_state != "CLEAN":
+        hint = STATUS_HINT.get(merge_state, "")
+        probs.append(f"mergeStateStatus is {merge_state}, not CLEAN"
                      + (f": {hint}" if hint else "")
-                     + f" (mergeable={d['mergeable']} only means no conflicts)")
+                     + f" (mergeable={pr_data['mergeable']} only means no conflicts)")
     # land deletes the PR's head branch by name, so the head has to be this
     # repo's own topic branch: a fork PR (or a missing field, which reads as
     # one) or a head named like a protected branch or like the base would
     # point that delete at a branch that is not the PR's.
-    if d.get("isCrossRepository", True):
+    if pr_data.get("isCrossRepository", True):
         probs.append("the head is in another repository (or that could not"
                      " be told); landing it would delete a branch by name")
-    head = d.get("headRefName")
-    if head in PROTECTED or head == "master" or head == d["baseRefName"]:
+    head = pr_data.get("headRefName")
+    if head in PROTECTED or head == "master" or head == pr_data["baseRefName"]:
         probs.append(f"the head branch {head!r} is protected or the same as"
                      " the base; refusing to merge and delete it")
-    if d["baseRefName"] != BASE:
-        probs.append(f"base is {d['baseRefName']}, not {BASE}"
+    if pr_data["baseRefName"] != BASE:
+        probs.append(f"base is {pr_data['baseRefName']}, not {BASE}"
                      " (promotion to main is side-flows.md, not this)")
     return probs
 
 
-def method(d):
-    return "--rebase" if len(d["commits"]) == 1 else "--merge"
+def method(pr_data):
+    return "--rebase" if len(pr_data["commits"]) == 1 else "--merge"
 
 
-def summary(d):
-    n = len(d["commits"])
-    say(f"{d['title']}\n{d['url']}")
-    say(f"{d['baseRefName']} <- {d['headRefName']}: +{d['additions']}"
-        f" -{d['deletions']}, {d['changedFiles']} files, {n} commit"
-        + ("" if n == 1 else "s"))
-    for c in d["commits"]:
-        say(f"  {c['oid'][:8]} {c['messageHeadline']}")
-    say(f"merge method: {method(d)}"
-        + (" (single commit)" if n == 1
+def summary(pr_data):
+    commit_count = len(pr_data["commits"])
+    say(f"{pr_data['title']}\n{pr_data['url']}")
+    say(f"{pr_data['baseRefName']} <- {pr_data['headRefName']}: +{pr_data['additions']}"
+        f" -{pr_data['deletions']}, {pr_data['changedFiles']} files, {commit_count} commit"
+        + ("" if commit_count == 1 else "s"))
+    for commit in pr_data["commits"]:
+        say(f"  {commit['oid'][:8]} {commit['messageHeadline']}")
+    say(f"merge method: {method(pr_data)}"
+        + (" (single commit)" if commit_count == 1
            else " (several commits: keep each message)"))
 
 
-def cmd_ready(a):
-    checks = run(["gh", "pr", "checks", a.pr, "--watch", "--interval", "20"])
-    d = view(a.pr)
-    summary(d)
-    probs = gate_problems(d)
+def cmd_ready(args):
+    checks = run(["gh", "pr", "checks", args.pr, "--watch", "--interval", "20"])
+    pr_data = view(args.pr)
+    summary(pr_data)
+    probs = gate_problems(pr_data)
     if checks.returncode != 0:
         probs.insert(0, f"gh pr checks exited {checks.returncode}")
     if probs:
         say("\nNOT READY -- don't ask to merge:")
-        for p in probs:
-            say(f"  - {p}")
+        for problem in probs:
+            say(f"  - {problem}")
         return 1
     say("\nREADY: ask the one combined question (merge, and delete the"
         " branch afterward?)")
@@ -248,31 +248,31 @@ class Steps:
         return True
 
 
-def cmd_land(a):
-    d = view(a.pr)
-    probs = gate_problems(d)
+def cmd_land(args):
+    pr_data = view(args.pr)
+    probs = gate_problems(pr_data)
     if probs:
-        say(f"refusing to merge #{a.pr}:")
-        for p in probs:
-            say(f"  - {p}")
+        say(f"refusing to merge #{args.pr}:")
+        for problem in probs:
+            say(f"  - {problem}")
         return 1
-    head, oid, m = d["headRefName"], d["headRefOid"], method(d)
+    head, oid, merge_method = pr_data["headRefName"], pr_data["headRefOid"], method(pr_data)
     local_tip = out(["git", "rev-parse", "--verify", "-q", f"refs/heads/{head}"])
     if local_tip and local_tip != oid:
         say(f"note: local {head} is at {local_tip[:8]}, the PR head is"
             f" {oid[:8]}; merging the PR head")
 
-    merge = ["gh", "pr", "merge", a.pr, m, "--match-head-commit", oid]
+    merge = ["gh", "pr", "merge", args.pr, merge_method, "--match-head-commit", oid]
     say(f"$ {shlex.join(merge)}")
     if run(merge).returncode != 0:
-        say(f"\nmerge FAILED; nothing deleted. #{a.pr} is still open"
+        say(f"\nmerge FAILED; nothing deleted. #{args.pr} is still open"
             " -- raise it, don't retry silently.")
         return 1
-    state = out(["gh", "pr", "view", a.pr, "--json", "state", "-q", ".state"])
+    state = out(["gh", "pr", "view", args.pr, "--json", "state", "-q", ".state"])
     if state != "MERGED":
-        say(f"\n#{a.pr} reports state {state}, not MERGED; nothing deleted.")
+        say(f"\n#{args.pr} reports state {state}, not MERGED; nothing deleted.")
         return 1
-    say(f"merged #{a.pr} ({m})")
+    say(f"merged #{args.pr} ({merge_method})")
 
     here = os.path.realpath(out(["git", "rev-parse", "--show-toplevel"]))
     # The main checkout is shared by other sessions and can't be removed
@@ -282,12 +282,12 @@ def cmd_land(a):
                        "--git-common-dir"]))
     wt = worktrees()
     exp_at = wt.get(BASE)
-    s = Steps()
-    s.add(["git", "fetch", "origin"])
+    steps = Steps()
+    steps.add(["git", "fetch", "origin"])
     if exp_at in (None, here):
         if exp_at is None:
-            s.add(["git", "checkout", BASE])
-        s.add(["git", "pull", "--ff-only"])
+            steps.add(["git", "checkout", BASE])
+        steps.add(["git", "pull", "--ff-only"])
     else:
         say(f"note: {BASE} is checked out at {exp_at}, another checkout;"
             " not pulled there.")
@@ -295,10 +295,10 @@ def cmd_land(a):
             say(f"note: {head} is checked out here, in the main checkout;"
                 " left as is rather than detaching a shared checkout.")
         elif wt.get(head) == here:
-            s.add(["git", "checkout", "--detach", f"origin/{BASE}"],
+            steps.add(["git", "checkout", "--detach", f"origin/{BASE}"],
                   note=f"note: this worktree is now detached at origin/{BASE};"
                        f" remove it when done: git worktree remove {here}")
-    if not s.run():
+    if not steps.run():
         return 1
 
     # Re-read: the checkout/detach above may have freed the branch.
@@ -312,16 +312,16 @@ def cmd_land(a):
         say(f"note: {head} is checked out at {held}; left. To finish:"
             f" git worktree remove {held} && git branch -D {head}")
     elif tip:
-        s.add(["git", "branch", "-D" if tip == oid else "-d", head])
+        steps.add(["git", "branch", "-D" if tip == oid else "-d", head])
     def on_remote():
         return run(["git", "ls-remote", "--exit-code", "--heads", "origin",
                     head], capture_output=True).returncode == 0
     # settled: GitHub's delete-on-merge can land between the ls-remote and
     # the delete; the branch being gone is the step's goal either way.
-    s.add(["git", "push", "origin", "--delete", head], check=on_remote,
+    steps.add(["git", "push", "origin", "--delete", head], check=on_remote,
           settled=lambda: not on_remote())
-    s.add(["just", "close-fixed", a.pr])
-    return 0 if s.run() else 1
+    steps.add(["just", "close-fixed", args.pr])
+    return 0 if steps.run() else 1
 
 
 # ---- commit ----------------------------------------------------------------
@@ -336,12 +336,12 @@ def with_trailer(msg, agent):
         return msg
     last = msg.rstrip("\n").split("\n\n")[-1].splitlines()
     in_block = len(msg.split("\n\n")) > 1 and all(
-        re.match(r"^[A-Za-z][A-Za-z0-9-]*: ", l) for l in last)
+        re.match(r"^[A-Za-z][A-Za-z0-9-]*: ", line) for line in last)
     return msg + ("" if in_block else "\n") + f"Co-Authored-By: {agent}\n"
 
 
-def cmd_commit(a):
-    paths = [p for p in a.paths if p != "--"]
+def cmd_commit(args):
+    paths = [path for path in args.paths if path != "--"]
     if not paths:
         sys.exit("usage: commit [--agent NAME] [--] <path>...  (message on"
                  " stdin; at least one path -- a bare commit takes whatever"
@@ -362,12 +362,12 @@ def cmd_commit(a):
     msg = sys.stdin.read()
     if not msg.strip():
         sys.exit("empty commit message on stdin")
-    msg = with_trailer(msg, a.agent)
-    for m in TRAILER.finditer(msg):
-        if "<" in m.group(1) or "@" in m.group(1) or len(m.group(1).split()) > 1:
-            print(f"warning: trailer `{m.group(0).strip()}` -- AGENTS.md wants"
+    msg = with_trailer(msg, args.agent)
+    for trailer_match in TRAILER.finditer(msg):
+        if "<" in trailer_match.group(1) or "@" in trailer_match.group(1) or len(trailer_match.group(1).split()) > 1:
+            print(f"warning: trailer `{trailer_match.group(0).strip()}` -- AGENTS.md wants"
                   " the agent name only, no model or email", file=sys.stderr)
-    changed = [p for p in paths if type_changed(p)]
+    changed = [path for path in paths if type_changed(path)]
     if changed:
         sys.exit(
             f"refusing: {', '.join(changed)} changed type (file/symlink <-> "
@@ -401,14 +401,14 @@ FOOTER = re.compile(r"^\s*🤖 Generated (by an LLM agent|with )")
 def disclosure_problems(body):
     """What the body lacks of the template's top-and-bottom disclosure."""
     text = re.sub(r"<!--.*?-->", "", body, flags=re.S)
-    lines = [l for l in text.splitlines() if l.strip()]
+    lines = [line for line in text.splitlines() if line.strip()]
     head = []
-    for l in lines:
-        if l.startswith("## "):
+    for line in lines:
+        if line.startswith("## "):
             break
-        head.append(l)
+        head.append(line)
     probs = []
-    if not any(DISCLOSURE.match(l) for l in head):
+    if not any(DISCLOSURE.match(line) for line in head):
         probs.append("no `🤖 Generated by an LLM agent` line before the"
                      " first `## ` heading")
     if not lines or not FOOTER.match(lines[-1]):
@@ -417,22 +417,22 @@ def disclosure_problems(body):
     return probs
 
 
-def cmd_pr(a):
+def cmd_pr(args):
     try:
-        body = open(a.body_file, encoding="utf-8").read()
-    except OSError as e:
-        sys.exit(f"can't read body file: {e}")
+        body = open(args.body_file, encoding="utf-8").read()
+    except OSError as error:
+        sys.exit(f"can't read body file: {error}")
     probs = disclosure_problems(body)
     if probs:
-        say(f"refusing: {a.body_file} lacks the LLM disclosure"
+        say(f"refusing: {args.body_file} lacks the LLM disclosure"
             " .github/PULL_REQUEST_TEMPLATE.md asks for at top and bottom:")
-        for p in probs:
-            say(f"  - {p}")
+        for problem in probs:
+            say(f"  - {problem}")
         return 1
-    if a.edit:
-        cmd = ["gh", "pr", "edit", a.edit, "--body-file", a.body_file]
-        if a.title:
-            cmd += ["--title", a.title]
+    if args.edit:
+        cmd = ["gh", "pr", "edit", args.edit, "--body-file", args.body_file]
+        if args.title:
+            cmd += ["--title", args.title]
         say(f"$ {shlex.join(cmd)}")
         return run(cmd).returncode
 
@@ -449,7 +449,7 @@ def cmd_pr(a):
                 or "").splitlines()
     if not subjects:
         sys.exit(f"refusing: {branch} has no commits ahead of origin/{BASE}")
-    title = a.title
+    title = args.title
     if not title:
         if len(subjects) > 1:
             sys.exit(f"{len(subjects)} commits ahead of origin/{BASE}:"
@@ -471,7 +471,7 @@ def cmd_pr(a):
             say("push FAILED; no PR opened")
             return 1
     cmd = ["gh", "pr", "create", "--base", BASE, "--head", branch,
-           "--title", title, "--body-file", a.body_file]
+           "--title", title, "--body-file", args.body_file]
     say(f"$ {shlex.join(cmd)}")
     return run(cmd).returncode
 
@@ -480,20 +480,20 @@ def main(argv=None):
     ap = argparse.ArgumentParser(prog="ship.py", description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name, fn in (("ready", cmd_ready), ("land", cmd_land)):
-        p = sub.add_parser(name)
-        p.add_argument("pr")
-        p.set_defaults(fn=fn)
-    p = sub.add_parser("commit")
-    p.add_argument("--agent", default="Claude")
-    p.add_argument("paths", nargs=argparse.REMAINDER)
-    p.set_defaults(fn=cmd_commit)
-    p = sub.add_parser("pr")
-    p.add_argument("body_file")
-    p.add_argument("--title")
-    p.add_argument("--edit", metavar="N")
-    p.set_defaults(fn=cmd_pr)
-    a = ap.parse_args(argv)
-    return a.fn(a)
+        subparser = sub.add_parser(name)
+        subparser.add_argument("pr")
+        subparser.set_defaults(fn=fn)
+    subparser = sub.add_parser("commit")
+    subparser.add_argument("--agent", default="Claude")
+    subparser.add_argument("paths", nargs=argparse.REMAINDER)
+    subparser.set_defaults(fn=cmd_commit)
+    subparser = sub.add_parser("pr")
+    subparser.add_argument("body_file")
+    subparser.add_argument("--title")
+    subparser.add_argument("--edit", metavar="N")
+    subparser.set_defaults(fn=cmd_pr)
+    args = ap.parse_args(argv)
+    return args.fn(args)
 
 
 if __name__ == "__main__":

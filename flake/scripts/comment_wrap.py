@@ -94,63 +94,63 @@ def comment_indents(text):
     interp = []  # string state to restore per open `${`
     depth = 0    # open `{` inside the innermost interpolation
     for lineno, line in enumerate(text.split("\n")):
-        i = 0
-        while i < len(line) and line[i] in " \t":
-            i += 1
-        if state == CODE and not interp and i < len(line) and line[i] == "#":
-            found[lineno] = i
+        pos = 0
+        while pos < len(line) and line[pos] in " \t":
+            pos += 1
+        if state == CODE and not interp and pos < len(line) and line[pos] == "#":
+            found[lineno] = pos
             continue  # the comment runs to end of line; nothing to lex
-        while i < len(line):
-            c = line[i]
+        while pos < len(line):
+            char = line[pos]
             if state == CODE:
-                if c == "#":
+                if char == "#":
                     break  # trailing comment, rest of line inert
-                if c == '"':
+                if char == '"':
                     state = DQ
-                elif line[i:i + 2] == "''":
+                elif line[pos:pos + 2] == "''":
                     state = SS
-                    i += 1
-                elif line[i:i + 2] == "/*":
-                    end = line.find("*/", i + 2)
-                    i = len(line) if end < 0 else end + 1
-                elif interp and c == "{":
+                    pos += 1
+                elif line[pos:pos + 2] == "/*":
+                    end = line.find("*/", pos + 2)
+                    pos = len(line) if end < 0 else end + 1
+                elif interp and char == "{":
                     depth += 1
-                elif interp and c == "}":
+                elif interp and char == "}":
                     depth -= 1
                     if depth <= 0:
                         depth = 0
                         state = interp.pop()
             elif state == DQ:
-                if c == "\\":
-                    i += 1
-                elif line[i:i + 2] == "${":
+                if char == "\\":
+                    pos += 1
+                elif line[pos:pos + 2] == "${":
                     interp.append(DQ)
                     depth = 1
                     state = CODE
-                    i += 1
-                elif c == '"':
+                    pos += 1
+                elif char == '"':
                     state = CODE
             else:  # SS
-                if line[i:i + 2] == "''":
-                    nxt = line[i + 2:i + 3]
+                if line[pos:pos + 2] == "''":
+                    nxt = line[pos + 2:pos + 3]
                     if nxt == "'":                 # ''' is a literal ''
-                        i += 3
+                        pos += 3
                         continue
-                    if line[i + 2:i + 4] == "${":  # ''${ is a literal ${
-                        i += 4
+                    if line[pos + 2:pos + 4] == "${":  # ''${ is a literal ${
+                        pos += 4
                         continue
                     if nxt == "\\":                # ''\x escape
-                        i += 4
+                        pos += 4
                         continue
                     state = CODE                   # close the string
-                    i += 2
+                    pos += 2
                     continue
-                if line[i:i + 2] == "${":
+                if line[pos:pos + 2] == "${":
                     interp.append(SS)
                     depth = 1
                     state = CODE
-                    i += 1
-            i += 1
+                    pos += 1
+            pos += 1
     return found
 
 
@@ -208,38 +208,38 @@ def classify(para_indent, para, limit, over):
     over-limit line numbers, computed by the caller."""
     texts = [content for _, content in para]
     joined = " ".join(texts)
-    if any(URL_RE.search(t) for t in texts):
+    if any(URL_RE.search(text) for text in texts):
         return "url", "carries a URL"
-    if any(TABLE_RE.search(t) for t in texts):
+    if any(TABLE_RE.search(text) for text in texts):
         return "table", "aligned # ... # row"
-    if any(BANNER_RE.match(t) for t in texts):
+    if any(BANNER_RE.match(text) for text in texts):
         return "banner", "decoration line"
     if BULLET_RE.match(texts[0]):
         return "bullet", "list shape, wrapped by hand"
-    if any(t.startswith((" ", "\t")) for t in texts):
+    if any(text.startswith((" ", "\t")) for text in texts):
         # A continuation aligned deeper than `# text` is a shell snippet
         # when it starts with a command (`sudo mv ...`), prose otherwise.
-        if any(t.split()[0].lower() in CMD_WORDS for t in texts):
+        if any(text.split()[0].lower() in CMD_WORDS for text in texts):
             return "code", "shell snippet, aligned"
         return "shape", "aligned continuation"
     # A `# summary:` paragraph is refillable EXCEPT its first line: the
     # summary stays one line by rule, so only that line's own width is a
     # finding. The rest of the lead reflows like any prose.
     summary = SUMMARY_RE.match(texts[0]) is not None
-    if not all(word_like(t) for t in (texts[1:] if summary else texts)):
+    if not all(word_like(text) for text in (texts[1:] if summary else texts)):
         return "shape", "not the `# text` shape"
-    if any(t.split()[0].lower() in CMD_WORDS for t in texts):
+    if any(text.split()[0].lower() in CMD_WORDS for text in texts):
         return "code", "reads as a shell command line"
     # Code-shaped only if the code characters sit outside backtick spans.
-    stripped = [BACKTICK_SPAN_RE.sub("C", t) for t in texts]
-    if any(BAD_CHARS_RE.search(t) for t in stripped):
+    stripped = [BACKTICK_SPAN_RE.sub("C", text) for text in texts]
+    if any(BAD_CHARS_RE.search(text) for text in stripped):
         return "code", "code characters outside backticks"
     if any(FLAG_TOKEN_RE.match(tok)
-           for t in stripped for tok in t.split() if tok != "--"):
+           for text in stripped for tok in text.split() if tok != "--"):
         return "code", "flag-like token"
     # A span opened on one line and closed on the next would swallow the
     # join's space into the quoted code: every line must balance its own.
-    if any(t.count("`") % 2 for t in texts):
+    if any(text.count("`") % 2 for text in texts):
         return "broken-span", "backtick span crosses lines"
     region = " ".join(texts[1:]) if summary else joined
     longest = max((len(tok) for tok in _tokens(region)), default=0)
@@ -298,11 +298,11 @@ def fix_text(text, limit):
             continue
         prefix = f"{' ' * par_indent}# "
         if SUMMARY_RE.match(para[0][1]):
-            replacement = [prefix + para[0][1]] + [prefix + c
-                                                   for c in rewrap(para[1:],
+            replacement = [prefix + para[0][1]] + [prefix + line
+                                                   for line in rewrap(para[1:],
                                                                    limit)]
         else:
-            replacement = [prefix + c for c in rewrap(para, limit)]
+            replacement = [prefix + line for line in rewrap(para, limit)]
         edits.append((para[0][0], len(para), replacement))
     for first, count, replacement in reversed(edits):
         lines[first:first + count] = replacement
@@ -346,7 +346,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
 
     root = Path(__file__).resolve().parent.parent  # flake/
-    targets = [Path(p) for p in args.paths] or [root / "modules"]
+    targets = [Path(given_path) for given_path in args.paths] or [root / "modules"]
     files = []
     for target in targets:
         if target.is_dir():

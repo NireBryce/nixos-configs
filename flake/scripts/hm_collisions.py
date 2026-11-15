@@ -16,8 +16,8 @@ def classify(entries, home):
     """Return (owned, absent, collisions, recursive_dirs) path lists."""
     owned, absent, collisions, recursive_dirs = [], [], [], []
 
-    for _, v in sorted(entries.items()):
-        target = v["target"]
+    for _, entry in sorted(entries.items()):
+        target = entry["target"]
         path = target if target.startswith("/") else os.path.join(home, target)
 
         if not os.path.lexists(path):
@@ -28,7 +28,7 @@ def classify(entries, home):
 
         if resolved.startswith("/nix/store/"):
             owned.append(path)
-        elif v["recursive"] and os.path.isdir(path):
+        elif entry["recursive"] and os.path.isdir(path):
             # HM links the contents, not the directory, so a real directory
             # here is what a previous activation produced rather than
             # something in the way.
@@ -50,12 +50,12 @@ def report(owned, absent, collisions, recursive_dirs):
 
     if recursive_dirs:
         out.append("recursive entries (HM links the contents, directory stays real):")
-        out.extend(f"    {p}" for p in recursive_dirs)
+        out.extend(f"    {path}" for path in recursive_dirs)
         out.append("")
 
     if collisions:
         out.append("COLLISIONS -- HM does not own these paths yet:")
-        out.extend(f"    {p}" for p in collisions)
+        out.extend(f"    {path}" for path in collisions)
         out.append("")
         out.append("Not fatal. home-manager.backupFileExtension is set permanently to")
         out.append("\"hm-bak\" in modules/general-config/system/home-manager/enable-home-manager.nix,")

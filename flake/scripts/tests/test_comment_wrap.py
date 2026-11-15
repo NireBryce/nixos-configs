@@ -129,9 +129,9 @@ class FixTests(unittest.TestCase):
         # Words survive: joining and refilling must not lose any. Compare
         # comment contents only -- the `#` markers a join removes are not
         # words.
-        def contents(t):
-            indents = comment_wrap.comment_indents(t)
-            return [comment_wrap.content_of(t.split("\n")[ln], ind)
+        def contents(text):
+            indents = comment_wrap.comment_indents(text)
+            return [comment_wrap.content_of(text.split("\n")[ln], ind)
                     for ln, ind in sorted(indents.items())]
         self.assertEqual(" ".join(contents(text)), " ".join(contents(fixed)))
 

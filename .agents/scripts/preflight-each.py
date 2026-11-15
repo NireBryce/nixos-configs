@@ -104,10 +104,10 @@ NAME_RE = re.compile(r"^preflight-each\.(\d{1,10})\.[A-Za-z0-9_]+$")
 
 
 def git(*args, check=True, cwd=None):
-    r = subprocess.run(["git", *args], capture_output=True, text=True, cwd=cwd)
-    if check and r.returncode != 0:
-        raise RuntimeError(f"git {' '.join(args)}: {r.stderr.strip()}")
-    return r
+    result = subprocess.run(["git", *args], capture_output=True, text=True, cwd=cwd)
+    if check and result.returncode != 0:
+        raise RuntimeError(f"git {' '.join(args)}: {result.stderr.strip()}")
+    return result
 
 
 # -- memory ------------------------------------------------------------------
@@ -116,8 +116,8 @@ def mem_available_gib():
     path = os.environ.get("PREFLIGHT_EACH_MEMINFO", "/proc/meminfo")
     avail = None
     try:
-        with open(path) as f:
-            for line in f:
+        with open(path) as handle:
+            for line in handle:
                 if line.startswith("MemAvailable:"):
                     avail = int(line.split()[1]) / (1024 * 1024)
                     break
@@ -137,24 +137,24 @@ def cgroup_headroom_gib():
     path and its ancestors, in GiB; None when no level is limited."""
     root = os.environ.get("PREFLIGHT_EACH_CGROUP_ROOT", "/sys/fs/cgroup")
     try:
-        with open(os.environ.get("PREFLIGHT_EACH_PROC_CGROUP", "/proc/self/cgroup")) as f:
-            rel = next((l.strip()[3:] for l in f if l.startswith("0::")), None)
+        with open(os.environ.get("PREFLIGHT_EACH_PROC_CGROUP", "/proc/self/cgroup")) as handle:
+            rel = next((line.strip()[3:] for line in handle if line.startswith("0::")), None)
     except OSError:
         return None
     if rel is None:
         return None
     best = None
-    parts = [p for p in rel.split("/") if p]
+    parts = [part for part in rel.split("/") if part]
     for depth in range(len(parts), -1, -1):
-        d = os.path.join(root, *parts[:depth])
+        directory = os.path.join(root, *parts[:depth])
         try:
-            with open(os.path.join(d, "memory.max")) as f:
-                mx = f.read().strip()
-            if mx == "max":
+            with open(os.path.join(directory, "memory.max")) as handle:
+                limit = handle.read().strip()
+            if limit == "max":
                 continue
-            with open(os.path.join(d, "memory.current")) as f:
-                cur = int(f.read().strip())
-            room = max(0, int(mx) - cur) / 2**30
+            with open(os.path.join(directory, "memory.current")) as handle:
+                cur = int(handle.read().strip())
+            room = max(0, int(limit) - cur) / 2**30
         except (OSError, ValueError):
             continue
         best = room if best is None else min(best, room)
@@ -164,8 +164,8 @@ def cgroup_headroom_gib():
 # -- run identity and markers ---------------------------------------------------
 def boot_id():
     try:
-        with open("/proc/sys/kernel/random/boot_id") as f:
-            return f.read().strip()
+        with open("/proc/sys/kernel/random/boot_id") as handle:
+            return handle.read().strip()
     except OSError:
         return "no-boot-id"
 
@@ -202,13 +202,13 @@ def admin_dirs():
         names = os.listdir(base)
     except OSError:
         return out
-    for n in names:
+    for name in names:
         try:
-            with open(os.path.join(base, n, "gitdir")) as f:
-                dotgit = f.read().strip()
+            with open(os.path.join(base, name, "gitdir")) as handle:
+                dotgit = handle.read().strip()
         except OSError:
             continue
-        out[os.path.realpath(os.path.dirname(dotgit))] = os.path.join(base, n)
+        out[os.path.realpath(os.path.dirname(dotgit))] = os.path.join(base, name)
     return out
 
 
@@ -221,14 +221,14 @@ def worktree_entries():
             out.append(cur)
         elif line.startswith("locked") and cur is not None:
             cur[1] = line[7:] if line.startswith("locked ") else ""
-    return [tuple(e) for e in out]
+    return [tuple(entry) for entry in out]
 
 
 def read_marker(admin):
     try:
-        with open(os.path.join(admin, MARKER)) as f:
-            m = json.load(f)
-        return m if isinstance(m, dict) else None
+        with open(os.path.join(admin, MARKER)) as handle:
+            marker_data = json.load(handle)
+        return marker_data if isinstance(marker_data, dict) else None
     except (OSError, ValueError):
         return None
 
@@ -251,21 +251,21 @@ def kill_recorded_groups(marker):
     the run itself (so a reused pgid's unrelated members are spared)."""
     floor = marker.get("start")
     pgids = set()
-    for g in marker.get("pgids", []):
+    for pgid_text in marker.get("pgids", []):
         try:
-            pgids.add(int(g))
+            pgids.add(int(pgid_text))
         except (ValueError, TypeError, OverflowError):
             pass
     if not pgids or floor is None:
         return
     try:
-        pids = [int(p) for p in os.listdir("/proc") if p.isdigit()]
+        pids = [int(pid_text) for pid_text in os.listdir("/proc") if pid_text.isdigit()]
     except OSError:
         return
     for pid in pids:
         try:
-            with open(f"/proc/{pid}/stat") as f:
-                st = f.read()
+            with open(f"/proc/{pid}/stat") as handle:
+                st = handle.read()
             fields = st[st.rindex(")") + 2:].split()
             pgrp, start = int(fields[2]), int(fields[19])
         except (OSError, ValueError, IndexError):
@@ -310,7 +310,7 @@ def sweep_stale(tmp, me):
         if ident is None or admin is None:
             continue
         marker = read_marker(admin)
-        if (not marker or any(marker.get(k) != ident[k] for k in ident)
+        if (not marker or any(marker.get(field) != ident[field] for field in ident)
                 or os.path.realpath(str(marker.get("path", ""))) != real):
             continue
         if ident["host"] != me["host"] or ident["boot"] != me["boot"]:
@@ -325,8 +325,8 @@ def sweep_stale(tmp, me):
     if swept:
         print(f"preflight-each: removed {swept} worktree(s) left by a killed run",
               file=sys.stderr)
-    for k in kept:
-        print(f"preflight-each: could not remove stale worktree {k}; left in place",
+    for field in kept:
+        print(f"preflight-each: could not remove stale worktree {field}; left in place",
               file=sys.stderr)
 
 
@@ -347,8 +347,8 @@ class Runner:
         # flake tree -> who checks it: "owner" is the commit index running
         # its check (claimed in commit order: the earliest commit without a
         # passing verdict), "verdict" "ok" once a check passed, from "sha".
-        self.trees = {t: {"owner": None, "verdict": None, "sha": None}
-                      for t in flake_trees if t is not None}
+        self.trees = {tree: {"owner": None, "verdict": None, "sha": None}
+                      for tree in flake_trees if tree is not None}
         self.printed = 0
 
     def write_markers_locked(self):
@@ -356,8 +356,8 @@ class Runner:
             data = dict(self.ident, path=path, pgids=sorted(self.pgids))
             tmpf = os.path.join(admin, MARKER + ".tmp")
             try:
-                with open(tmpf, "w") as f:
-                    json.dump(data, f)
+                with open(tmpf, "w") as handle:
+                    json.dump(data, handle)
                 os.replace(tmpf, os.path.join(admin, MARKER))
             except OSError:
                 pass
@@ -389,8 +389,8 @@ class Runner:
             # Every group ever spawned: a finished job can leave members behind.
             procs = list(self.spawned)
         left = procgroup.stop(procs)
-        for g in left:
-            print(f"preflight-each: process group {g} still has members after KILL",
+        for pgid in left:
+            print(f"preflight-each: process group {pgid} still has members after KILL",
                   file=sys.stderr)
         for path, admin in self.worktrees:
             if not remove_marked(path, admin):
@@ -398,8 +398,8 @@ class Runner:
         self.worktrees = []
 
     # -- one commit ----------------------------------------------------------
-    def run_commit(self, job, i):
-        sha = self.shas[i]
+    def run_commit(self, job, commit_index):
+        sha = self.shas[commit_index]
         wt = self.worktrees[job][0]
         start = time.time()
         subject = git("log", "-1", "--format=%s", sha).stdout.strip()
@@ -410,20 +410,20 @@ class Runner:
         env.pop("PREFLIGHT_CACHED_CHECK", None)
         if self.jobs > 1:
             env["TEST_JOBS"] = str(max(1, (os.cpu_count() or 1) // self.jobs))
-        tree = self.flake_trees[i]
+        tree = self.flake_trees[commit_index]
         owner = False
         entry = None
         if tree is not None:
             entry = self.trees[tree]
             with self.cond:
                 # Wait while an earlier commit with this tree is checking it.
-                while (entry["owner"] not in (None, i) and entry["verdict"] is None
+                while (entry["owner"] not in (None, commit_index) and entry["verdict"] is None
                        and not self.stopping):
                     self.cond.wait(0.5)
                 if entry["verdict"] == "ok":
                     env["PREFLIGHT_CACHED_CHECK"] = entry["sha"][:8]
                 else:
-                    entry["owner"], owner = i, True
+                    entry["owner"], owner = commit_index, True
         fd, status = tempfile.mkstemp(prefix="preflight-each-status.")
         os.close(fd)
         fd, log = tempfile.mkstemp(prefix="preflight-each-log.")
@@ -434,29 +434,29 @@ class Runner:
                 with self.lock:
                     if self.stopping:
                         return
-                    p = procgroup.spawn(["bash", "-c", self.cmd], cwd=wt, env=env,
+                    proc = procgroup.spawn(["bash", "-c", self.cmd], cwd=wt, env=env,
                                         stdout=out, stderr=subprocess.STDOUT,
                                         stdin=subprocess.DEVNULL)
-                    self.procs[job] = p
-                    self.spawned.append(p)
-                    self.pgids.add(p.pid)
+                    self.procs[job] = proc
+                    self.spawned.append(proc)
+                    self.pgids.add(proc.pid)
                     self.write_markers_locked()
-                rc = p.wait()
+                rc = proc.wait()
                 # The job is over: nothing of it may run on into the next
                 # commit's checkout of this worktree.
-                procgroup.stop([p], grace=0.5)
+                procgroup.stop([proc], grace=0.5)
                 with self.lock:
                     self.procs.pop(job, None)
             try:
-                with open(status) as f:
-                    verdict = json.load(f).get(CHECK_STEP)
+                with open(status) as handle:
+                    verdict = json.load(handle).get(CHECK_STEP)
             except (OSError, ValueError, AttributeError):
                 verdict = None
             if owner and verdict == "ok":
                 with self.cond:
                     entry["verdict"], entry["sha"] = "ok", sha
-            with open(log, errors="replace") as f:
-                text = f.read().splitlines()
+            with open(log, errors="replace") as handle:
+                text = handle.read().splitlines()
         finally:
             if owner:
                 with self.cond:
@@ -470,14 +470,14 @@ class Runner:
         secs = round(time.time() - start)
         short = sha[:8]
         if rc == 0:
-            steps = next((m.group(1) for l in reversed(text)
-                          for m in [re.match(r"^preflight passed: (\d+) steps", l)] if m), "?")
+            steps = next((match.group(1) for log_line in reversed(text)
+                          for match in [re.match(r"^preflight passed: (\d+) steps", log_line)] if match), "?")
             line = [f"ok   {short} {subject}  ({steps} steps, {secs}s)"]
         else:
             line = [f"FAIL {short} {subject}  ({secs}s)"]
-            line += ["     " + l for l in text[-40:]]
+            line += ["     " + log_line for log_line in text[-40:]]
         with self.lock:
-            self.results[i] = (rc, line)
+            self.results[commit_index] = (rc, line)
             self.flush_locked()
 
     def flush_locked(self):
@@ -490,32 +490,32 @@ class Runner:
             with self.lock:
                 if self.stopping or self.next >= len(self.shas):
                     return
-                i = self.next
+                commit_index = self.next
                 self.next += 1
                 # Claim the tree's check here, in commit order, not after
                 # this job's checkout -- another job may get there first.
-                entry = self.trees.get(self.flake_trees[i])
+                entry = self.trees.get(self.flake_trees[commit_index])
                 if entry and entry["owner"] is None and entry["verdict"] is None:
-                    entry["owner"] = i
+                    entry["owner"] = commit_index
             try:
-                self.run_commit(job, i)
-            except Exception as e:  # a git step failed: report it, keep going
+                self.run_commit(job, commit_index)
+            except Exception as error:  # a git step failed: report it, keep going
                 with self.lock:
-                    if entry and entry["owner"] == i and entry["verdict"] is None:
+                    if entry and entry["owner"] == commit_index and entry["verdict"] is None:
                         entry["owner"] = None   # let a waiter check this tree
                         self.cond.notify_all()
-                    self.results[i] = (1, [f"FAIL {self.shas[i][:8]}  ({e})"])
+                    self.results[commit_index] = (1, [f"FAIL {self.shas[commit_index][:8]}  ({error})"])
                     self.flush_locked()
 
     def run(self):
-        threads = [threading.Thread(target=self.worker, args=(j,), daemon=True)
-                   for j in range(self.jobs)]
-        for t in threads:
-            t.start()
-        for t in threads:
-            while t.is_alive():
-                t.join(0.2)     # short joins: signals reach the main thread
-        return 1 if any(r is None or r[0] != 0 for r in self.results) else 0
+        threads = [threading.Thread(target=self.worker, args=(slot,), daemon=True)
+                   for slot in range(self.jobs)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            while thread.is_alive():
+                thread.join(0.2)     # short joins: signals reach the main thread
+        return 1 if any(result_row is None or result_row[0] != 0 for result_row in self.results) else 0
 
 
 def clamp_jobs(want, shas, flake_trees):
@@ -529,11 +529,11 @@ def clamp_jobs(want, shas, flake_trees):
         return 1
     # At most one check per distinct flake tree runs at a time (a commit
     # sharing a running commit's tree waits for its verdict).
-    trees = len({t or s for t, s in zip(flake_trees, shas)})
+    trees = len({flake_tree or sha for flake_tree, sha in zip(flake_trees, shas)})
 
-    def need(n):
-        return min(n, trees) * CHECK_GIB + n * REST_GIB
-    fit = max([n for n in range(1, jobs + 1) if need(n) <= avail] or [1])
+    def need(job_count):
+        return min(job_count, trees) * CHECK_GIB + job_count * REST_GIB
+    fit = max([job_count for job_count in range(1, jobs + 1) if need(job_count) <= avail] or [1])
     if fit < jobs:
         print(f"preflight-each: --jobs {want} reduced to {fit}: {source} "
               f"{avail:.1f} GiB; {jobs} jobs over {trees} flake tree(s) need "
@@ -545,19 +545,19 @@ def clamp_jobs(want, shas, flake_trees):
 def main(argv):
     jobs, rest = 1, []
     it = iter(argv)
-    for a in it:
-        if a in ("-j", "--jobs"):
-            a = next(it, "")
-        elif a.startswith("--jobs="):
-            a = a.split("=", 1)[1]
+    for arg in it:
+        if arg in ("-j", "--jobs"):
+            arg = next(it, "")
+        elif arg.startswith("--jobs="):
+            arg = arg.split("=", 1)[1]
         else:
-            rest.append(a)
+            rest.append(arg)
             continue
-        if not a.isdigit() or int(a) < 1:
+        if not arg.isdigit() or int(arg) < 1:
             print("usage: preflight-each.py [--jobs N] [<range>]", file=sys.stderr)
             return 2
-        jobs = int(a)
-    if len(rest) > 1 or any(r.startswith("-") for r in rest):
+        jobs = int(arg)
+    if len(rest) > 1 or any(result.startswith("-") for result in rest):
         print("usage: preflight-each.py [--jobs N] [<range>]", file=sys.stderr)
         return 2
     rng = rest[0] if rest else "origin/experimental..HEAD"
@@ -570,11 +570,11 @@ def main(argv):
     if git("fetch", "-q", "origin", check=False).returncode != 0:
         print("warning: git fetch origin failed; using local refs", file=sys.stderr)
 
-    r = git("rev-list", "--reverse", rng, check=False)
-    shas = r.stdout.split() if r.returncode == 0 else []
+    result = git("rev-list", "--reverse", rng, check=False)
+    shas = result.stdout.split() if result.returncode == 0 else []
     if not shas:
         tip = rng.split("..")[-1] or "HEAD"
-        if r.returncode != 0 or git("rev-parse", "-q", "--verify", f"{tip}^{{commit}}",
+        if result.returncode != 0 or git("rev-parse", "-q", "--verify", f"{tip}^{{commit}}",
                                     check=False).returncode != 0:
             print(f"bad range: {rng}", file=sys.stderr)
             return 2
@@ -586,22 +586,22 @@ def main(argv):
     sweep_stale(tmp, ident)
     # None: no flake/ at that commit (fixture repos), so nothing to cache.
     flake_trees = []
-    for s in shas:
-        r = git("rev-parse", "-q", "--verify", f"{s}:flake", check=False)
-        flake_trees.append(r.stdout.strip() if r.returncode == 0 else None)
+    for sha in shas:
+        result = git("rev-parse", "-q", "--verify", f"{sha}:flake", check=False)
+        flake_trees.append(result.stdout.strip() if result.returncode == 0 else None)
     jobs = clamp_jobs(jobs, shas, flake_trees)
 
     runner = Runner(shas, flake_trees, jobs, cmd, tmp, ident)
 
     def on_signal(signum, _frame):
-        for s in SIGNALS:
-            signal.signal(s, signal.SIG_IGN)
+        for signal_number in SIGNALS:
+            signal.signal(signal_number, signal.SIG_IGN)
         print("interrupted", file=sys.stderr, flush=True)
         runner.cleanup()
         os._exit(130)   # worker threads are daemons mid-wait; don't join them
 
-    for s in SIGNALS:
-        signal.signal(s, on_signal)
+    for signal_number in SIGNALS:
+        signal.signal(signal_number, on_signal)
     try:
         runner.create_worktrees()
         where = runner.worktrees[0][0] if jobs == 1 else f"{jobs} worktrees"
@@ -609,8 +609,8 @@ def main(argv):
               f"({'worktree ' if jobs == 1 else ''}{where})", flush=True)
         return runner.run()
     finally:
-        for s in SIGNALS:
-            signal.signal(s, signal.SIG_IGN)
+        for signal_number in SIGNALS:
+            signal.signal(signal_number, signal.SIG_IGN)
         runner.cleanup()
 
 

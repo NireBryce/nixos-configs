@@ -85,19 +85,19 @@ class GenError(Exception):
 
 def render_table(headers, rows):
     lines = ['| ' + ' | '.join(headers) + ' |', '|' + '---|' * len(headers)]
-    lines += ['| ' + ' | '.join(r) + ' |' for r in rows]
+    lines += ['| ' + ' | '.join(row) + ' |' for row in rows]
     return '\n'.join(lines)
 
 
 def parse_table(body):
     """[{header: cell}, ...] for the first markdown table in `body`; [] if
     there is none (a region being adopted for the first time, or emptied)."""
-    lines = [l.strip() for l in body.splitlines() if l.strip().startswith('|')]
+    lines = [line.strip() for line in body.splitlines() if line.strip().startswith('|')]
     if len(lines) < 2:
         return []
-    split = lambda l: [c.strip() for c in CELL_SPLIT.split(l.strip('|'))]
+    split = lambda line: [cell.strip() for cell in CELL_SPLIT.split(line.strip('|'))]
     headers = split(lines[0])
-    return [dict(zip(headers, split(l))) for l in lines[2:]]
+    return [dict(zip(headers, split(line))) for line in lines[2:]]
 
 
 def _same_key(row_id, cell):
@@ -130,8 +130,8 @@ class Region:
         old = parse_table(old_body)
         out, empty, used = [], [], set()
         for row_id, cells in self.rows(root):
-            prev = next((i for i, r in enumerate(old)
-                         if i not in used and _same_key(row_id, r.get(self.key, ''))),
+            prev = next((index for index, old_row in enumerate(old)
+                         if index not in used and _same_key(row_id, old_row.get(self.key, ''))),
                         None)
             if prev is not None:
                 used.add(prev)
@@ -139,8 +139,8 @@ class Region:
                 cells[col] = old[prev].get(col, '') if prev is not None else ''
                 if not cells[col]:
                     empty.append((row_id, col))
-            out.append([cells[h] for h in self.headers])
-        dropped = [r for i, r in enumerate(old) if i not in used]
+            out.append([cells[header] for header in self.headers])
+        dropped = [old_row for index, old_row in enumerate(old) if index not in used]
         text = (self.marker() + '\n\n' + render_table(self.headers, out)
                 + '\n\n' + END)
         return text, empty, dropped
@@ -168,11 +168,11 @@ def host_rows(root):
     hosts = nixtree.actual_hosts(root)
     if not hosts:
         raise GenError('hosts.nix declares no nire-* hosts (or moved)')
-    shorts = [h.removeprefix('nire-') for h in hosts]
-    for s in shorts:
-        p = root / 'flake' / 'modules' / 'host-config' / f'{s}-configuration.nix'
-        if not p.exists():
-            raise GenError(f'no {p.relative_to(root)} for nire-{s}')
+    shorts = [host.removeprefix('nire-') for host in hosts]
+    for short_name in shorts:
+        config_path = root / 'flake' / 'modules' / 'host-config' / f'{short_name}-configuration.nix'
+        if not config_path.exists():
+            raise GenError(f'no {config_path.relative_to(root)} for nire-{short_name}')
     imports = nixtree.host_imports(root, nixtree.find_categories(root), shorts)
     for name, cls in hosts.items():
         short = name.removeprefix('nire-')
@@ -203,8 +203,8 @@ def category_rows(homelab):
         modules = root / 'flake' / 'modules'
         pages = root / 'wiki' / 'config-structure' / 'categories'
         found = []
-        for name, d in nixtree.find_categories(root).items():
-            rel = d.relative_to(modules).as_posix()
+        for name, category_dir in nixtree.find_categories(root).items():
+            rel = category_dir.relative_to(modules).as_posix()
             if (rel == HOMELAB or rel.startswith(HOMELAB + '/')) != homelab:
                 continue
             if (pages / f'{name}.md').exists():
@@ -213,18 +213,19 @@ def category_rows(homelab):
                 link = f'{name}/00-INDEX.md'
             else:
                 continue  # no page, no row (amd, root-rollback)
-            nested = sorted(c.name for c in nixtree.categories_under(root, d))
+            nested = sorted(nested_dir.name for nested_dir in
+                            nixtree.categories_under(root, category_dir))
             dir_cell = f'`{rel}/`'
             if 0 < len(nested) <= NESTED_NAMED_MAX:
-                dir_cell += ' (+ nested ' + ', '.join(f'`{n}`' for n in nested) + ')'
+                dir_cell += ' (+ nested ' + ', '.join(f'`{nested_name}`' for nested_name in nested) + ')'
             elif nested:
                 dir_cell += f' (+ {len(nested)} nested)'
-            classes = nixtree.category_classes(d)
-            ordered = [c for c in CLASS_ORDER if c in classes] + sorted(classes - set(CLASS_ORDER))
+            classes = nixtree.category_classes(category_dir)
+            ordered = [class_name for class_name in CLASS_ORDER if class_name in classes] + sorted(classes - set(CLASS_ORDER))
             found.append(((rel.split('/')[0], name), name, {
                 'Category': f'[{name}]({link})', 'Directory': dir_cell,
                 'Class(es)': ', '.join(ordered)}))
-        for _, name, cells in sorted(found, key=lambda t: t[0]):
+        for _, name, cells in sorted(found, key=lambda entry: entry[0]):
             yield name, cells
     return rows
 
@@ -246,15 +247,15 @@ def count_rows(root):
     files = sorted((root / 'flake' / 'modules').rglob('*.nix'))
     if not files:
         raise GenError('no .nix files under flake/modules/')
-    texts = [f.read_text() for f in files]
+    texts = [file_path.read_text() for file_path in files]
     for label, pat in COUNT_ROWS:
         if pat is None:
-            n = len(files)
+            file_count = len(files)
         elif isinstance(pat, re.Pattern):
-            n = sum(1 for t in texts if pat.search(t))
+            file_count = sum(1 for text in texts if pat.search(text))
         else:
-            n = sum(1 for t in texts if pat in t)
-        yield label, {'What': label, 'Files': str(n)}
+            file_count = sum(1 for text in texts if pat in text)
+        yield label, {'What': label, 'Files': str(file_count)}
 
 
 def module_layout(root):
@@ -273,15 +274,15 @@ def module_layout(root):
         raise GenError('no categories under flake/modules/')
     flake = pathlib.Path(__file__).resolve().parents[3] / 'flake'
     try:
-        r = subprocess.run(['nix', 'run', f'{flake}#module-graph', '--',
+        result = subprocess.run(['nix', 'run', f'{flake}#module-graph', '--',
                             'tree', '-', '--depth', '1', '--categories-only'],
                            input=json.dumps(doc), capture_output=True, text=True)
     except FileNotFoundError:
         raise GenError('nix is not installed; the diagram is drawn by the flake-module-graph input')
-    if r.returncode:
-        lines = r.stderr.strip().splitlines()
-        raise GenError(f'module-graph failed: {lines[-1] if lines else r.returncode}')
-    return '```mermaid\n' + r.stdout.rstrip('\n') + '\n```'
+    if result.returncode:
+        lines = result.stderr.strip().splitlines()
+        raise GenError(f'module-graph failed: {lines[-1] if lines else result.returncode}')
+    return '```mermaid\n' + result.stdout.rstrip('\n') + '\n```'
 
 
 SKILLS_DIR = '.agents/skills'
@@ -300,9 +301,9 @@ def skill_rows(root):
         raise GenError(f'no SKILL.md files under {SKILLS_DIR}/')
     for path in skills:
         name = path.parent.name
-        m = FRONTMATTER.match(path.read_text())
+        match = FRONTMATTER.match(path.read_text())
         fm = {}
-        for line in (m.group(1).splitlines() if m else []):
+        for line in (match.group(1).splitlines() if match else []):
             key, sep, value = line.partition(': ')
             if sep:
                 fm[key.strip()] = value.strip()
@@ -315,7 +316,7 @@ def skill_rows(root):
         }
 
 
-REGIONS = {r.name: r for r in [
+REGIONS = {region.name: region for region in [
     Region('skills-index', 'wiki/meta/skills-index.md',
            f'the frontmatter of each {SKILLS_DIR}/*/SKILL.md',
            ['Skill', 'Does', 'Use when'], 'Skill', [], skill_rows),
@@ -361,8 +362,8 @@ def run(root, write):
                 f"region(s) -- every `<!-- generated:<name> ... -->` line needs "
                 f"its own `{END}`")
         new_text, pos = [], 0
-        for m in regions:
-            name = m.group('name')
+        for match in regions:
+            name = match.group('name')
             seen.setdefault(name, []).append(rel)
             region = REGIONS.get(name)
             if region is None:
@@ -372,27 +373,27 @@ def run(root, write):
                 continue
             try:
                 fresh, empty, dropped = region.render(
-                    root, text[m.start('body'):m.end('body')])
-            except GenError as e:
-                findings.append(f"GEN ERROR  {rel}: region '{name}': {e}")
+                    root, text[match.start('body'):match.end('body')])
+            except GenError as error:
+                findings.append(f"GEN ERROR  {rel}: region '{name}': {error}")
                 continue
             for row_id, col in empty:
                 findings.append(
                     f"EMPTY HAND CELL  {rel}: region '{name}' row '{row_id}' "
                     f"has no {col} -- it is hand-written; fill it in (the "
                     f"generated columns come from {region.source})")
-            if fresh != text[m.start():m.end()]:
+            if fresh != text[match.start():match.end()]:
                 if write:
-                    for r in dropped:
-                        if not any(r.get(c) for c in region.hand):
+                    for dropped_row in dropped:
+                        if not any(dropped_row.get(cell_name) for cell_name in region.hand):
                             continue  # nothing hand-written was lost
                         notes.append(
                             f"dropped  {rel}: region '{name}' row "
-                            f"{r.get(region.key, '?')!r} (no longer in "
+                            f"{dropped_row.get(region.key, '?')!r} (no longer in "
                             f"{region.source}); its hand cells were "
-                            f"{ {c: r.get(c, '') for c in region.hand} }")
-                    new_text.append(text[pos:m.start()] + fresh)
-                    pos = m.end()
+                            f"{ {cell_name: dropped_row.get(cell_name, '') for cell_name in region.hand} }")
+                    new_text.append(text[pos:match.start()] + fresh)
+                    pos = match.end()
                 else:
                     findings.append(
                         f"STALE GENERATED  {rel}: region '{name}' does not match "
@@ -411,7 +412,7 @@ def run(root, write):
         if len(where) != len(set(where)):
             findings.append(
                 f"DUPLICATE REGION  'generated:{name}' appears more than once "
-                f"on one page: {sorted(set(p for p in where if where.count(p) > 1))}")
+                f"on one page: {sorted(set(doc_page for doc_page in where if where.count(doc_page) > 1))}")
     return findings, notes
 
 
@@ -424,14 +425,14 @@ def check(root):
 def main(argv):
     args = argv[1:]
     write = '--check' not in args
-    args = [a for a in args if a != '--check']
+    args = [arg for arg in args if arg != '--check']
     root = (pathlib.Path(args[0]).resolve() if args
             else pathlib.Path(__file__).resolve().parents[3])
     findings, notes = run(root, write)
-    for n in notes:
-        print(n)
-    for f in findings:
-        print(f)
+    for note in notes:
+        print(note)
+    for finding in findings:
+        print(finding)
     if findings:
         return 1
     print('wiki-gen: ' + ('all generated regions current' if not write

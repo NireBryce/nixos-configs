@@ -35,10 +35,10 @@ class Mapping(unittest.TestCase):
         self.addCleanup(shutil.rmtree, self.dir, ignore_errors=True)
 
     def hook(self, name, body):
-        p = self.dir / name
-        p.write_text("#!/usr/bin/env bash\ncat >/dev/null\n" + body)
-        p.chmod(0o755)
-        return f'"{p}"'
+        hook_path = self.dir / name
+        hook_path.write_text("#!/usr/bin/env bash\ncat >/dev/null\n" + body)
+        hook_path.chmod(0o755)
+        return f'"{hook_path}"'
 
     def code(self, *hooks):
         results = guard_check.run_hooks("ls", self.dir, "s", hooks=list(hooks),
@@ -84,11 +84,11 @@ class Mapping(unittest.TestCase):
 
     def test_payload_shape(self):
         out = self.dir / "seen.json"
-        h = self.hook("p.sh", f"true")
+        hook = self.hook("p.sh", f"true")
         # Re-write to capture stdin instead of discarding it.
-        Path(h.strip('"')).write_text(
+        Path(hook.strip('"')).write_text(
             f"#!/usr/bin/env bash\ncat > {out}\n")
-        guard_check.run_hooks("git status", self.dir, "sess", hooks=[h],
+        guard_check.run_hooks("git status", self.dir, "sess", hooks=[hook],
                               hook_root=self.dir)
         got = json.loads(out.read_text())
         self.assertEqual(got["tool_name"], "Bash")
@@ -171,19 +171,19 @@ class Untrusted(unittest.TestCase):
 class Settings(unittest.TestCase):
     def test_reads_the_bash_matcher_hooks_from_settings(self):
         hooks = guard_check.bash_pretooluse_hooks()
-        names = [Path(h.strip('"')).name for h in hooks]
+        names = [Path(hook.strip('"')).name for hook in hooks]
         self.assertIn("git-guard-pretooluse.sh", names)
         self.assertNotIn("impermanence-edit-guard-pretooluse.sh", names)
 
     def test_other_matchers_are_skipped(self):
-        d = Path(tempfile.mkdtemp(prefix="guard-check-"))
-        self.addCleanup(shutil.rmtree, d, ignore_errors=True)
-        (d / "s.json").write_text(json.dumps({"hooks": {"PreToolUse": [
+        tmp_dir = Path(tempfile.mkdtemp(prefix="guard-check-"))
+        self.addCleanup(shutil.rmtree, tmp_dir, ignore_errors=True)
+        (tmp_dir / "s.json").write_text(json.dumps({"hooks": {"PreToolUse": [
             {"matcher": "Bash", "hooks": [{"type": "command", "command": "a"}]},
             {"matcher": "Read|Bash", "hooks": [{"type": "command", "command": "b"}]},
             {"matcher": "Edit", "hooks": [{"type": "command", "command": "c"}]},
         ]}}))
-        self.assertEqual(guard_check.bash_pretooluse_hooks(d / "s.json"),
+        self.assertEqual(guard_check.bash_pretooluse_hooks(tmp_dir / "s.json"),
                          ["a", "b"])
 
 
@@ -192,7 +192,7 @@ class RealHooks(unittest.TestCase):
     def setUp(self):
         self.repo = Path(tempfile.mkdtemp(prefix="guard-check-repo-"))
         self.addCleanup(shutil.rmtree, self.repo, ignore_errors=True)
-        def git(*a):
+        def git(*args):
             # Isolated from the user's global config: the session's
             # commit.gpgsign + agent-served signing key must not decide
             # whether a fixture commit can happen at all.
@@ -200,7 +200,7 @@ class RealHooks(unittest.TestCase):
                        GIT_CONFIG_GLOBAL=os.devnull,
                        GIT_CONFIG_SYSTEM=os.devnull)
             subprocess.run(["git", "-C", str(self.repo), "-c", "user.name=t",
-                            "-c", "user.email=t@t", *a], check=True,
+                            "-c", "user.email=t@t", *args], check=True,
                            capture_output=True, env=env)
         git("init", "-q")
         (self.repo / "f").write_text("a\n")
@@ -215,13 +215,13 @@ class RealHooks(unittest.TestCase):
             capture_output=True, text=True)
 
     def test_discarding_a_dirty_tree_is_denied(self):
-        p = self.run_cli("git reset --hard")
-        self.assertEqual(p.returncode, 2, p.stdout)
-        self.assertIn("DENY", p.stdout)
+        completed = self.run_cli("git reset --hard")
+        self.assertEqual(completed.returncode, 2, completed.stdout)
+        self.assertIn("DENY", completed.stdout)
 
     def test_a_harmless_command_passes(self):
-        p = self.run_cli("ls")
-        self.assertEqual(p.returncode, 0, p.stdout)
+        completed = self.run_cli("ls")
+        self.assertEqual(completed.returncode, 0, completed.stdout)
 
 
 if __name__ == "__main__":

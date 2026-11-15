@@ -28,16 +28,16 @@ MAX_AMBIGUOUS = 1  # a short name matching more tracked paths than this is skipp
 
 def normalize(token):
     try:
-        from wiki_stale_refs import normalize as n
-        return n(token)
+        from wiki_stale_refs import normalize as normalize_name
+        return normalize_name(token)
     except ImportError:  # fixture repos have no wiki/meta/scripts
-        return "/".join(p for p in token.split("/") if p not in (".", ".."))
+        return "/".join(part for part in token.split("/") if part not in (".", ".."))
 
 
 def git(root, *args):
-    p = subprocess.run(["git", "-C", str(root), *args], capture_output=True,
+    completed = subprocess.run(["git", "-C", str(root), *args], capture_output=True,
                        text=True)
-    return p.stdout if p.returncode == 0 else ""
+    return completed.stdout if completed.returncode == 0 else ""
 
 
 def docs(root):
@@ -48,8 +48,8 @@ def docs(root):
     found |= set(root.glob(".agents/skills/*/SKILL.md"))
     if (root / "AGENTS.md").exists():
         found.add(root / "AGENTS.md")
-    return sorted(p.relative_to(root).as_posix() for p in found
-                  if "__pycache__" not in p.parts)
+    return sorted(path.relative_to(root).as_posix() for path in found
+                  if "__pycache__" not in path.parts)
 
 
 class Index:
@@ -57,27 +57,27 @@ class Index:
 
     def __init__(self, root):
         self.files = set(git(root, "ls-files").splitlines())
-        self.dirs = {"/".join(f.split("/")[:i]) for f in self.files
-                     for i in range(1, f.count("/") + 1)}
+        self.dirs = {"/".join(file_name.split("/")[:depth]) for file_name in self.files
+                     for depth in range(1, file_name.count("/") + 1)}
         self.all = self.files | self.dirs
         self.by_name = {}
-        for p in self.all:
-            parts = p.split("/")
-            for i in range(len(parts)):
-                self.by_name.setdefault("/".join(parts[i:]), []).append(p)
+        for path in self.all:
+            parts = path.split("/")
+            for depth in range(len(parts)):
+                self.by_name.setdefault("/".join(parts[depth:]), []).append(path)
 
     def resolve(self, token):
         """Repo path for a cited token or None (unknown, ambiguous, or a
         bare word)."""
-        t = normalize(token.strip().rstrip("/"))
-        t = re.sub(r":\d+(-\d+)?$", "", t)
-        if not t or any(c in t for c in " *<>{}$|()=") or t.startswith(("http", "~")):
+        target = normalize(token.strip().rstrip("/"))
+        target = re.sub(r":\d+(-\d+)?$", "", target)
+        if not target or any(char in target for char in " *<>{}$|()=") or target.startswith(("http", "~")):
             return None
-        if "/" not in t and not t.endswith(EXTS):
+        if "/" not in target and not target.endswith(EXTS):
             return None
-        if t in self.all:
-            return t
-        hits = self.by_name.get(t, [])
+        if target in self.all:
+            return target
+        hits = self.by_name.get(target, [])
         return hits[0] if len(hits) <= MAX_AMBIGUOUS and hits else None
 
 
@@ -85,18 +85,18 @@ def cited(text, index):
     """Set of tracked repo paths (files or dirs) the text cites."""
     out = set()
     for rx in (BACKTICK, MDLINK):
-        for m in rx.finditer(text):
-            p = index.resolve(m.group(1))
-            if p:
-                out.add(p)
+        for match in rx.finditer(text):
+            path = index.resolve(match.group(1))
+            if path:
+                out.add(path)
     return out
 
 
 def last_modified(root, rel):
     """(date, source): the `_Last modified:_` line, else last commit date."""
     text = (Path(root) / rel).read_text(errors="replace")
-    m = DATE.search(text)
-    if m:
-        return m.group(1), "line"
-    d = git(root, "log", "-1", "--format=%cs", "--", rel).strip()
-    return (d or None), "git"
+    match = DATE.search(text)
+    if match:
+        return match.group(1), "line"
+    commit_date = git(root, "log", "-1", "--format=%cs", "--", rel).strip()
+    return (commit_date or None), "git"

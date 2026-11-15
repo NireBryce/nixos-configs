@@ -91,9 +91,9 @@ remind  = "Packages: darwin buildability is automatic (drop-unsupported-packages
 id        = "scripts"
 paths     = ["**/*.sh", "**/*.py", "**/*.just", ".justfile"]
 rules     = "scripts.md"
-lessons   = [1]
+lessons   = [1, 54]
 remind_on = "create"
-remind    = "New script: no Python buried in bash (a real .py instead); a checker is tested against a case it should catch, in the same commit (§1)."
+remind    = "New script: no Python buried in bash (a real .py instead); a checker is tested against a case it should catch, in the same commit (§1); name variables for what they hold, never one letter (§54)."
 
 [[topic]]
 id      = "agent-config"

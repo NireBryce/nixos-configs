@@ -73,8 +73,8 @@ def run_guard(script, payload):
     # just-guard asks whenever a JUST_* variable is inherited, and the
     # #458 deny-under-ZCode emitters key on ZCODE_PROJECT_DIR; keep the
     # fixtures independent of whatever harness ran this test.
-    env = {k: v for k, v in os.environ.items()
-           if not k.startswith("JUST_") and k != "ZCODE_PROJECT_DIR"}
+    env = {name: value for name, value in os.environ.items()
+           if not name.startswith("JUST_") and name != "ZCODE_PROJECT_DIR"}
     proc = subprocess.run(
         ["bash", str(script)], input=json.dumps(payload).encode(),
         capture_output=True, timeout=60, env=env)
@@ -99,8 +99,8 @@ def zcode_env():
     """The environment as ZCode presents it to a hook: ZCODE_PROJECT_DIR
     set (#458's under-ZCode discriminator), JUST_* stripped the way
     run_guard strips it."""
-    env = {k: v for k, v in os.environ.items()
-           if not k.startswith("JUST_") and k != "ZCODE_PROJECT_DIR"}
+    env = {name: value for name, value in os.environ.items()
+           if not name.startswith("JUST_") and name != "ZCODE_PROJECT_DIR"}
     env["ZCODE_PROJECT_DIR"] = str(REPO)
     return env
 
@@ -298,11 +298,11 @@ class SecretsGuardPreToolUse(GuardCase):
         allow = json.loads(SETTINGS.read_text())["permissions"]["allow"]
         for rule in allow:
             self.assertNotRegex(rule, r"^Bash\(nix\b", rule)
-            m = re.fullmatch(r"Bash\(just ([\w-]+) \*\)", rule)
-            if not m:
+            match = re.fullmatch(r"Bash\(just ([\w-]+) \*\)", rule)
+            if not match:
                 self.assertNotIn("*", rule, f"unexpected wildcard: {rule}")
                 continue
-            shown = subprocess.run(["just", "--show", m.group(1)], cwd=REPO,
+            shown = subprocess.run(["just", "--show", match.group(1)], cwd=REPO,
                                    capture_output=True, text=True).stdout
             self.assertIn("[positional-arguments]", shown, rule)
 
@@ -400,10 +400,10 @@ class SecretsReadGuardPreToolUse(GuardCase):
             self.assertIn("just read-sops-names", model_context(out))
 
     def test_symlink_into_the_tree_denies(self):
-        d = pathlib.Path(tempfile.mkdtemp(prefix="read-guard-"))
-        self.addCleanup(shutil.rmtree, d, ignore_errors=True)
-        (d / "link").symlink_to("/run/secrets")
-        out = self.run_tool("Read", file_path=str(d / "link" / "x"))
+        directory = pathlib.Path(tempfile.mkdtemp(prefix="read-guard-"))
+        self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
+        (directory / "link").symlink_to("/run/secrets")
+        out = self.run_tool("Read", file_path=str(directory / "link" / "x"))
         self.assertEqual((out or {}).get("hookSpecificOutput", {})
                          .get("permissionDecision"), "deny")
 
@@ -500,24 +500,24 @@ class GitGuardPreToolUse(GuardCase):
                      "git clean -fd")
 
     def repo(self):
-        r = make_repo("git-guard-")
-        self.addCleanup(shutil.rmtree, r, ignore_errors=True)
-        return r
+        repo = make_repo("git-guard-")
+        self.addCleanup(shutil.rmtree, repo, ignore_errors=True)
+        return repo
 
     def test_clean_tree_allows_silently(self):
         # The ship skill's `reset --hard origin/experimental` recovery after
         # `git branch <b>` has nothing to lose on a clean tree.
-        r = self.repo()
+        repo = self.repo()
         for cmd in self.STATE_CHECKED:
-            self.assertIsNone(run_guard(self.script, bash_payload(cmd, r)),
+            self.assertIsNone(run_guard(self.script, bash_payload(cmd, repo)),
                               cmd)
 
     def test_dirty_tracked_denies_with_paths(self):
         # The #182 shape: someone else's uncommitted edit in the tree.
-        r = self.repo()
-        (r / "tracked.txt").write_text("changed\n")
+        repo = self.repo()
+        (repo / "tracked.txt").write_text("changed\n")
         for cmd in self.STATE_CHECKED[:-1]:
-            out = self.assertDeny(self.script, cmd, "tracked.txt", cwd=r)
+            out = self.assertDeny(self.script, cmd, "tracked.txt", cwd=repo)
             self.assertIn("Ask the user",
                           out["hookSpecificOutput"]["permissionDecisionReason"])
 
@@ -526,18 +526,18 @@ class GitGuardPreToolUse(GuardCase):
         # (long names, over ~4KB) head exits while grep is still writing,
         # grep takes SIGPIPE, and under `set -eo pipefail` the hook exited 141
         # instead of answering. A handful of short paths never reached it.
-        r = self.repo()
-        names = [f"dirty-{i:03d}-" + "x" * 90 + ".txt" for i in range(120)]
-        for n in names:
-            (r / n).write_text("a\n")
-        git(r, "add", ".")
-        git(r, "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-q",
+        repo = self.repo()
+        names = [f"dirty-{index:03d}-" + "x" * 90 + ".txt" for index in range(120)]
+        for dirty_name in names:
+            (repo / dirty_name).write_text("a\n")
+        git(repo, "add", ".")
+        git(repo, "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-q",
             "-m", "many files")
-        for n in names:
-            (r / n).write_text("b\n")
+        for dirty_name in names:
+            (repo / dirty_name).write_text("b\n")
         for _ in range(3):  # the race is timing-dependent; the data is not
             out = self.assertDeny(self.script, "git reset --hard",
-                                  "(120 dirty paths in all)", cwd=r)
+                                  "(120 dirty paths in all)", cwd=repo)
             reason = out["hookSpecificOutput"]["permissionDecisionReason"]
             self.assertIn("dirty-000-", reason)       # the listing's start
             self.assertNotIn("dirty-119-", reason)    # cut at 21 lines
@@ -545,28 +545,28 @@ class GitGuardPreToolUse(GuardCase):
     def test_untracked_only(self):
         # reset --hard leaves untracked files alone (-uno); clean deletes
         # exactly them.
-        r = self.repo()
-        (r / "scratch.txt").write_text("x\n")
+        repo = self.repo()
+        (repo / "scratch.txt").write_text("x\n")
         self.assertIsNone(run_guard(self.script,
-                                    bash_payload("git reset --hard", r)))
-        self.assertDeny(self.script, "git clean -fd", "scratch.txt", cwd=r)
+                                    bash_payload("git reset --hard", repo)))
+        self.assertDeny(self.script, "git clean -fd", "scratch.txt", cwd=repo)
 
     def test_clean_ignores_tracked_changes(self):
-        r = self.repo()
-        (r / "tracked.txt").write_text("changed\n")
+        repo = self.repo()
+        (repo / "tracked.txt").write_text("changed\n")
         self.assertIsNone(run_guard(self.script,
-                                    bash_payload("git clean -f", r)))
+                                    bash_payload("git clean -f", repo)))
 
     def test_clean_x_counts_ignored(self):
-        r = self.repo()
-        (r / ".gitignore").write_text("result\n")
-        git(r, "add", ".gitignore")
-        git(r, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
+        repo = self.repo()
+        (repo / ".gitignore").write_text("result\n")
+        git(repo, "add", ".gitignore")
+        git(repo, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
             "-q", "-m", "ignore")
-        (r / "result").write_text("x\n")
+        (repo / "result").write_text("x\n")
         self.assertIsNone(run_guard(self.script,
-                                    bash_payload("git clean -fd", r)))
-        self.assertDeny(self.script, "git clean -fdx", "result", cwd=r)
+                                    bash_payload("git clean -fd", repo)))
+        self.assertDeny(self.script, "git clean -fdx", "result", cwd=repo)
 
     def test_git_C_and_cd_pick_the_repo(self):
         # The payload cwd is clean; the command targets the dirty repo.
@@ -621,13 +621,13 @@ class GitGuardPreToolUse(GuardCase):
 
     def test_plain_shapes_on_clean_tree_still_pass(self):
         # The whitelist must not tax the flows it exists to allow.
-        r = self.repo()
+        repo = self.repo()
         for cmd in ("git reset --hard origin/experimental",
-                    f"cd {r} && git reset --hard",
+                    f"cd {repo} && git reset --hard",
                     "git fetch origin && git reset --hard origin/experimental",
-                    f"git -C {r} checkout -- .",
+                    f"git -C {repo} checkout -- .",
                     "git status --short\ngit reset --hard HEAD~0"):
-            self.assertIsNone(run_guard(self.script, bash_payload(cmd, r)),
+            self.assertIsNone(run_guard(self.script, bash_payload(cmd, repo)),
                               cmd)
 
     def test_unresolvable_dir_asks(self):
@@ -637,15 +637,15 @@ class GitGuardPreToolUse(GuardCase):
                        "git status --short", cwd=self.repo())
 
     def test_not_a_repo_asks(self):
-        d = pathlib.Path(tempfile.mkdtemp(prefix="git-guard-norepo-"))
-        self.addCleanup(shutil.rmtree, d, ignore_errors=True)
-        self.assertAsk(self.script, "git reset --hard", cwd=d)
+        directory = pathlib.Path(tempfile.mkdtemp(prefix="git-guard-norepo-"))
+        self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
+        self.assertAsk(self.script, "git reset --hard", cwd=directory)
 
     def test_deny_outranks_ask(self):
-        r = self.repo()
-        (r / "tracked.txt").write_text("changed\n")
+        repo = self.repo()
+        (repo / "tracked.txt").write_text("changed\n")
         self.assertDeny(self.script,
-                        "git reset --hard && git push -f origin x", cwd=r)
+                        "git reset --hard && git push -f origin x", cwd=repo)
 
     def test_clean_tree_still_asks_for_other_patterns(self):
         # Allowing the reset must not swallow a force push later in the line.
@@ -668,33 +668,33 @@ class GitGuardPreToolUse(GuardCase):
     def test_inherited_git_dir_on_clean_tree_asks(self):
         # The command inherits GIT_DIR and acts on the repo it names, so a
         # clean status elsewhere doesn't verify it.
-        r = self.repo()
+        repo = self.repo()
         for var in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE"):
-            env = {**os.environ, var: str(r / ".git")}
+            env = {**os.environ, var: str(repo / ".git")}
             rc, out = run_hook_raw(self.script,
-                                   bash_payload("git reset --hard", r), env)
+                                   bash_payload("git reset --hard", repo), env)
             self.assertEqual(rc, 0)
             self.assertEqual(json.loads(out)["hookSpecificOutput"]
                              ["permissionDecision"], "ask", var)
             # Commands with nothing to discard stay silent.
             rc, out = run_hook_raw(self.script,
-                                   bash_payload("git status", r), env)
+                                   bash_payload("git status", repo), env)
             self.assertEqual((rc, out.strip()), (0, ""), var)
 
     # Path-scoped tier 1: checkout [<tree-ish>] [--] <paths>, rm -f.
 
     def dirty_repo(self):
         """Repo with tracked.txt modified and a clean second file, other.txt."""
-        r = self.repo()
-        (r / "other.txt").write_text("o\n")
-        git(r, "add", "other.txt")
-        git(r, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
+        repo = self.repo()
+        (repo / "other.txt").write_text("o\n")
+        git(repo, "add", "other.txt")
+        git(repo, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
             "-q", "-m", "other")
-        (r / "tracked.txt").write_text("changed\n")
-        return r
+        (repo / "tracked.txt").write_text("changed\n")
+        return repo
 
     def test_checkout_paths_on_dirty_path_denies(self):
-        r = self.dirty_repo()
+        repo = self.dirty_repo()
         for cmd in ("git checkout -- tracked.txt",
                     "git checkout HEAD -- tracked.txt",
                     "git checkout HEAD tracked.txt",
@@ -704,22 +704,22 @@ class GitGuardPreToolUse(GuardCase):
                     "git checkout main .", "git checkout main -- .",
                     "git rm -f tracked.txt", "git rm -rf .",
                     "git rm --force -- tracked.txt"):
-            self.assertDeny(self.script, cmd, "tracked.txt", cwd=r)
+            self.assertDeny(self.script, cmd, "tracked.txt", cwd=repo)
 
     def test_checkout_paths_on_clean_path_passes(self):
         # Another file being dirty doesn't block discarding a clean one.
-        r = self.dirty_repo()
+        repo = self.dirty_repo()
         for cmd in ("git checkout -- other.txt",
                     "git checkout HEAD -- other.txt",
                     "git checkout main other.txt",
                     "git rm -f other.txt"):
-            self.assertIsNone(run_guard(self.script, bash_payload(cmd, r)),
+            self.assertIsNone(run_guard(self.script, bash_payload(cmd, repo)),
                               cmd)
 
     def test_checkout_paths_unplain_pathspec_checks_whole_tree(self):
-        r = self.dirty_repo()
+        repo = self.dirty_repo()
         self.assertDeny(self.script, "git checkout -- *", "tracked.txt",
-                        cwd=r)
+                        cwd=repo)
         # Clean tree: still not a silent allow, since `*` is outside the
         # plain grammar.
         self.assertAsk(self.script, "git checkout -- *", cwd=self.repo())
@@ -727,36 +727,36 @@ class GitGuardPreToolUse(GuardCase):
     def test_checkout_from_treeish_counts_overwritten_untracked(self):
         # An untracked file that exists in the tree-ish is overwritten; one
         # that doesn't is left alone.
-        r = self.repo()
-        git(r, "checkout", "-q", "-b", "side")
-        (r / "new.txt").write_text("side\n")
-        git(r, "add", "new.txt")
-        git(r, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
+        repo = self.repo()
+        git(repo, "checkout", "-q", "-b", "side")
+        (repo / "new.txt").write_text("side\n")
+        git(repo, "add", "new.txt")
+        git(repo, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
             "-q", "-m", "side")
-        git(r, "checkout", "-q", "main")
-        (r / "new.txt").write_text("mine\n")
+        git(repo, "checkout", "-q", "main")
+        (repo / "new.txt").write_text("mine\n")
         self.assertDeny(self.script, "git checkout side -- new.txt",
-                        "new.txt", cwd=r)
-        self.assertDeny(self.script, "git checkout side .", "new.txt", cwd=r)
+                        "new.txt", cwd=repo)
+        self.assertDeny(self.script, "git checkout side .", "new.txt", cwd=repo)
         self.assertIsNone(run_guard(self.script, bash_payload(
-            "git checkout side -- tracked.txt", r)))
+            "git checkout side -- tracked.txt", repo)))
 
     def test_branch_reset_existing_asks(self):
-        r = self.repo()
-        git(r, "branch", "other")
+        repo = self.repo()
+        git(repo, "branch", "other")
         for cmd in ("git checkout -B other", "git checkout -B other main",
                     "git switch -C other", "git switch --force-create other",
-                    f"git -C {r} switch -C other"):
-            self.assertAsk(self.script, cmd, "already exists", cwd=r)
+                    f"git -C {repo} switch -C other"):
+            self.assertAsk(self.script, cmd, "already exists", cwd=repo)
         for cmd in ("git checkout -B fresh", "git switch -C fresh main"):
-            self.assertIsNone(run_guard(self.script, bash_payload(cmd, r)),
+            self.assertIsNone(run_guard(self.script, bash_payload(cmd, repo)),
                               cmd)
         # Repo unknown: can't tell, so ask.
-        self.assertAsk(self.script, 'cd "$W" && git checkout -B fresh', cwd=r)
+        self.assertAsk(self.script, 'cd "$W" && git checkout -B fresh', cwd=repo)
 
     def test_everyday_commands_untouched(self):
         # Even with a dirty tree, these lose nothing and must stay silent.
-        r = self.dirty_repo()
+        repo = self.dirty_repo()
         for cmd in ("git checkout main", "git checkout -b x",
                     "git checkout -b y origin/experimental",
                     "git switch -c z", "git stash", "git stash -u",
@@ -766,15 +766,15 @@ class GitGuardPreToolUse(GuardCase):
                     "git branch -d x", "git read-tree HEAD",
                     "git commit -m 'checkout a b'",
                     "git log --grep checkout main other"):
-            self.assertIsNone(run_guard(self.script, bash_payload(cmd, r)),
+            self.assertIsNone(run_guard(self.script, bash_payload(cmd, repo)),
                               cmd)
 
     def test_pathspec_from_file_targets_whole_tree(self):
         # Either spelling: the whole tree is checked, and the option's value
         # (here naming the clean other.txt, or a branch) is neither a
         # pathspec nor a tree-ish.
-        r = self.dirty_repo()
-        (r / "list.txt").write_text("other.txt\n")
+        repo = self.dirty_repo()
+        (repo / "list.txt").write_text("other.txt\n")
         for cmd in ("git checkout --pathspec-from-file=list.txt",
                     "git checkout --pathspec-from-file list.txt",
                     "git checkout --pathspec-from-file other.txt",
@@ -782,124 +782,124 @@ class GitGuardPreToolUse(GuardCase):
                     "git checkout HEAD --pathspec-from-file=list.txt",
                     "git rm -f --pathspec-from-file=list.txt",
                     "git rm -f --pathspec-from-file other.txt"):
-            self.assertDeny(self.script, cmd, "tracked.txt", cwd=r)
+            self.assertDeny(self.script, cmd, "tracked.txt", cwd=repo)
         for cmd in ("git restore --pathspec-from-file=list.txt",
                     "git restore --pathspec-from-file list.txt",
                     "git restore --staged --pathspec-from-file=list.txt"):
-            self.assertAsk(self.script, cmd, cwd=r)
-        c = self.repo()
-        (c / "list.txt").write_text("tracked.txt\n")
+            self.assertAsk(self.script, cmd, cwd=repo)
+        clean_repo = self.repo()
+        (clean_repo / "list.txt").write_text("tracked.txt\n")
         for cmd in ("git checkout --pathspec-from-file=list.txt",
                     "git checkout --pathspec-from-file list.txt",
                     "git rm -f --pathspec-from-file list.txt"):
-            self.assertIsNone(run_guard(self.script, bash_payload(cmd, c)),
+            self.assertIsNone(run_guard(self.script, bash_payload(cmd, clean_repo)),
                               cmd)
 
     def test_checkout_from_treeish_counts_overwritten_ignored(self):
         # An ignored file that exists in the tree-ish is overwritten too;
         # one that doesn't is left alone.
-        r = self.repo()
-        (r / ".gitignore").write_text("gen.txt\n*.log\n")
-        git(r, "add", ".gitignore")
-        git(r, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
+        repo = self.repo()
+        (repo / ".gitignore").write_text("gen.txt\n*.log\n")
+        git(repo, "add", ".gitignore")
+        git(repo, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
             "-q", "-m", "ignore")
-        git(r, "checkout", "-q", "-b", "side")
-        (r / "gen.txt").write_text("side\n")
-        git(r, "add", "-f", "gen.txt")
-        git(r, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
+        git(repo, "checkout", "-q", "-b", "side")
+        (repo / "gen.txt").write_text("side\n")
+        git(repo, "add", "-f", "gen.txt")
+        git(repo, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
             "-q", "-m", "side")
-        git(r, "checkout", "-q", "main")
-        (r / "junk.log").write_text("x\n")
+        git(repo, "checkout", "-q", "main")
+        (repo / "junk.log").write_text("x\n")
         self.assertIsNone(run_guard(self.script, bash_payload(
-            "git checkout side .", r)))
-        (r / "gen.txt").write_text("mine\n")
+            "git checkout side .", repo)))
+        (repo / "gen.txt").write_text("mine\n")
         self.assertDeny(self.script, "git checkout side -- gen.txt",
-                        "gen.txt", cwd=r)
-        self.assertDeny(self.script, "git checkout side .", "gen.txt", cwd=r)
+                        "gen.txt", cwd=repo)
+        self.assertDeny(self.script, "git checkout side .", "gen.txt", cwd=repo)
         self.assertIsNone(run_guard(self.script, bash_payload(
-            "git checkout side -- tracked.txt", r)))
+            "git checkout side -- tracked.txt", repo)))
 
     def test_checkout_single_word_not_a_commit_is_a_path(self):
-        r = self.dirty_repo()
-        (r / "sub").mkdir()
-        (r / "sub" / "a.txt").write_text("a\n")
-        git(r, "add", "sub")
-        git(r, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
+        repo = self.dirty_repo()
+        (repo / "sub").mkdir()
+        (repo / "sub" / "a.txt").write_text("a\n")
+        git(repo, "add", "sub")
+        git(repo, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
             "-q", "-m", "sub")
-        (r / "sub" / "a.txt").write_text("changed\n")
+        (repo / "sub" / "a.txt").write_text("changed\n")
         for cmd, needle in (("git checkout tracked.txt", "tracked.txt"),
                             ("git checkout sub", "sub/a.txt"),
                             ("git checkout ./", "tracked.txt"),
                             ("git checkout :/", "tracked.txt"),
                             ("git checkout *.txt", "tracked.txt")):
-            self.assertDeny(self.script, cmd, needle, cwd=r)
+            self.assertDeny(self.script, cmd, needle, cwd=repo)
         # A clean path, or a word that resolves as a commit, passes.
         for cmd in ("git checkout other.txt", "git checkout main",
                     "git checkout HEAD~0", "git checkout -"):
-            self.assertIsNone(run_guard(self.script, bash_payload(cmd, r)),
+            self.assertIsNone(run_guard(self.script, bash_payload(cmd, repo)),
                               cmd)
         # A glob is outside the plain grammar: never a silent allow.
         self.assertAsk(self.script, "git checkout *.txt", cwd=self.repo())
         # Repo unknown: can't tell a branch from a path.
-        self.assertAsk(self.script, 'cd "$W" && git checkout main', cwd=r)
+        self.assertAsk(self.script, 'cd "$W" && git checkout main', cwd=repo)
 
     def test_status_runs_without_fsmonitor(self):
         # A repo-configured fsmonitor program never runs from the guard.
-        r = self.repo()
-        marker = r.parent / f"{r.name}-fsmonitor-ran"
-        hook = r.parent / f"{r.name}-fsmonitor.sh"
+        repo = self.repo()
+        marker = repo.parent / f"{repo.name}-fsmonitor-ran"
+        hook = repo.parent / f"{repo.name}-fsmonitor.sh"
         hook.write_text(f"#!/bin/sh\ntouch {marker}\nexit 1\n")
         hook.chmod(0o755)
         self.addCleanup(lambda: hook.unlink(missing_ok=True))
         self.addCleanup(lambda: marker.unlink(missing_ok=True))
-        git(r, "config", "core.fsmonitor", str(hook))
-        git(r, "status", "--porcelain")
+        git(repo, "config", "core.fsmonitor", str(hook))
+        git(repo, "status", "--porcelain")
         self.assertTrue(marker.exists(), "fixture: fsmonitor not invoked")
         marker.unlink()
         for cmd in ("git reset --hard", "git checkout tracked.txt",
                     "git checkout main -- tracked.txt", "git rm -f tracked.txt",
                     "git checkout -B other"):
-            run_guard(self.script, bash_payload(cmd, r))
+            run_guard(self.script, bash_payload(cmd, repo))
             self.assertFalse(marker.exists(), cmd)
 
     def test_rm_f_is_not_clean_f(self):
         # The op is read from git's subcommand position, not from a word.
-        r = self.repo()
-        (r / "clean.txt").write_text("c\n")
-        git(r, "add", "clean.txt")
-        git(r, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
+        repo = self.repo()
+        (repo / "clean.txt").write_text("c\n")
+        git(repo, "add", "clean.txt")
+        git(repo, "-c", "user.email=t@t", "-c", "user.name=t", "commit",
             "-q", "-m", "clean")
         self.assertIsNone(run_guard(self.script, bash_payload(
-            "git rm -f clean.txt", r)))
-        (r / "scratch.txt").write_text("x\n")
+            "git rm -f clean.txt", repo)))
+        (repo / "scratch.txt").write_text("x\n")
         self.assertIsNone(run_guard(self.script, bash_payload(
-            "git rm -f clean.txt", r)))
-        self.assertDeny(self.script, "git clean -f", "scratch.txt", cwd=r)
-        (r / "clean.txt").write_text("changed\n")
+            "git rm -f clean.txt", repo)))
+        self.assertDeny(self.script, "git clean -f", "scratch.txt", cwd=repo)
+        (repo / "clean.txt").write_text("changed\n")
         self.assertDeny(self.script, "git rm -f clean.txt", "clean.txt",
-                        cwd=r)
+                        cwd=repo)
 
     def test_branch_force_existing_asks(self):
-        r = self.repo()
-        git(r, "branch", "other")
+        repo = self.repo()
+        git(repo, "branch", "other")
         for cmd in ("git branch -f other", "git branch -f other main",
                     "git branch --force other HEAD", "git branch -M main other",
                     "git branch -C other", "git branch -m -f main other"):
-            self.assertAsk(self.script, cmd, "already exists", cwd=r)
-        self.assertAsk(self.script, "git branch -d -f other", cwd=r)
+            self.assertAsk(self.script, cmd, "already exists", cwd=repo)
+        self.assertAsk(self.script, "git branch -d -f other", cwd=repo)
         for cmd in ("git branch -f fresh", "git branch -M fresh",
                     "git branch -m other2", "git branch fresh2",
                     "git branch -d other"):
-            self.assertIsNone(run_guard(self.script, bash_payload(cmd, r)),
+            self.assertIsNone(run_guard(self.script, bash_payload(cmd, repo)),
                               cmd)
 
     def test_read_tree_update_asks(self):
-        r = self.repo()
+        repo = self.repo()
         for cmd in ("git read-tree -u --reset HEAD", "git read-tree -m -u HEAD",
                     "git read-tree -mu HEAD"):
-            self.assertAsk(self.script, cmd, "read-tree -u", cwd=r)
+            self.assertAsk(self.script, cmd, "read-tree -u", cwd=repo)
         for cmd in ("git read-tree HEAD", "git read-tree -m HEAD"):
-            self.assertIsNone(run_guard(self.script, bash_payload(cmd, r)),
+            self.assertIsNone(run_guard(self.script, bash_payload(cmd, repo)),
                               cmd)
 
     def test_stash_then_drop_asks(self):
@@ -985,8 +985,8 @@ class GitGuardPreToolUse(GuardCase):
     # pinning Claude Code's ask-everywhere side of the split.
 
     def test_zcode_hardens_must_hold_asks_to_deny(self):
-        r = self.repo()
-        git(r, "branch", "other")
+        repo = self.repo()
+        git(repo, "branch", "other")
         for cmd in ("git push -f origin main",
                     "git push --mirror origin",
                     "git branch -D stale-branch",
@@ -995,7 +995,7 @@ class GitGuardPreToolUse(GuardCase):
                     "git read-tree -u --reset HEAD",
                     "git checkout -B other",
                     'cd "$W" && git reset --hard'):
-            out = self.assertZcodeDeny(self.script, cmd, cwd=r)
+            out = self.assertZcodeDeny(self.script, cmd, cwd=repo)
             self.assertIn(
                 "run it by hand",
                 out["hookSpecificOutput"]["permissionDecisionReason"], cmd)
@@ -1004,7 +1004,7 @@ class GitGuardPreToolUse(GuardCase):
         # An adapter exports GUARD_ASK_ENFORCED; it wins over payload
         # sniffing in both directions.
         cmd = "git push -f origin main"
-        env = {k: v for k, v in zcode_env().items() if k != "ZCODE_PROJECT_DIR"}
+        env = {name: entry for name, entry in zcode_env().items() if name != "ZCODE_PROJECT_DIR"}
         for value, want in (("0", "deny"), ("1", "ask")):
             for payload in (bash_payload(cmd), zcode_payload(bash_payload(cmd))):
                 rc, raw = run_hook_raw(self.script, payload,
@@ -1050,10 +1050,10 @@ class GitGuardPreToolUse(GuardCase):
     def test_zcode_tier1_deny_unchanged(self):
         # Tier 1 denied before #458 and must not be downgraded to an ask
         # by the new decision logic.
-        r = self.repo()
-        (r / "tracked.txt").write_text("changed\n")
+        repo = self.repo()
+        (repo / "tracked.txt").write_text("changed\n")
         rc, raw = run_hook_raw(self.script,
-                               zcode_payload(bash_payload("git reset --hard", r)),
+                               zcode_payload(bash_payload("git reset --hard", repo)),
                                zcode_env())
         self.assertEqual(rc, 0)
         self.assertEqual(json.loads(raw)["hookSpecificOutput"]
@@ -1106,9 +1106,9 @@ class ImpermanenceEditGuard(unittest.TestCase):
     def test_lookalike_paths_pass(self):
         # `*` must anchor on the real directory components, not a
         # substring: a file merely named after the tree is not the tree.
-        for p in (str(REPO / "flake/modules/general-config/impermanence-notes.md"),
+        for path in (str(REPO / "flake/modules/general-config/impermanence-notes.md"),
                   "/tmp/impermanence-scratch/foo.nix"):
-            self.assertIsNone(self.run_edit(p))
+            self.assertIsNone(self.run_edit(path))
 
     def test_ordinary_module_passes(self):
         out = self.run_edit(str(REPO / "flake/modules/general-config/system"
@@ -1125,8 +1125,8 @@ class NixUntrackedGuard(GuardCase):
     def setUp(self):
         self.repo = pathlib.Path(tempfile.mkdtemp(prefix="untracked-guard-"))
         self.addCleanup(shutil.rmtree, self.repo, ignore_errors=True)
-        git = lambda *a: subprocess.run(
-            ["git", "-C", str(self.repo), *a], check=True, capture_output=True)
+        git = lambda *args: subprocess.run(
+            ["git", "-C", str(self.repo), *args], check=True, capture_output=True)
         git("-c", "init.defaultBranch=main", "init", "-q")
         (self.repo / "tracked.nix").write_text("{ }\n")
         git("add", "tracked.nix")
@@ -1192,10 +1192,10 @@ class JustGuardPreToolUse(GuardCase):
     script = HOOKS / "just-guard-pretooluse.sh"
 
     def foreign(self):
-        d = pathlib.Path(tempfile.mkdtemp(prefix="just-guard-"))
-        self.addCleanup(shutil.rmtree, d, ignore_errors=True)
-        (d / "justfile").write_text("preflight:\n    true\n")
-        return d
+        directory = pathlib.Path(tempfile.mkdtemp(prefix="just-guard-"))
+        self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
+        (directory / "justfile").write_text("preflight:\n    true\n")
+        return directory
 
     def test_repo_recipes_pass(self):
         for cmd in ("just preflight", "just threads foo bar",
@@ -1207,37 +1207,37 @@ class JustGuardPreToolUse(GuardCase):
         self.assertPass(self.script, "echo adjust", cwd=REPO)
 
     def test_foreign_justfile_asks(self):
-        f = self.foreign()
-        out = self.assertAsk(self.script, "just preflight", cwd=f)
+        foreign_repo = self.foreign()
+        out = self.assertAsk(self.script, "just preflight", cwd=foreign_repo)
         self.assertIn("justfile", model_context(out))
-        self.assertAsk(self.script, "just preflight", "justfile", cwd=f)
-        self.assertAsk(self.script, f"cd {f} && just preflight", cwd=REPO)
+        self.assertAsk(self.script, "just preflight", "justfile", cwd=foreign_repo)
+        self.assertAsk(self.script, f"cd {foreign_repo} && just preflight", cwd=REPO)
         self.assertAsk(self.script, "just preflight",
                        cwd=REPO / "dev-shells" / "python")
 
     def test_explicit_justfile_asks(self):
-        f = self.foreign()
-        for cmd in (f"just --justfile {f}/justfile preflight",
-                    f"just -f {f}/justfile preflight",
-                    f"just -d {f} preflight",
-                    f"just -f{f}/justfile preflight",
-                    f"just -qf {f}/justfile preflight",
-                    f"just --justfile={f}/justfile preflight",
-                    f"just --working-directory={f} preflight",
+        foreign_repo = self.foreign()
+        for cmd in (f"just --justfile {foreign_repo}/justfile preflight",
+                    f"just -f {foreign_repo}/justfile preflight",
+                    f"just -d {foreign_repo} preflight",
+                    f"just -f{foreign_repo}/justfile preflight",
+                    f"just -qf {foreign_repo}/justfile preflight",
+                    f"just --justfile={foreign_repo}/justfile preflight",
+                    f"just --working-directory={foreign_repo} preflight",
                     "just --shell sh preflight",
                     "just --dotenv-path /tmp/x preflight",
                     "just sub/preflight",
-                    f"just --color never -f {f}/justfile preflight",
-                    f"just --color never --justfile {f}/justfile preflight",
-                    f"just --command-color red -f {f}/justfile preflight",
-                    f"just -s x -f {f}/justfile preflight"):
+                    f"just --color never -f {foreign_repo}/justfile preflight",
+                    f"just --color never --justfile {foreign_repo}/justfile preflight",
+                    f"just --command-color red -f {foreign_repo}/justfile preflight",
+                    f"just -s x -f {foreign_repo}/justfile preflight"):
             self.assertAsk(self.script, cmd, cwd=REPO)
 
     def test_inherited_just_env_asks(self):
         # A JUST_* variable the command inherits can change which justfile
         # runs, or how: every `just` asks; other commands stay silent.
-        base = {k: v for k, v in os.environ.items()
-                if not k.startswith("JUST_")}
+        base = {name: value for name, value in os.environ.items()
+                if not name.startswith("JUST_")}
         for var, val in (("JUST_JUSTFILE", "/tmp/x/justfile"),
                          ("JUST_WORKING_DIRECTORY", "/tmp"),
                          ("JUST_DOTENV_PATH", "/tmp/.env"),
@@ -1257,16 +1257,16 @@ class JustGuardPreToolUse(GuardCase):
         self.assertEqual((rc, out.strip()), (0, ""))
 
     def test_unfollowable_shapes_ask(self):
-        f = self.foreign()
-        for cmd in (f"(cd {f} && just preflight)",
-                    f'cd "{f}" && just preflight',
-                    f"timeout 5 sh -c true; cd {f} && timeout 5 just preflight",
-                    f"W=$(cd {f} && just preflight)",
-                    f"cd {f} && just preflight 2>&1 | tail -1",
+        foreign_repo = self.foreign()
+        for cmd in (f"(cd {foreign_repo} && just preflight)",
+                    f'cd "{foreign_repo}" && just preflight',
+                    f"timeout 5 sh -c true; cd {foreign_repo} && timeout 5 just preflight",
+                    f"W=$(cd {foreign_repo} && just preflight)",
+                    f"cd {foreign_repo} && just preflight 2>&1 | tail -1",
                     # cd behind a keyword, wrapper or group
-                    f"builtin cd {f} && just preflight",
-                    f"{{ cd {f}; just preflight; }}",
-                    f"if true; then cd {f}; just preflight; fi"):
+                    f"builtin cd {foreign_repo} && just preflight",
+                    f"{{ cd {foreign_repo}; just preflight; }}",
+                    f"if true; then cd {foreign_repo}; just preflight; fi"):
             self.assertAsk(self.script, cmd, cwd=REPO)
         # just behind a wrapper or keyword, run from the foreign dir
         for cmd in ("stdbuf -oL just preflight",
@@ -1284,7 +1284,7 @@ class JustGuardPreToolUse(GuardCase):
                     "sudo -u root just preflight",
                     'exec "just" preflight',
                     "'just' preflight"):
-            self.assertAsk(self.script, cmd, cwd=f)
+            self.assertAsk(self.script, cmd, cwd=foreign_repo)
 
     def test_ordinary_shapes_in_the_repo_pass(self):
         # Redirections, pipes, command substitution, wrappers, assignments,
@@ -1313,9 +1313,9 @@ class JustGuardPreToolUse(GuardCase):
         # This guard protects Claude Code's allow rules; ZCode reads none,
         # so under it the guard must not deny (or ask) anything -- least of
         # all ordinary piped recipes and prose it can't parse.
-        f = self.foreign()
-        for cmd, cwd in (("just preflight", f),
-                         (f"cd {f} && just preflight", REPO),
+        foreign_repo = self.foreign()
+        for cmd, cwd in (("just preflight", foreign_repo),
+                         (f"cd {foreign_repo} && just preflight", REPO),
                          ("just agent recurring export 2>&1 | tail -1", REPO),
                          ("git commit -m 'just a note'", REPO)):
             rc, raw = run_hook_raw(self.script, zcode_payload(bash_payload(cmd, cwd)),
@@ -1323,8 +1323,8 @@ class JustGuardPreToolUse(GuardCase):
             self.assertEqual((rc, raw.strip()), (0, ""), cmd)
 
     def test_inherited_zcode_env_keeps_guarding_claude_code(self):
-        f = self.foreign()
-        rc, raw = run_hook_raw(self.script, bash_payload("just preflight", f),
+        foreign_repo = self.foreign()
+        rc, raw = run_hook_raw(self.script, bash_payload("just preflight", foreign_repo),
                                zcode_env())
         self.assertEqual(json.loads(raw)["hookSpecificOutput"]
                          ["permissionDecision"], "ask")
@@ -1372,8 +1372,8 @@ class ZcodeCanary(GuardCase):
         # Claude Code, however the ambient environment looks (run_guard's
         # stripping is repeated here -- the canary's whole job is reading
         # this variable, so the fixture sets it explicitly either way).
-        env = {k: v for k, v in os.environ.items()
-               if not k.startswith("JUST_") and k != "ZCODE_PROJECT_DIR"}
+        env = {name: value for name, value in os.environ.items()
+               if not name.startswith("JUST_") and name != "ZCODE_PROJECT_DIR"}
         self.assertIsNone(self.canary(bash_payload("git status -sb"), env))
 
     # The jq filter each hook uses to tell a ZCode payload apart.
@@ -1393,7 +1393,7 @@ class ZcodeCanary(GuardCase):
                               "just-guard-pretooluse.sh")}
         for name, exprs in found.items():
             self.assertEqual(len(exprs), 1, f"{name}: {exprs}")
-        self.assertEqual(len({e[0] for e in found.values()}), 1, found)
+        self.assertEqual(len({error[0] for error in found.values()}), 1, found)
 
     def test_detection_extractor_sees_a_drifted_copy(self):
         # The pin above is only meaningful if the extractor tells two
@@ -1454,13 +1454,13 @@ def path_without_jq():
     """A PATH holding symlinks to every tool the hooks use except jq --
     jq usually shares a directory with the rest (/run/current-system/sw/
     bin), so dropping a whole directory from PATH can't isolate it."""
-    d = pathlib.Path(tempfile.mkdtemp(prefix="nojq-"))
+    directory = pathlib.Path(tempfile.mkdtemp(prefix="nojq-"))
     for tool in ("bash", "cat", "git", "grep", "sed", "awk", "head", "wc",
                  "env", "dirname", "hostname", "uname", "python3"):
         found = shutil.which(tool)
         if found:
-            (d / tool).symlink_to(found)
-    return d
+            (directory / tool).symlink_to(found)
+    return directory
 
 
 class MissingJq(unittest.TestCase):
@@ -1469,14 +1469,14 @@ class MissingJq(unittest.TestCase):
     which is what the old `|| true` wiring made of a missing jq."""
 
     def test_every_hook_warns_without_jq(self):
-        d = path_without_jq()
-        self.addCleanup(shutil.rmtree, d, ignore_errors=True)
+        directory = path_without_jq()
+        self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
         # Run from a scratch repo, never this one: without jq the
         # SessionStart hook can't read .cwd and falls back to
         # CLAUDE_PROJECT_DIR/$PWD -- and it sets core.hooksPath there.
         scratch = make_repo("nojq-cwd-")
         self.addCleanup(shutil.rmtree, scratch, ignore_errors=True)
-        env = {**os.environ, "PATH": str(d),
+        env = {**os.environ, "PATH": str(directory),
                "CLAUDE_PROJECT_DIR": str(scratch)}
         payload = {"tool_name": "Bash", "cwd": str(scratch),
                    "tool_input": {"command": "sops -d secrets.yaml",
@@ -1651,9 +1651,9 @@ class SessionStart(unittest.TestCase):
         self.assertNotIn("just agent helpers", self.context(self.repo))
 
     def test_outside_a_repo_still_succeeds(self):
-        d = pathlib.Path(tempfile.mkdtemp(prefix="session-start-norepo-"))
-        self.addCleanup(shutil.rmtree, d, ignore_errors=True)
-        self.assertIn("not inside a git repo", self.context(d))
+        directory = pathlib.Path(tempfile.mkdtemp(prefix="session-start-norepo-"))
+        self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
+        self.assertIn("not inside a git repo", self.context(directory))
 
 
 class EditCheck(unittest.TestCase):
@@ -1758,8 +1758,8 @@ class NixShellInterp(unittest.TestCase):
         files = subprocess.run(["git", "-C", str(REPO), "ls-files", "*.nix"],
                                capture_output=True, text=True).stdout.split()
         self.assertTrue(files)
-        hits = [(f, s) for f in files for s in self.mod.findings(
-            (REPO / f).read_text(errors="replace"))]
+        hits = [(file_name, finding) for file_name in files for finding in self.mod.findings(
+            (REPO / file_name).read_text(errors="replace"))]
         self.assertEqual(hits, [])
 
 
@@ -1788,7 +1788,7 @@ class Wiring(unittest.TestCase):
             for entry in group:
                 for hook in entry["hooks"]:
                     referenced |= set(re.findall(HOOK_REF, hook["command"]))
-        on_disk = {f".agents/hooks/{p.name}" for p in hook_scripts()}
+        on_disk = {f".agents/hooks/{path.name}" for path in hook_scripts()}
         self.assertEqual(on_disk, referenced,
                          "a guard exists on disk but is not wired into "
                          "settings.json (or vice versa)")
@@ -1838,8 +1838,8 @@ class LessonReminder(unittest.TestCase):
         self.session = 0
 
     def run_hook(self, payload, session=True):
-        env = {k: v for k, v in os.environ.items()
-               if not k.startswith("JUST_") and k != "ZCODE_PROJECT_DIR"}
+        env = {name: value for name, value in os.environ.items()
+               if not name.startswith("JUST_") and name != "ZCODE_PROJECT_DIR"}
         env["LESSON_REMINDER_STATE_DIR"] = self.state
         if session is True:
             self.session += 1
@@ -1892,13 +1892,13 @@ class LessonReminder(unittest.TestCase):
         sys.path.insert(0, str(HOOKS))
         import lessons_map
         tracked = git(REPO, "ls-files").split()
-        for t in lessons_map.load(REPO):
-            if not t.get("delivered_by"):
+        for topic in lessons_map.load(REPO):
+            if not topic.get("delivered_by"):
                 continue
-            for rx in t["_globs"]:
-                sample = next(f for f in tracked if rx.match(f))
-                with self.subTest(topic=t["id"], file=sample):
-                    out = run_guard(HOOKS / t["delivered_by"],
+            for rx in topic["_globs"]:
+                sample = next(tracked_file for tracked_file in tracked if rx.match(tracked_file))
+                with self.subTest(topic=topic["id"], file=sample):
+                    out = run_guard(HOOKS / topic["delivered_by"],
                                     {"tool_name": "Edit", "tool_input":
                                      {"file_path": str(REPO / sample)}})
                     self.assertTrue(model_context(out))

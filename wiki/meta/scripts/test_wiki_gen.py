@@ -82,32 +82,32 @@ when_to_use: Asked to do the thing | or its cousin.
 '''
 
 
-def quiet(fn, *a, **kw):
+def quiet(fn, *args, **kw):
     with contextlib.redirect_stdout(io.StringIO()):
-        return fn(*a, **kw)
+        return fn(*args, **kw)
 
 
 class Fixture(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
         self.root = pathlib.Path(self._tmp.name)
-        m = 'flake/modules/'
-        self.write(m + 'host-config/hosts.nix', HOSTS_NIX)
-        self.write(m + 'host-config/alpha-configuration.nix',
+        modules_dir = 'flake/modules/'
+        self.write(modules_dir + 'host-config/hosts.nix', HOSTS_NIX)
+        self.write(modules_dir + 'host-config/alpha-configuration.nix',
                    '{\n    includes.nixos = [ "impermanence" "homelab" ];\n}\n')
-        self.write(m + 'host-config/beta-configuration.nix',
+        self.write(modules_dir + 'host-config/beta-configuration.nix',
                    '{\n    includes.nixos = [ "boot" ];\n}\n')
-        self.write(m + 'host-config/gamma-configuration.nix',
+        self.write(modules_dir + 'host-config/gamma-configuration.nix',
                    '{\n    includes.darwin = [ "boot" ];\n}\n')
-        g = m + 'general-config/'
+        general_dir = modules_dir + 'general-config/'
         for cat, cls in [('general-config/boot', 'darwin'),
                          ('general-config/impermanence', 'nixos'),
                          ('homelab-config/homelab', 'nixos'),
                          ('homelab-config/homelab/backup', 'nixos'),
                          ('general-config/impermanence/rollback', 'homeManager')]:
-            self.write(m + cat + '/defaults.nix', CATEGORY)
-            self.write(m + cat + '/thing.nix', MOD.replace('CLASS', cls))
-        self.write(g + 'boot/other.nix', MOD.replace('CLASS', 'nixos'))
+            self.write(modules_dir + cat + '/defaults.nix', CATEGORY)
+            self.write(modules_dir + cat + '/thing.nix', MOD.replace('CLASS', cls))
+        self.write(general_dir + 'boot/other.nix', MOD.replace('CLASS', 'nixos'))
         for page in ('boot', 'impermanence', 'homelab', 'backup'):
             self.write(f'wiki/config-structure/categories/{page}.md', f'# {page}\n')
         self.write('wiki/fleet/hosts.md', HOSTS_MD)
@@ -123,9 +123,9 @@ class Fixture(unittest.TestCase):
         self._tmp.cleanup()
 
     def write(self, rel, text):
-        p = self.root / rel
-        p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(text)
+        path = self.root / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text)
 
     def read(self, rel):
         return (self.root / rel).read_text()
@@ -137,8 +137,8 @@ class Fixture(unittest.TestCase):
         return quiet(wiki_gen.run, self.root, False)[0]
 
     def fill_hand_cells(self):
-        p = self.root / 'wiki/config-structure/categories/00-INDEX.md'
-        p.write_text(p.read_text().replace(' |  |', ' | some hosts |'))
+        path = self.root / 'wiki/config-structure/categories/00-INDEX.md'
+        path.write_text(path.read_text().replace(' |  |', ' | some hosts |'))
 
 
 class Hosts(Fixture):
@@ -154,17 +154,17 @@ class Hosts(Fixture):
 
     def test_idempotent(self):
         self.gen()
-        before = {p: p.read_text() for p in (self.root / 'wiki').rglob('*.md')}
+        before = {path: path.read_text() for path in (self.root / 'wiki').rglob('*.md')}
         _, notes = self.gen()
         self.assertEqual(notes, [])
-        self.assertEqual(before, {p: p.read_text() for p in before})
+        self.assertEqual(before, {path: path.read_text() for path in before})
 
     def test_source_change_is_stale_until_regenerated(self):
         self.gen()
         self.fill_hand_cells()
         self.assertEqual(self.check(), [])
-        p = self.root / 'flake/modules/host-config/hosts.nix'
-        p.write_text(p.read_text().replace('nire-beta  = mkHost', 'nire-beta  = mkDarwinHost'))
+        path = self.root / 'flake/modules/host-config/hosts.nix'
+        path.write_text(path.read_text().replace('nire-beta  = mkHost', 'nire-beta  = mkDarwinHost'))
         findings = self.check()
         self.assertEqual(len(findings), 1)
         self.assertTrue(findings[0].startswith("STALE GENERATED  wiki/fleet/hosts.md: region 'hosts-table'"))
@@ -176,9 +176,9 @@ class Hosts(Fixture):
     def test_hand_edit_to_derived_cell_is_reverted_role_kept(self):
         self.gen()
         self.fill_hand_cells()
-        p = self.root / 'wiki/fleet/hosts.md'
-        p.write_text(p.read_text().replace('workstation | yes', 'big desk | no'))
-        self.assertTrue(any(f.startswith('STALE GENERATED') for f in self.check()))
+        path = self.root / 'wiki/fleet/hosts.md'
+        path.write_text(path.read_text().replace('workstation | yes', 'big desk | no'))
+        self.assertTrue(any(finding.startswith('STALE GENERATED') for finding in self.check()))
         self.gen()
         self.assertIn('| `nire-alpha` | nixos | big desk | yes |', self.read('wiki/fleet/hosts.md'))
 
@@ -187,8 +187,8 @@ class Hosts(Fixture):
         self.fill_hand_cells()
         self.write('flake/modules/host-config/delta-configuration.nix',
                    '{\n    includes.nixos = [ ];\n}\n')
-        p = self.root / 'flake/modules/host-config/hosts.nix'
-        p.write_text(p.read_text().replace(
+        path = self.root / 'flake/modules/host-config/hosts.nix'
+        path.write_text(path.read_text().replace(
             '        guest', '        nire-delta = mkHost "x86_64-linux" x;\n        guest'))
         findings, _ = self.gen()
         self.assertEqual(findings, [
@@ -200,18 +200,18 @@ class Hosts(Fixture):
 
     def test_removed_host_reports_dropped_hand_text(self):
         self.gen()
-        p = self.root / 'flake/modules/host-config/hosts.nix'
-        p.write_text(p.read_text().replace(
+        path = self.root / 'flake/modules/host-config/hosts.nix'
+        path.write_text(path.read_text().replace(
             '        nire-beta  = mkHost "x86_64-linux" config.flake.modules.nixos.betaConfiguration;\n', ''))
         _, notes = self.gen()
-        self.assertTrue(any("'`nire-beta`'" in n and "'Role': 'server'" in n for n in notes), notes)
+        self.assertTrue(any("'`nire-beta`'" in note and "'Role': 'server'" in note for note in notes), notes)
         self.assertNotIn('nire-beta', self.read('wiki/fleet/hosts.md'))
 
     def test_missing_host_config_is_an_error_not_a_guess(self):
         (self.root / 'flake/modules/host-config/beta-configuration.nix').unlink()
         findings = self.check()
-        self.assertTrue(any(f.startswith("GEN ERROR  wiki/fleet/hosts.md: region 'hosts-table'")
-                            and 'beta-configuration.nix' in f for f in findings), findings)
+        self.assertTrue(any(finding.startswith("GEN ERROR  wiki/fleet/hosts.md: region 'hosts-table'")
+                            and 'beta-configuration.nix' in finding for finding in findings), findings)
 
 
 class Categories(Fixture):
@@ -233,7 +233,7 @@ class Categories(Fixture):
         self.fill_hand_cells()
         self.write('wiki/config-structure/categories/homelab/00-INDEX.md', '# homelab\n')
         (self.root / 'wiki/config-structure/categories/homelab.md').unlink()
-        self.assertTrue(any('categories-index-homelab' in f for f in self.check()))
+        self.assertTrue(any('categories-index-homelab' in finding for finding in self.check()))
         self.gen()
         self.assertIn('| [homelab](homelab/00-INDEX.md) | `homelab-config/homelab/` '
                       '(+ nested `backup`) | nixos | some hosts |',
@@ -255,11 +255,11 @@ class Markers(Fixture):
     def test_unknown_missing_broken(self):
         self.gen()
         self.fill_hand_cells()
-        p = self.root / 'wiki/config-structure/module-style-guide-for-agents.md'
-        p.write_text('# Counts\n\n<!-- generated:no-such -->\n<!-- /generated -->\n')
+        path = self.root / 'wiki/config-structure/module-style-guide-for-agents.md'
+        path.write_text('# Counts\n\n<!-- generated:no-such -->\n<!-- /generated -->\n')
         self.write('wiki/other.md', '# x\n\n<!-- generated:hosts-table -->\n| a |\n')
         findings = self.check()
-        kinds = sorted(f.split('  ')[0] for f in findings)
+        kinds = sorted(finding.split('  ')[0] for finding in findings)
         self.assertEqual(kinds, ['BROKEN REGION', 'MISSING REGION', 'UNKNOWN REGION'], findings)
 
     def test_markers_in_code_are_not_regions(self):
@@ -277,7 +277,7 @@ class Markers(Fixture):
         findings, _ = self.gen()
         # The copy starts without hand cells, so each row asks for its Role.
         self.assertEqual(len(findings), 3)
-        self.assertTrue(all(f.startswith('EMPTY HAND CELL  wiki/hosts-for-agents.md') for f in findings))
+        self.assertTrue(all(finding.startswith('EMPTY HAND CELL  wiki/hosts-for-agents.md') for finding in findings))
 
 
 class Layout(Fixture):
@@ -298,10 +298,10 @@ class Layout(Fixture):
         self.gen()
         self.fill_hand_cells()
         self.assertEqual(self.check(), [])
-        g = 'flake/modules/general-config/fresh/'
-        self.write(g + 'defaults.nix', CATEGORY)
-        self.write(g + 'f.nix', MOD.replace('CLASS', 'nixos'))
-        findings = [f for f in self.check() if 'module-layout' in f]
+        fresh_dir = 'flake/modules/general-config/fresh/'
+        self.write(fresh_dir + 'defaults.nix', CATEGORY)
+        self.write(fresh_dir + 'f.nix', MOD.replace('CLASS', 'nixos'))
+        findings = [finding for finding in self.check() if 'module-layout' in finding]
         self.assertEqual(len(findings), 1)
         self.assertTrue(findings[0].startswith(
             "STALE GENERATED  wiki/config-structure/architecture.md: region 'module-layout'"))
@@ -323,9 +323,9 @@ class Skills(Fixture):
         self.gen()
         self.fill_hand_cells()
         self.assertEqual(self.check(), [])
-        p = self.root / '.agents/skills/alpha-skill/SKILL.md'
-        p.write_text(p.read_text().replace('Does the thing.', 'Does another thing.'))
-        findings = [f for f in self.check() if 'skills-index' in f]
+        path = self.root / '.agents/skills/alpha-skill/SKILL.md'
+        path.write_text(path.read_text().replace('Does the thing.', 'Does another thing.'))
+        findings = [finding for finding in self.check() if 'skills-index' in finding]
         self.assertEqual(len(findings), 1)
         self.assertTrue(findings[0].startswith(
             "STALE GENERATED  wiki/meta/skills-index.md: region 'skills-index'"))
@@ -335,7 +335,7 @@ class Skills(Fixture):
 
     def test_a_skill_without_a_description_is_a_finding_not_a_blank_row(self):
         self.write('.agents/skills/bare/SKILL.md', '---\nname: bare\n---\n\n# Body\n')
-        findings = [f for f in self.check() if 'skills-index' in f]
+        findings = [finding for finding in self.check() if 'skills-index' in finding]
         self.assertEqual(len(findings), 1)
         self.assertTrue(findings[0].startswith('GEN ERROR  wiki/meta/skills-index.md'))
         self.assertIn('has no description', findings[0])

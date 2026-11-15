@@ -35,15 +35,15 @@ def scan_lines(text):
     fence = None  # (char, length) of the open fence
     for lineno, line in enumerate(text.splitlines(), 1):
         if fence is None:
-            m = OPEN.match(line)
-            if m and not (m.group(1)[0] == '`' and '`' in m.group(2)):
-                fence = (m.group(1)[0], len(m.group(1)))
+            match = OPEN.match(line)
+            if match and not (match.group(1)[0] == '`' and '`' in match.group(2)):
+                fence = (match.group(1)[0], len(match.group(1)))
                 yield lineno, line, OPENER
             else:
                 yield lineno, line, TEXT
             continue
-        m = CLOSE.match(line)
-        if m and m.group(1)[0] == fence[0] and len(m.group(1)) >= fence[1]:
+        match = CLOSE.match(line)
+        if match and match.group(1)[0] == fence[0] and len(match.group(1)) >= fence[1]:
             fence = None
             yield lineno, line, CLOSER
         else:
@@ -62,9 +62,9 @@ def blank_fences(text):
     spaces, newlines kept: line numbers and character offsets still index
     the original."""
     out = []
-    kinds = {n: kind for n, _, kind in scan_lines(text)}
-    for n, line in enumerate(text.splitlines(keepends=True), 1):
-        if kinds.get(n, TEXT) == TEXT:
+    kinds = {line_number: kind for line_number, _, kind in scan_lines(text)}
+    for line_number, line in enumerate(text.splitlines(keepends=True), 1):
+        if kinds.get(line_number, TEXT) == TEXT:
             out.append(line)
         else:
             out.append(re.sub(r'[^\r\n]', ' ', line))

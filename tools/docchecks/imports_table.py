@@ -55,12 +55,12 @@ def _blanket_phrase(count, tail):
     only. N is the roster's own count, so a phrase that went stale when a
     host was added covers nothing and the unnamed hosts are reported --
     the finding that sends the page to be renumbered."""
-    spelled = [w for w, n in NUMWORD.items() if n == count] + [str(count)]
+    spelled = [word for word, number in NUMWORD.items() if number == count] + [str(count)]
     return re.compile(rf'\ball\s+(?:{"|".join(spelled)})\s+{tail}\b', re.I)
 
 
 def _clauses_mentioning(section, host):
-    return [c for c in _CLAUSE_SPLIT.split(section) if host in c]
+    return [clause for clause in _CLAUSE_SPLIT.split(section) if host in clause]
 
 
 def imported_by_findings(where, category, hosts, section, shorts, nixos):
@@ -97,8 +97,8 @@ def _by_category(root):
     imports = tree.host_imports(root, tree.find_categories(root))
     by_category = {}
     for host, names in imports.items():
-        for n in names:
-            by_category.setdefault(n, set()).add(host)
+        for category_name in names:
+            by_category.setdefault(category_name, set()).add(host)
     return by_category
 
 
@@ -121,11 +121,11 @@ def check_imports(root, cfg):
             if not candidate.exists():
                 continue
             text = candidate.read_text()
-            m = IMPORTED_BY_HEADING.search(text)
-            if not m:
+            match = IMPORTED_BY_HEADING.search(text)
+            if not match:
                 continue
             checked = True
-            rest = text[m.end():]
+            rest = text[match.end():]
             end = NEXT_HEADING.search(rest)
             section = rest[:end.start()] if end else rest
             findings += imported_by_findings(
@@ -147,10 +147,10 @@ def check_table(root, cfg):
 
     index_page = root / INDEX_PAGE
     text = index_page.read_text()
-    m = INDEX_HEADING.search(text)
-    if not m:
+    match = INDEX_HEADING.search(text)
+    if not match:
         return [Finding("NO 'Index' SECTION", str(index_page), "")]
-    rest = text[m.end():]
+    rest = text[match.end():]
     end = NEXT_HEADING.search(rest)
     section = rest[:end.start()] if end else rest
     findings = []

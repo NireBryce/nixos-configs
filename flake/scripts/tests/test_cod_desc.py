@@ -174,15 +174,15 @@ class CommittedTableTest(unittest.TestCase):
     def test_seed_commands_present(self):
         rows = cod_desc.read_table()
         for command in ('cod', 'sops', 'uv', 'tailscale'):
-            self.assertIn(command, {c for c, _ in rows},
+            self.assertIn(command, {table_command for table_command, _ in rows},
                           f'{command}: seed command missing from the table')
 
     def test_read_table_rejects_trailing_eq(self):
         import tempfile
         with tempfile.NamedTemporaryFile('w', suffix='.tsv',
-                                         delete=False) as f:
-            f.write('sops\t--value-stdin=\tdescription\n')
-            path = f.name
+                                         delete=False) as handle:
+            handle.write('sops\t--value-stdin=\tdescription\n')
+            path = handle.name
         try:
             with self.assertRaises(ValueError, msg='trailing ='):
                 cod_desc.read_table(pathlib.Path(path))
@@ -192,9 +192,9 @@ class CommittedTableTest(unittest.TestCase):
     def test_read_table_rejects_wrong_field_count(self):
         import tempfile
         with tempfile.NamedTemporaryFile('w', suffix='.tsv',
-                                         delete=False) as f:
-            f.write('sops\t--decrypt\n')  # no description
-            path = f.name
+                                         delete=False) as handle:
+            handle.write('sops\t--decrypt\n')  # no description
+            path = handle.name
         try:
             with self.assertRaises(ValueError, msg='field count'):
                 cod_desc.read_table(pathlib.Path(path))
@@ -204,9 +204,9 @@ class CommittedTableTest(unittest.TestCase):
     def test_read_table_rejects_duplicate_key(self):
         import tempfile
         with tempfile.NamedTemporaryFile('w', suffix='.tsv',
-                                         delete=False) as f:
-            f.write('sops\t--decrypt\ta\nsops\t--decrypt\tb\n')
-            path = f.name
+                                         delete=False) as handle:
+            handle.write('sops\t--decrypt\ta\nsops\t--decrypt\tb\n')
+            path = handle.name
         try:
             with self.assertRaises(ValueError, msg='duplicate'):
                 cod_desc.read_table(pathlib.Path(path))
@@ -248,8 +248,8 @@ class WiringTest(unittest.TestCase):
     def test_advice_attaches_descriptions_when_loaded_from_a_function(self):
         # Load the file the way ble-import does (source inside a function),
         # with ble.sh's own functions stubbed to log, then run the advice.
-        with tempfile.TemporaryDirectory() as d:
-            tsv = pathlib.Path(d) / 'table.tsv'
+        with tempfile.TemporaryDirectory() as directory:
+            tsv = pathlib.Path(directory) / 'table.tsv'
             tsv.write_text('sops\t--decrypt\tDecrypt a file\n'
                            'sops\t--value-stdin\tRead the value from stdin\n')
             script = f"""

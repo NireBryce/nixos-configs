@@ -93,7 +93,7 @@ def read_steps():
                          text=True)
     if out.returncode != 0:
         sys.exit(f"just --show preflight failed:\n{out.stderr}")
-    return [l[5:] for l in out.stdout.splitlines() if l.startswith("    @")]
+    return [line[5:] for line in out.stdout.splitlines() if line.startswith("    @")]
 
 
 def stop_all():
@@ -108,8 +108,8 @@ def stop_all():
 
 
 def on_signal(signum, _frame):
-    for s in SIGNALS:
-        signal.signal(s, signal.SIG_IGN)
+    for signal_number in SIGNALS:
+        signal.signal(signal_number, signal.SIG_IGN)
     print("interrupted", file=sys.stderr, flush=True)
     stop_all()
     sys.exit(130)
@@ -133,28 +133,28 @@ class Step:
                 with procs_lock:
                     if stopping:
                         stopped.add(self.index)
-                        p = None
+                        proc = None
                     else:
                         try:
                             # bash -u -o pipefail: what the serial version's
                             # `eval` ran under.
-                            p = procgroup.spawn(
+                            proc = procgroup.spawn(
                                 ["bash", "-u", "-o", "pipefail", "-c", self.cmd],
                                 stdout=log, stderr=subprocess.STDOUT,
                                 stdin=subprocess.DEVNULL, env=env)
-                        except OSError as e:
-                            log.write(f"could not start: {e}\n".encode())
-                            p = None
+                        except OSError as error:
+                            log.write(f"could not start: {error}\n".encode())
+                            proc = None
                         else:
-                            procs[self.index] = p
-                rc = p.wait() if p else (-signal.SIGTERM if self.index in stopped else 1)
-                if p:
+                            procs[self.index] = proc
+                rc = proc.wait() if proc else (-signal.SIGTERM if self.index in stopped else 1)
+                if proc:
                     # The step is over: stop anything it left running.
-                    procgroup.stop([p], grace=0.5)
-        except Exception as e:  # noqa: BLE001 -- reported as this step's failure
+                    procgroup.stop([proc], grace=0.5)
+        except Exception as error:  # noqa: BLE001 -- reported as this step's failure
             try:
                 with open(self.log, "ab") as log:
-                    log.write(f"preflight-brief: {e!r}\n".encode())
+                    log.write(f"preflight-brief: {error!r}\n".encode())
             except OSError:
                 pass
             rc = 1
@@ -167,8 +167,8 @@ class Step:
 
     def lines(self):
         try:
-            with open(self.log, errors="replace") as f:
-                return f.read().splitlines()
+            with open(self.log, errors="replace") as log_file:
+                return log_file.read().splitlines()
         except OSError:
             return []
 
@@ -176,16 +176,16 @@ class Step:
 def report(step, width):
     if step.state == "ok":
         lines = step.lines()
-        notes = sum(1 for l in lines if l.startswith("REVIEW"))
+        notes = sum(1 for log_line in lines if log_line.startswith("REVIEW"))
         extra = f"  ({notes} REVIEW notes)" if notes else ""
         print(f"ok    {step.cmd:<{width}} {step.secs:4d}s{extra}")
-        for l in lines:
-            if l.startswith("NOTE"):
-                print(f"      {l}")
+        for log_line in lines:
+            if log_line.startswith("NOTE"):
+                print(f"      {log_line}")
     elif step.state == "fail":
         print(f"FAIL  {step.cmd:<{width}} {step.secs:4d}s\n")
-        for l in step.lines()[-TAIL:]:
-            print(l)
+        for log_line in step.lines()[-TAIL:]:
+            print(log_line)
         print()
     elif step.state == "cached":
         print(f"ok    {step.cmd:<{width}}    -  ({step.why})")
@@ -212,8 +212,8 @@ def test_jobs(env, concurrent):
     except ValueError:
         base = 0
     base = base or os.cpu_count() or 1
-    n = sum(1 for s in concurrent if "test" in s.cmd) or 1
-    return str(max(2, base // n))
+    test_count = sum(1 for step in concurrent if "test" in step.cmd) or 1
+    return str(max(2, base // test_count))
 
 
 def main():
@@ -226,18 +226,18 @@ def main():
     if not cmds:
         print("no steps found in the preflight recipe")
         sys.exit(2)
-    for s in SIGNALS:
-        signal.signal(s, on_signal)
+    for signal_number in SIGNALS:
+        signal.signal(signal_number, on_signal)
 
     width = 44
     cached = os.environ.get("PREFLIGHT_CACHED_CHECK", "")
-    env = {k: v for k, v in os.environ.items()
-           if k not in ("PREFLIGHT_CACHED_CHECK", "PREFLIGHT_STATUS_FILE")}
+    env = {name: value for name, value in os.environ.items()
+           if name not in ("PREFLIGHT_CACHED_CHECK", "PREFLIGHT_STATUS_FILE")}
     started = time.time()
     with tempfile.TemporaryDirectory(prefix="preflight-brief.") as logdir:
-        steps = [Step(i, c, logdir) for i, c in enumerate(cmds)]
-        concurrent = [s for s in steps if s.cmd not in SERIAL_LAST]
-        serial = [s for s in steps if s.cmd in SERIAL_LAST]
+        steps = [Step(index, command, logdir) for index, command in enumerate(cmds)]
+        concurrent = [one_step for one_step in steps if one_step.cmd not in SERIAL_LAST]
+        serial = [one_step for one_step in steps if one_step.cmd in SERIAL_LAST]
         env["TEST_JOBS"] = test_jobs(env, concurrent)
         done = queue.Queue()
         first_fail = None
@@ -255,11 +255,11 @@ def main():
                 if first_fail is None:
                     first_fail = step
 
-        for s in concurrent:
-            if s.cmd == CHECK_STEP and cached:
-                s.state, s.why = "cached", f"cached: same flake tree as {cached}"
+        for one_step in concurrent:
+            if one_step.cmd == CHECK_STEP and cached:
+                one_step.state, one_step.why = "cached", f"cached: same flake tree as {cached}"
                 continue
-            threading.Thread(target=s.run, args=(env, done), daemon=True).start()
+            threading.Thread(target=one_step.run, args=(env, done), daemon=True).start()
             pending += 1
 
         printed = 0
@@ -271,33 +271,33 @@ def main():
                 printed += 1
 
         while pending:
-            s = next_done(done)
+            one_step = next_done(done)
             pending -= 1
             had_fail = first_fail is not None
-            finish(s)
+            finish(one_step)
             if first_fail is not None and not had_fail:
                 stop_all()
             flush_ready(len(steps))
 
-        for s in serial:
+        for one_step in serial:
             if first_fail is not None:
-                s.state, s.why = "skip", f"not run: {first_fail.cmd} failed"
+                one_step.state, one_step.why = "skip", f"not run: {first_fail.cmd} failed"
                 continue
-            flush_ready(s.index)
-            threading.Thread(target=s.run, args=(env, done), daemon=True).start()
+            flush_ready(one_step.index)
+            threading.Thread(target=one_step.run, args=(env, done), daemon=True).start()
             finish(next_done(done))
         flush_ready(len(steps))
 
         status = os.environ.get("PREFLIGHT_STATUS_FILE")
         if status:
-            with open(status, "w") as f:
-                json.dump({s.cmd: s.state for s in steps}, f)
+            with open(status, "w") as status_file:
+                json.dump({one_step.cmd: one_step.state for one_step in steps}, status_file)
 
     wall = round(time.time() - started)
     if first_fail is None:
         print(f"preflight passed: {len(steps)} steps in {wall}s")
         sys.exit(0)
-    failed = sum(1 for s in steps if s.state == "fail")
+    failed = sum(1 for one_step in steps if one_step.state == "fail")
     print(f"preflight FAILED: {failed} of {len(steps)} steps ({wall}s)")
     sys.exit(1)
 

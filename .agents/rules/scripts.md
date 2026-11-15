@@ -26,3 +26,13 @@ paths:
   writes into the repo tree (as `just lint` rewrites its baseline while
   `just check` hashes `flake/`) goes in its `SERIAL_LAST`, run after the
   rest; its header says how the other steps were shown not to write.
+- **Name variables for what they hold, never one character.** `result`, `repo`,
+  `match`, `path`, `line`; `_` for an ignored value is the only exception.
+  This covers loop and comprehension variables, lambda parameters, `except ...
+  as` names and import aliases. `just short-names` (in preflight) fails a
+  Python file that gains one; `just short-names list <file>` shows where. Files
+  not yet cleaned are in `flake/scripts/short-names-baseline.json`, whose counts
+  may only fall: after cleaning one, `just short-names update`. When renaming,
+  edit by syntax tree rather than text, then run `ruff check --select F821` and
+  the file's tests, and grep for callers passing the old parameter name as a
+  keyword (§54).
