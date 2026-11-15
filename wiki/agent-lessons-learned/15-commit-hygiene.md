@@ -10,7 +10,7 @@ _Last modified: 2026-09-29_
 
 - **A commit message must not describe state that does not exist.** One referred
   to a note not yet written; the next commit had to make it true.
-- **Check what is staged before writing the message.** One commit swept 24 files
+- **Check what is staged before writing the message.** One commit swept 24 files <!-- count-ok: incident record, not a repo count -->
   in alongside a two-file rename; another quietly included a change the message
   never mentioned. Staging early — `git add` before `nix eval`, which flakes
   require — makes both easy to do by accident.

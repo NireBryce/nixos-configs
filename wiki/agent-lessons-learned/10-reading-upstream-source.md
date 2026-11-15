@@ -10,7 +10,7 @@ _Last modified: 2026-09-29_
 
 - `flake-parts/extras/modules.nix:33` — `flake.modules` is
   `lazyAttrsOf (lazyAttrsOf deferredModule)` at the **top level**; the only
-  `freeformType` is on `flake`. That is why 151 files could not keep
+  `freeformType` is on `flake`. That is why 151 files <!-- count-ok: incident record, not a repo count --> could not keep
   `flake.modules` inside `perSystem`.
 - `home-environment.nix:322` — `home.sessionPath` is `listOf str`, so duplicate
   definitions concatenate.

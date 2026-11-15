@@ -18,7 +18,7 @@ false, and the machine was right there to say so:
   designed.
 
 The second error was reading a number from the wrong tool. `coredumpctl list`
-reported 76,171 entries; `find -type f` reported 1121 files. Those count
+reported 76,171 entries; `find -type f` reported 1121 files <!-- count-ok: incident record, not a repo count -->. Those count
 different things — the journal keeps a record after tmpfiles has vacuumed the
 dump — so the "backlog" I thought was being reprocessed every boot was mostly
 records whose files were already gone. drkonqi's "Unable to find file for pid
