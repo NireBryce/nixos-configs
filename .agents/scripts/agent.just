@@ -30,6 +30,10 @@ guard-check *args:
 show *specs:
     @cd "{{invocation_directory()}}" && "{{scripts}}/show.sh" "$@"
 
+# Rename Python variables by syntax tree; find keyword callers of renamed parameters: rename-names list|rename|callers
+rename-names *args:
+    @cd "{{invocation_directory()}}" && "{{scripts}}/rename_names.py" "$@"
+
 # `just preflight`, steps run concurrently, one line each; a failing step's tail
 preflight-brief:
     @"{{scripts}}/preflight-brief.py"
