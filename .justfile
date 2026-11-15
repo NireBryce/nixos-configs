@@ -305,6 +305,7 @@ preflight:
     @python3 .agents/scripts/test_guard_check.py
     @python3 .agents/scripts/test_docs.py
     @python3 .agents/scripts/test_move_refs.py
+    @python3 .agents/scripts/test_rename_names.py
     @python3 .agents/scripts/test_book_lint.py
     @python3 .agents/scripts/test_book_pages_links.py
     @python3 .agents/scripts/book_lint.py check
