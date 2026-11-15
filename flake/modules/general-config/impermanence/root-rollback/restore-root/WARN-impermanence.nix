@@ -222,6 +222,12 @@
                 "/etc/ssh/ssh_host_ed25519_key.pub"
                 "/etc/ssh/ssh_host_rsa_key"
                 "/etc/ssh/ssh_host_rsa_key.pub"
+                # The mldsa44-ed25519 key is in services.openssh.hostKeys
+                # by default since the nixpkgs bump that brought openssh
+                # 10.6; invariants.nix fails when a hostKeys path is not
+                # listed here.
+                "/etc/ssh/ssh_host_mldsa44_ed25519_key"
+                "/etc/ssh/ssh_host_mldsa44_ed25519_key.pub"
             ];
         };
 
