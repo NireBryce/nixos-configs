@@ -40,10 +40,10 @@ def rule_globs(root):
     out = {}
     base = root / '.agents' / 'rules'
     for path in rule_files(root, '.agents/rules'):
-        m = RULE_FRONTMATTER.match(path.read_text())
-        lines = m.group(1).splitlines() if m else []
+        match = RULE_FRONTMATTER.match(path.read_text())
+        lines = match.group(1).splitlines() if match else []
         out[path.relative_to(base).as_posix()] = [
-            i.group(1) for i in map(RULE_PATH_ITEM.match, lines) if i]
+            item.group(1) for item in map(RULE_PATH_ITEM.match, lines) if item]
     return out
 
 
@@ -59,51 +59,51 @@ def check_lessons(root, cfg):
     for line in page.read_text().splitlines():
         if not line.startswith('- **§'):
             continue
-        m = ENTRY.match(line)
-        if not m:
+        match = ENTRY.match(line)
+        if not match:
             findings.append(Finding('MALFORMED LESSON', PAGE, line[:70]))
             continue
-        n, link = int(m.group(1)), m.group(2)
-        if n in entries:
+        number, link = int(match.group(1)), match.group(2)
+        if number in entries:
             findings.append(Finding(
-                'DUPLICATE LESSON', PAGE, f"§{n} has two entries"))
-        entries[n] = link
-        if not link.startswith(f'agent-lessons-learned/{n}-'):
+                'DUPLICATE LESSON', PAGE, f"§{number} has two entries"))
+        entries[number] = link
+        if not link.startswith(f'agent-lessons-learned/{number}-'):
             findings.append(Finding(
-                'LESSON LINK', PAGE, f"§{n} links {link}, not its own "
+                'LESSON LINK', PAGE, f"§{number} links {link}, not its own "
                                      f"article"))
         for field in ('Home: ', 'Enforced: '):
             if f'. {field}' not in line:
                 findings.append(Finding(
-                    'LESSON FIELD', PAGE, f"§{n} has no `{field.strip()}`"))
+                    'LESSON FIELD', PAGE, f"§{number} has no `{field.strip()}`"))
 
     articles = {}
-    for p in sorted(art_dir.glob('*.md')):
-        if p.name == HUMAN_README:
+    for article_path in sorted(art_dir.glob('*.md')):
+        if article_path.name == HUMAN_README:
             continue
-        m = ARTICLE.match(p.name)
-        if not m:
+        match = ARTICLE.match(article_path.name)
+        if not match:
             findings.append(Finding(
-                'LESSON ARTICLE NAME', str(p), "not `<N>-<slug>.md`"))
+                'LESSON ARTICLE NAME', str(article_path), "not `<N>-<slug>.md`"))
             continue
-        n = int(m.group(1))
-        if n in articles:
+        number = int(match.group(1))
+        if number in articles:
             findings.append(Finding(
-                'DUPLICATE ARTICLE', str(p),
-                f"§{n} already has {articles[n].name}"))
-        articles[n] = p
-        if not p.read_text().startswith(f'# {n}. '):
+                'DUPLICATE ARTICLE', str(article_path),
+                f"§{number} already has {articles[number].name}"))
+        articles[number] = article_path
+        if not article_path.read_text().startswith(f'# {number}. '):
             findings.append(Finding(
-                'LESSON ARTICLE TITLE', str(p),
-                f"title isn't `# {n}. ...`"))
+                'LESSON ARTICLE TITLE', str(article_path),
+                f"title isn't `# {number}. ...`"))
 
     top = max([*entries, *articles], default=0)
-    for n in range(1, top + 1):
-        if n not in entries:
-            findings.append(Finding('MISSING LESSON', PAGE, f"no entry for §{n}"))
-        if n not in articles:
+    for number in range(1, top + 1):
+        if number not in entries:
+            findings.append(Finding('MISSING LESSON', PAGE, f"no entry for §{number}"))
+        if number not in articles:
             findings.append(Finding(
-                'MISSING ARTICLE', ART_DIR, f"no {n}-*.md for §{n}"))
+                'MISSING ARTICLE', ART_DIR, f"no {number}-*.md for §{number}"))
 
     # validate() returns plain strings (its module cannot import factcheck);
     # the runner needs Finding objects, so convert here.

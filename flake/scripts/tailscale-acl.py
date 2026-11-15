@@ -113,15 +113,15 @@ def request(url, method, body=None, content_type="application/hujson", allow_404
     try:
         with urllib.request.urlopen(req, data=data) as resp:
             return resp.read().decode()
-    except urllib.error.HTTPError as e:
+    except urllib.error.HTTPError as error:
         # `allow_404` is for callers that ASK a question a 404 answers --
         # "does this service exist yet?" -- rather than callers that hit an
         # error. Without it every 404 is fatal here, which is right for
         # every other caller.
-        if allow_404 and e.code == 404:
+        if allow_404 and error.code == 404:
             return None
         # Never echo headers -- the request carried the bearer token.
-        sys.exit(f"Tailscale API error {e.code}: {e.read().decode()[:500]}")
+        sys.exit(f"Tailscale API error {error.code}: {error.read().decode()[:500]}")
 
 
 def cmd_get(args):

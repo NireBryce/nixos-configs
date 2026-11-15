@@ -94,8 +94,8 @@ KEY_ALIASES = {'esc': 'escape', 'del': 'delete', 'return': 'enter'}
 KNOWN_KEYS = ({'enter', 'return', 'space', 'tab', 'escape', 'esc', 'backspace',
                'delete', 'del', 'insert', 'home', 'end', 'pageup', 'pagedown',
                'up', 'down', 'left', 'right', 'menu', 'plus', 'minus', 'clear'}
-              | {f'f{n}' for n in range(1, 25)}
-              | {f'kp_{n}' for n in range(10)}
+              | {f'f{number}' for number in range(1, 25)}
+              | {f'kp_{digit}' for digit in range(10)}
               | {'kp_add', 'kp_subtract', 'kp_multiply', 'kp_divide', 'kp_enter',
                  'kp_decimal'})
 
@@ -127,7 +127,7 @@ class Chord:
     def sort_key(self):
         if not self.decoded:
             return (1, self.raw)
-        return (0, self.key, tuple(MOD_ORDER.index(m) for m in MOD_ORDER if m in self.mods))
+        return (0, self.key, tuple(MOD_ORDER.index(mod) for mod in MOD_ORDER if mod in self.mods))
 
     def __repr__(self):
         return f'<Chord {self.render()}>'
@@ -135,7 +135,7 @@ class Chord:
     def render(self):
         if not self.decoded:
             return self.raw
-        parts = [m.capitalize() for m in MOD_ORDER if m in self.mods]
+        parts = [mod.capitalize() for mod in MOD_ORDER if mod in self.mods]
         key = self.key
         if len(key) == 1 and key.isalpha():
             parts.append(key.upper())
@@ -164,7 +164,7 @@ def _from_control(code):
 def _decode_csi(params, final):
     """`ESC [` params final -- xterm CSI; xterm modifier param m = 1 + bitmask
     (1 shift, 2 alt/meta, 4 ctrl, 8 meta again for display purposes)."""
-    nums = [int(p) if p.isdigit() else 0 for p in params.split(';') if p != ''] \
+    nums = [int(param) if param.isdigit() else 0 for param in params.split(';') if param != ''] \
         if params else []
     if final in '^$':                     # rxvt: ^ = ctrl held, $ = shift held
         key = TILDE_KEYS.get(str(nums[0] if nums else 1))
@@ -194,8 +194,8 @@ def _decode_seq(seq):
     if seq == '\x1b':
         return Chord([], 'escape')
     if seq.startswith('\x1b['):
-        m = re.fullmatch(r'\x1b\[([0-9;]*)(.)', seq)
-        return _decode_csi(m.group(1), m.group(2)) if m else None
+        match = re.fullmatch(r'\x1b\[([0-9;]*)(.)', seq)
+        return _decode_csi(match.group(1), match.group(2)) if match else None
     if seq.startswith('\x1bO'):
         ch = seq[2:]
         if ch in ('c', 'd'):              # ctrl+arrows in application mode
@@ -231,20 +231,20 @@ def _caret_to_seq(spec):
     (`\\^`, `\\-`, `\\\\`) protect a literal next char -- which is how
     `'^[[3\\^'` reaches this parser intact from a quoted shell string.
     """
-    out, i = [], 0
-    while i < len(spec):
-        c = spec[i]
-        if c == '\\' and i + 1 < len(spec):
-            out.append(spec[i + 1])
-            i += 2
-        elif c == '^' and i + 1 < len(spec):
-            nxt = spec[i + 1]
+    out, pos = [], 0
+    while pos < len(spec):
+        char = spec[pos]
+        if char == '\\' and pos + 1 < len(spec):
+            out.append(spec[pos + 1])
+            pos += 2
+        elif char == '^' and pos + 1 < len(spec):
+            nxt = spec[pos + 1]
             out.append('\x1b' if nxt == '[' else '\x7f' if nxt == '?'
                        else chr(ord(nxt.upper()) & 0x1f))
-            i += 2
+            pos += 2
         else:
-            out.append(c)
-            i += 1
+            out.append(char)
+            pos += 1
     return ''.join(out)
 
 
@@ -270,13 +270,13 @@ def parse_plus(spec, kitty_mod=KITTY_MOD_DEFAULT):
 
 def parse_emacs(spec):
     """emacs/ble.sh specs: C-r, M-x, C-v; chained prefixes like C-S-r."""
-    m = re.fullmatch(r'((?:[CMSs]-)+)(.+)', spec)
-    if not m:
+    match = re.fullmatch(r'((?:[CMSs]-)+)(.+)', spec)
+    if not match:
         return None
-    key = m.group(2).lower()
+    key = match.group(2).lower()
     if len(key) != 1 and not key.isalnum():
         return None
-    return Chord([EMACS_MODS[p] for p in m.group(1).split('-')[:-1]], key)
+    return Chord([EMACS_MODS[mod] for mod in match.group(1).split('-')[:-1]], key)
 
 
 def parse_caret(spec):
@@ -301,7 +301,7 @@ def parse_chord(spec, kitty_mod=KITTY_MOD_DEFAULT):
     spec = spec.strip().strip('`').strip('"').strip("'")
     if not spec:
         return None
-    for attempt in (lambda s: parse_plus(s, kitty_mod), parse_emacs, parse_caret):
+    for attempt in (lambda text: parse_plus(text, kitty_mod), parse_emacs, parse_caret):
         chord = attempt(spec)
         if chord and chord.decoded:
             return chord
@@ -340,10 +340,10 @@ def parse_kitty_source(text, tool, source, kitty_mod=KITTY_MOD_DEFAULT):
     matched in a single regex, so a `long_text=` on a following line attaches
     to its own entry and an entry without one cannot steal the next entry's.
     """
-    starts = [m.start() for m in re.finditer(r'\bmap\(', text)]
+    starts = [match.start() for match in re.finditer(r'\bmap\(', text)]
     out = []
-    for i, start in enumerate(starts):
-        span = text[start:starts[i + 1] if i + 1 < len(starts) else len(text)]
+    for index, start in enumerate(starts):
+        span = text[start:starts[index + 1] if index + 1 < len(starts) else len(text)]
         head = re.match(r"map\(\s*'([^']+)'\s*,\s*'([^']+)'", span)
         if not head:
             continue
@@ -365,10 +365,10 @@ def _rows_to_bindings(rows, tool, source, kitty_mod=KITTY_MOD_DEFAULT):
     """
     out = []
     for cells in rows:
-        cells = [html.unescape(c.replace('`', '').strip()) for c in cells if c.strip()]
+        cells = [html.unescape(cell.replace('`', '').strip()) for cell in cells if cell.strip()]
         if len(cells) < 2:
             continue
-        key_at = next((i for i, c in enumerate(cells) if parse_chord(c, kitty_mod)), None)
+        key_at = next((index for index, cell in enumerate(cells) if parse_chord(cell, kitty_mod)), None)
         if key_at is None:
             continue
         action_at = key_at + 1 if key_at + 1 < len(cells) else 0
@@ -381,11 +381,11 @@ def parse_markdown_table(text, tool, source, **_):
     """Pasted docs as a pipe table or aligned plain text."""
     rows = []
     for line in text.splitlines():
-        s = line.strip()
-        if not s or set(s) <= set('|-: '):
+        stripped = line.strip()
+        if not stripped or set(stripped) <= set('|-: '):
             continue
-        rows.append([c.strip() for c in s.strip('|').split('|')] if '|' in s
-                    else re.split(r'\s{2,}', s))
+        rows.append([cell.strip() for cell in stripped.strip('|').split('|')] if '|' in stripped
+                    else re.split(r'\s{2,}', stripped))
     return _rows_to_bindings(rows, tool, source)
 
 
@@ -424,14 +424,14 @@ def parse_html_table(text, tool, source, **_):
 def strip_comment(line):
     """Drop a trailing shell comment; '#' inside quotes is data, not a comment."""
     quote = None
-    for i, c in enumerate(line):
+    for index, char in enumerate(line):
         if quote:
-            if c == quote:
+            if char == quote:
                 quote = None
-        elif c in ('"', "'"):
-            quote = c
-        elif c == '#':
-            return line[:i]
+        elif char in ('"', "'"):
+            quote = char
+        elif char == '#':
+            return line[:index]
     return line
 
 
@@ -466,16 +466,16 @@ def parse_bindkey(text, tool, source, **_):
             continue
         flags, positional = [], []
         args = tokens[1:]
-        i = 0
-        while i < len(args):
-            if args[i].startswith('-') and len(args[i]) > 1:
-                flags.append(args[i])
-                if args[i] in ('-N', '-m') and i + 1 < len(args):
-                    i += 1
-                    positional.append(args[i])
+        index = 0
+        while index < len(args):
+            if args[index].startswith('-') and len(args[index]) > 1:
+                flags.append(args[index])
+                if args[index] in ('-N', '-m') and index + 1 < len(args):
+                    index += 1
+                    positional.append(args[index])
             else:
-                positional.append(args[i])
-            i += 1
+                positional.append(args[index])
+            index += 1
         if '-d' in flags:
             mode = 'main'
             state = {'main': {}}
@@ -514,7 +514,7 @@ def parse_bindkey(text, tool, source, **_):
         resolved = target_chord and state.get(send_mode, {}).get(target_chord.canonical())
         if resolved and resolved.action:
             binding.notes += f' -> {resolved.action}'
-    return [b for table in state.values() for b in table.values()]
+    return [bound for table in state.values() for bound in table.values()]
 
 
 def parse_ble_bind(text, tool, source, **_):
@@ -528,13 +528,13 @@ def parse_ble_bind(text, tool, source, **_):
     on ';'. `-f KEY -` (dash widget) is an unbind.
     """
     out = []
-    starts = [m.start() for m in re.finditer(r'ble-bind\b', text)]
+    starts = [match.start() for match in re.finditer(r'ble-bind\b', text)]
     for idx, start in enumerate(starts):
         region = text[start:starts[idx + 1] if idx + 1 < len(starts) else len(text)]
         for boundary in ("'", '\n'):
-            p = region.find(boundary)
-            if p != -1:
-                region = region[:p]
+            cut = region.find(boundary)
+            if cut != -1:
+                region = region[:cut]
         for command in region.split(';'):
             command = command.strip()
             if not command.startswith('ble-bind'):
@@ -544,16 +544,16 @@ def parse_ble_bind(text, tool, source, **_):
             except ValueError:
                 tokens = command.split()
             mode, key, action, unbind = '', None, None, False
-            i = 1                                      # tokens[0] is 'ble-bind'
-            while i < len(tokens):
-                if tokens[i] == '-m' and i + 1 < len(tokens):
-                    mode = tokens[i + 1]
-                    i += 2
-                elif tokens[i] in ('-f', '-x') and i + 2 < len(tokens):
-                    key, action, unbind = tokens[i + 1], tokens[i + 2], tokens[i + 2] == '-'
-                    i += 3
+            index = 1                                      # tokens[0] is 'ble-bind'
+            while index < len(tokens):
+                if tokens[index] == '-m' and index + 1 < len(tokens):
+                    mode = tokens[index + 1]
+                    index += 2
+                elif tokens[index] in ('-f', '-x') and index + 2 < len(tokens):
+                    key, action, unbind = tokens[index + 1], tokens[index + 2], tokens[index + 2] == '-'
+                    index += 3
                 else:
-                    i += 1
+                    index += 1
             if key is None:
                 continue
             chord = parse_chord(key) or Chord(raw=key)
@@ -587,8 +587,8 @@ def kitty_mod_from_config():
     """The configured kitty_mod, or kitty's default. extraConfig is a plain
     setting line (`kitty_mod ctrl+shift`), not a binding, so it is read
     rather than parsed by the keybindings logic."""
-    m = re.search(r'kitty_mod\s+([a-z+]+)', KITTY_CONFIG.read_text())
-    return m.group(1) if m else KITTY_MOD_DEFAULT
+    match = re.search(r'kitty_mod\s+([a-z+]+)', KITTY_CONFIG.read_text())
+    return match.group(1) if match else KITTY_MOD_DEFAULT
 
 
 def read_repo_kitty():
@@ -597,16 +597,16 @@ def read_repo_kitty():
     out = []
     block = re.search(r'keybindings\s*=\s*\{(.*?)\}', text, re.S)
     if block:
-        for m in re.finditer(r'"([^"]+)"\s*=\s*"([^"]+)"', block.group(1)):
-            chord = parse_chord(m.group(1), mod)
+        for match in re.finditer(r'"([^"]+)"\s*=\s*"([^"]+)"', block.group(1)):
+            chord = parse_chord(match.group(1), mod)
             if chord:
-                out.append(Binding('kitty', '', chord, m.group(2),
+                out.append(Binding('kitty', '', chord, match.group(2),
                                    f'repo {KITTY_CONFIG.relative_to(FLAKE)}'))
     return out
 
 
 def read_repo_zsh():
-    text = '\n'.join(p.read_text() for p in ZSH_BINDINGS)
+    text = '\n'.join(path.read_text() for path in ZSH_BINDINGS)
     source = 'repo ' + ZSH_BINDINGS[0].parent.relative_to(FLAKE).as_posix() + '/*.zsh'
     return parse_bindkey(text, 'zsh', source)
 
@@ -640,25 +640,25 @@ def merge(upstream, overrides):
 
 def render_markdown(tool, bindings, kitty_mod=None):
     by_mode = {}
-    for b in bindings:
-        by_mode.setdefault(b.mode or 'default', []).append(b)
+    for binding in bindings:
+        by_mode.setdefault(binding.mode or 'default', []).append(binding)
     lines = [f'# Keybinding cheat sheet — {tool}', '']
     if kitty_mod:
         lines += [f'kitty_mod resolves to `{kitty_mod}` (from the repo config).', '']
-    for mode in sorted(by_mode, key=lambda m: (MODE_ORDER.get(m, 9), m)):
-        rows = sorted(by_mode[mode], key=lambda b: b.chord.sort_key())
+    for mode in sorted(by_mode, key=lambda mode_name: (MODE_ORDER.get(mode_name, 9), mode_name)):
+        rows = sorted(by_mode[mode], key=lambda binding: binding.chord.sort_key())
         if len(by_mode) > 1:
             lines += [f'## mode: {mode}', '']
         lines += ['| Key | Action | Notes | Source |',
                   '| --- | --- | --- | --- |']
-        for b in rows:
-            if b.unbound and b.notes and b.notes.startswith('sends '):
-                action, notes = f"`{b.notes}`", ''   # a translation is an action, not an unbind
-            elif b.unbound:
+        for binding in rows:
+            if binding.unbound and binding.notes and binding.notes.startswith('sends '):
+                action, notes = f"`{binding.notes}`", ''   # a translation is an action, not an unbind
+            elif binding.unbound:
                 action, notes = '*(unbound)*', ''
             else:
-                action, notes = f'`{b.action}`', b.notes or ''
-            lines.append(f'| {b.chord.render()} | {action} | {notes} | {b.source} |')
+                action, notes = f'`{binding.action}`', binding.notes or ''
+            lines.append(f'| {binding.chord.render()} | {action} | {notes} | {binding.source} |')
         lines.append('')
     return '\n'.join(lines)
 

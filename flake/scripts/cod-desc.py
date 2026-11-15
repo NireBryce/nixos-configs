@@ -94,9 +94,9 @@ def read_table(path=DATA):
 def check_sorted(path=DATA):
     """Candidate rows must be sorted by (command, candidate) among
     themselves -- keeps the diff readable and makes duplicates obvious."""
-    keys = [k for k in read_table(path)]
+    keys = [key for key in read_table(path)]
     if keys != sorted(keys):
-        bad = [k for old, k in zip(keys, keys[1:]) if k <= old]
+        bad = [key for old, key in zip(keys, keys[1:]) if key <= old]
         raise ValueError(f'{path}: rows out of sorted order near {bad[0]}')
 
 
@@ -117,7 +117,7 @@ def cod_learned():
         rows = db.execute('SELECT ExecutablePath FROM HelpPage').fetchall()
     finally:
         db.close()
-    return sorted({pathlib.Path(p).name for (p,) in rows})
+    return sorted({pathlib.Path(path_name).name for (path_name,) in rows})
 
 
 def cod_candidates(command):
@@ -216,10 +216,10 @@ def parse_help(text):
             pending = None
             continue
         if section == 'options':
-            m = OPTION_RE.match(line)
-            b = None if m else OPTION_BARE_RE.match(line)
-            if m:
-                indent, column, desc = m.groups()
+            option_match = OPTION_RE.match(line)
+            bare_match = None if option_match else OPTION_BARE_RE.match(line)
+            if option_match:
+                indent, column, desc = option_match.groups()
                 desc_col = len(indent.expandtabs()) + \
                     len(column.expandtabs()) + 2
                 pending = None
@@ -227,10 +227,10 @@ def parse_help(text):
                     candidate = token.rstrip('=')
                     if candidate not in found:
                         found[candidate] = clean_desc(desc)
-            elif b:
+            elif bare_match:
                 # clap long-help: flag column alone, description arrives on
                 # the following line(s), more indented than the flag
-                indent, column = b.groups()
+                indent, column = bare_match.groups()
                 pending = (len(line) - len(line.lstrip()),
                            re.findall(r'-{1,2}[\w][\w=-]*', column))
                 for token in pending[1]:
@@ -257,12 +257,13 @@ def parse_help(text):
                     last = next(reversed(found))
                     found[last] = clean_desc(found[last] + ' ' + line)
         elif section == 'commands':
-            m = COMMAND_RE.match(line)
-            if m:
-                name, desc = m.groups()
+            command_match = COMMAND_RE.match(line)
+            if command_match:
+                name, desc = command_match.groups()
                 if name not in found:
                     found[name] = clean_desc(desc)
-    return {c: d for c, d in found.items() if d}
+    return {command: description
+            for command, description in found.items() if description}
 
 
 def run_help(command):
@@ -298,7 +299,8 @@ def cmd_draft(args):
         served = cod_candidates(command) if command in learned else None
         source = 'cod serves these'
         if served is None:
-            served = sorted(parsed, key=lambda c: (not c.startswith('--'), c))
+            served = sorted(
+                parsed, key=lambda flag: (not flag.startswith('--'), flag))
             source = 'parsed from --help'
 
         for candidate in served:
@@ -311,15 +313,15 @@ def cmd_draft(args):
 
 def cmd_audit(args):
     table = read_table()
-    table_commands = {c for c, _ in table}
+    table_commands = {cmd for cmd, _ in table}
     learned = cod_learned()
 
-    untabled = [c for c in learned if c not in table_commands]
+    untabled = [cmd for cmd in learned if cmd not in table_commands]
     if untabled:
         print('learned by cod, no rows in the table (candidates show bare):')
         for command in untabled:
-            n = len(cod_candidates(command) or [])
-            print(f'  {command} ({n} candidates)')
+            candidate_count = len(cod_candidates(command) or [])
+            print(f'  {command} ({candidate_count} candidates)')
     unlearned = sorted(table_commands - set(learned))
     if unlearned:
         print('in the table, not learned on this host (rows dormant until'
@@ -332,8 +334,8 @@ def cmd_audit(args):
     if args.used:
         used = atuin_top_commands()
         covered = carapace_specs()
-        queue = [c for c in used
-                 if c not in covered and c not in table_commands]
+        queue = [cmd for cmd in used
+                 if cmd not in covered and cmd not in table_commands]
         if queue:
             print('used recently, outside carapace and the table (worth'
                   ' `cod learn -- <cmd> --help`):')
@@ -363,8 +365,8 @@ def atuin_top_commands(limit=3000, top=40):
         word = line.split()
         if word:
             counts[word[0]] = counts.get(word[0], 0) + 1
-    ranked = sorted(counts, key=lambda c: -counts[c])[:top]
-    return [c for c in ranked if re.match(r'^[\w][\w.-]*$', c)]
+    ranked = sorted(counts, key=lambda command: -counts[command])[:top]
+    return [command for command in ranked if re.match(r'^[\w][\w.-]*$', command)]
 
 
 def carapace_specs():
@@ -378,7 +380,7 @@ def carapace_specs():
         return []
     try:
         import json
-        return {str(k) for k in json.loads(proc.stdout)}
+        return {str(spec_name) for spec_name in json.loads(proc.stdout)}
     except ValueError:
         return []
 

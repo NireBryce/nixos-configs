@@ -31,8 +31,8 @@ class FakeNix:
 
 def document(categories, modules, includes=None, enables=None):
     return {'version': 1, 'classes': ['nixos', 'homeManager', 'darwin'],
-            'categories': {n: {'dir': d, 'members': [], 'nested': [], 'flag': None} for n, d in categories.items()},
-            'modules': {n: {'path': p, 'classes': ['nixos']} for n, p in modules.items()},
+            'categories': {module_name: {'dir': directory, 'members': [], 'nested': [], 'flag': None} for module_name, directory in categories.items()},
+            'modules': {module_name: {'path': path, 'classes': ['nixos']} for module_name, path in modules.items()},
             'includes': includes or {}, 'enables': enables or {}, 'folders': [], 'defaults': [], 'admin': []}
 
 
@@ -55,15 +55,15 @@ class Tree(unittest.TestCase):
         """Each module file as dirs-as-categories would read it: house style
         (what the doc checks read), with the same includes/enables the document
         gets. A file a test wrote itself (ORPHAN-OK) is left alone."""
-        for name, p in self.mods.items():
-            f = self.root / p
-            if f.exists() and 'ORPHAN-OK' in f.read_text():
+        for name, rel_path in self.mods.items():
+            target = self.root / rel_path
+            if target.exists() and 'ORPHAN-OK' in target.read_text():
                 continue
-            f.parent.mkdir(parents=True, exist_ok=True)
-            lines = [f'    {kind}.{cls} = [ {" ".join(chr(34) + n + chr(34) for n in names)} ];'
+            target.parent.mkdir(parents=True, exist_ok=True)
+            lines = [f'    {kind}.{cls} = [ {" ".join(chr(34) + module_name + chr(34) for module_name in names)} ];'
                      for kind, table in (('includes', self.includes), ('enables', self.enables))
                      for cls, names in table.get(name, {}).items()]
-            f.write_text('{\n' + '\n'.join(lines + ['    nixos = { };']) + '\n}\n')
+            target.write_text('{\n' + '\n'.join(lines + ['    nixos = { };']) + '\n}\n')
 
     def doc(self):
         self.write_all()
@@ -89,8 +89,8 @@ def tree_header():
     has to write that one: a header the tree has moved on from was left in
     the template once, and 227 of 241 modules disagreed with it."""
     headers = collections.Counter(
-        tuple(p.read_text().splitlines()[:4])
-        for p in (pathlib.Path(modules.__file__).resolve().parents[1] / 'modules').rglob('*.nix'))
+        tuple(nix_file.read_text().splitlines()[:4])
+        for nix_file in (pathlib.Path(modules.__file__).resolve().parents[1] / 'modules').rglob('*.nix'))
     (header, _), = headers.most_common(1)
     return '\n'.join(header) + '\n'
 
@@ -165,17 +165,17 @@ class Drift(Tree):
         hits = quiet(modules.drift, doc, static)
         self.assertEqual(len(hits), 4, hits)
         for needle in ("category 'extra'", "module 'a'", "includes 'alpha'", "enables 'a'"):
-            self.assertTrue(any(needle in h for h in hits), needle)
+            self.assertTrue(any(needle in hit for hit in hits), needle)
 
 
 class Options(Tree):
     """A module file that declares an option must be named <topic>-options.nix."""
 
     def put(self, rel, text):
-        f = self.root / rel
-        f.parent.mkdir(parents=True, exist_ok=True)
-        f.write_text(text)
-        return str(f)
+        target = self.root / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(text)
+        return str(target)
 
     def test_flags_a_declaration_outside_an_options_file(self):
         bad = self.put('area/swap.nix', '{ nixos = { options.x = lib.mkOption { }; }; }\n')
@@ -184,8 +184,8 @@ class Options(Tree):
 
     def test_each_declaring_helper_is_caught(self):
         for helper in ('mkOption', 'mkEnableOption', 'mkPackageOption'):
-            f = self.put(f'area/{helper}.nix', f'{{ nixos = {{ options.x = lib.{helper} {{ }}; }}; }}\n')
-            self.assertIn(f, quiet(modules.options, self.root), helper)
+            target = self.put(f'area/{helper}.nix', f'{{ nixos = {{ options.x = lib.{helper} {{ }}; }}; }}\n')
+            self.assertIn(target, quiet(modules.options, self.root), helper)
 
     def test_an_options_file_a_comment_and_an_exempt_file_pass(self):
         self.put('area/swap-options.nix', '{ nixos = { options.x = lib.mkOption { }; }; }\n')

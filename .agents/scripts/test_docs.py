@@ -31,9 +31,9 @@ def git(cwd, *args, date=None):
 
 
 def write(root, rel, text):
-    p = Path(root) / rel
-    p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(text)
+    file_path = Path(root) / rel
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    file_path.write_text(text)
 
 
 class Fixture(unittest.TestCase):
@@ -64,19 +64,19 @@ class Fixture(unittest.TestCase):
 class Drift(Fixture):
     def test_changed_cited_file_ranks_first(self):
         rows = doc_drift.rank(self.r)
-        names = [r["doc"] for r in rows]
+        names = [result["doc"] for result in rows]
         hot, cold = rows[names.index("wiki/hot.md")], rows[names.index("wiki/cold.md")]
         self.assertEqual((hot["commits"], cold["commits"]), (1, 0))
         self.assertLess(names.index("wiki/hot.md"), names.index("wiki/cold.md"))
         self.assertEqual(hot["top"], [("src/a/one.nix", 1)])
 
     def test_missing_path_skipped_and_symlink_not_listed(self):
-        rows = {r["doc"]: r for r in doc_drift.rank(self.r)}
+        rows = {result["doc"]: result for result in doc_drift.rank(self.r)}
         self.assertEqual(rows["wiki/cold.md"]["cited"], 1)  # gone/old.nix skipped
         self.assertNotIn("wiki/README.md", rows)
 
     def test_commit_on_doc_date_not_counted_and_git_date_fallback(self):
-        rows = {r["doc"]: r for r in doc_drift.rank(self.r)}
+        rows = {result["doc"]: result for result in doc_drift.rank(self.r)}
         self.assertEqual(rows[".agents/rules/r.md"]["src"], "git")
         self.assertEqual(rows[".agents/rules/r.md"]["date"], "2026-01-01")
         self.assertEqual(rows[".agents/rules/r.md"]["commits"], 1)  # link target resolved
@@ -89,22 +89,22 @@ class Partition(Fixture):
     def test_every_doc_once_and_units_together(self):
         docs, us, groups = doc_partition.partition(self.r, 3)
         self.assertEqual(doc_partition.verify(docs, groups, us), [])
-        where = {f: i for i, g in enumerate(groups) for f in g["files"]}
+        where = {file_name: group_index for group_index, group in enumerate(groups) for file_name in group["files"]}
         self.assertEqual(len({where["wiki/cold.md"], where["wiki/cold-for-agents.md"],
                               where["wiki/cold-history.md"]}), 1)
         self.assertEqual(where["wiki/README.md"], where["wiki/hot.md"])
 
     def test_selfcheck_catches_dropped_and_duplicated(self):
         docs, us, groups = doc_partition.partition(self.r, 3)
-        victim = next(g for g in groups if "AGENTS.md" in g["files"])
+        victim = next(group for group in groups if "AGENTS.md" in group["files"])
         victim["files"].remove("AGENTS.md")
-        self.assertTrue(any("AGENTS.md: unassigned" in p
-                            for p in doc_partition.verify(docs, groups, us)))
+        self.assertTrue(any("AGENTS.md: unassigned" in problem
+                            for problem in doc_partition.verify(docs, groups, us)))
         victim["files"].append("AGENTS.md")
-        other = next(g for g in groups if g is not victim)
+        other = next(group for group in groups if group is not victim)
         other["files"].append("AGENTS.md")
-        self.assertTrue(any("assigned twice" in p
-                            for p in doc_partition.verify(docs, groups, us)))
+        self.assertTrue(any("assigned twice" in problem
+                            for problem in doc_partition.verify(docs, groups, us)))
 
     def test_cli_ok_exit_zero(self):
         self.assertEqual(doc_partition.main(["--root", str(self.r), "--agents", "2"]), 0)

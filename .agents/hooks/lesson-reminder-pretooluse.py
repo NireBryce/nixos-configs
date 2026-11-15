@@ -62,12 +62,12 @@ def unseen(topics, path):
         shown = set(path.read_text().split())
     except OSError:
         shown = set()
-    fresh = [t for t in topics if t['id'] not in shown]
+    fresh = [topic for topic in topics if topic['id'] not in shown]
     if fresh:
         try:
             path.parent.mkdir(parents=True, exist_ok=True)
-            with open(path, 'a') as f:
-                f.write(''.join(t['id'] + '\n' for t in fresh))
+            with open(path, 'a') as handle:
+                handle.write(''.join(topic['id'] + '\n' for topic in fresh))
         except OSError:
             pass
     return fresh
@@ -99,13 +99,13 @@ def topics_for(payload, lessons_map):
     rel = path.relative_to(root).as_posix()
     creating = tool == 'Write' and not path.exists()
     out = []
-    for t in lessons_map.match_path(lessons_map.load(root), rel):
-        on = t.get('remind_on', 'edit')
-        if t.get('delivered_by') or on == 'never':
+    for topic in lessons_map.match_path(lessons_map.load(root), rel):
+        on = topic.get('remind_on', 'edit')
+        if topic.get('delivered_by') or on == 'never':
             continue
         if on == 'create' and not creating:
             continue
-        out.append(t)
+        out.append(topic)
     return out
 
 
@@ -115,17 +115,17 @@ def main():
         if lessons_map.tomllib is None:
             return 0  # Python < 3.11: no reminders, and no banner per call
         payload = json.load(sys.stdin)
-        topics = [t for t in topics_for(payload, lessons_map) if t.get('remind')]
+        topics = [topic for topic in topics_for(payload, lessons_map) if topic.get('remind')]
         topics = unseen(topics, state_file(payload))
-    except Exception as e:  # noqa: BLE001 -- fail open, but say so
+    except Exception as error:  # noqa: BLE001 -- fail open, but say so
         print(json.dumps({'systemMessage':
-              f'lesson-reminder: {type(e).__name__}: {e} -- no lesson '
+              f'lesson-reminder: {type(error).__name__}: {error} -- no lesson '
               f'reminders for this call (.agents/hooks/lessons_map.py)'}))
         return 0
     if not topics:
         return 0
-    lines = [f"LESSON REMINDER ({t['id']}): {t['remind']} "
-             f"Full rule: {lessons_map.pointers(t)}." for t in topics]
+    lines = [f"LESSON REMINDER ({topic['id']}): {topic['remind']} "
+             f"Full rule: {lessons_map.pointers(topic)}." for topic in topics]
     print(json.dumps({'hookSpecificOutput': {
         'hookEventName': 'PreToolUse',
         'additionalContext': '\n'.join(lines)}}))

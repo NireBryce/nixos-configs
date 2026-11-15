@@ -69,13 +69,13 @@ def statix_findings():
     objects back-to-back with no separator or enclosing array, so a plain
     json.load can't parse the stream -- decode one object at a time instead."""
     proc = run_tool(['statix', 'check', '-o', 'json', '.'], 'statix')
-    dec, data, i, out = json.JSONDecoder(), proc.stdout, 0, []
-    while i < len(data):
-        while i < len(data) and data[i] in ' \t\r\n':
-            i += 1
-        if i >= len(data):
+    dec, data, offset, out = json.JSONDecoder(), proc.stdout, 0, []
+    while offset < len(data):
+        while offset < len(data) and data[offset] in ' \t\r\n':
+            offset += 1
+        if offset >= len(data):
             break
-        obj, i = dec.raw_decode(data, i)
+        obj, offset = dec.raw_decode(data, offset)
         for report in obj.get('report', []):
             for diag in report.get('diagnostics', []):
                 line = diag.get('at', {}).get('from', {}).get('line', '?')
@@ -92,8 +92,8 @@ def deadnix_findings():
         if not line:
             continue
         obj = json.loads(line)
-        for r in obj.get('results', []):
-            out.append((obj['file'], r.get('line', '?'), r.get('message', '')))
+        for result in obj.get('results', []):
+            out.append((obj['file'], result.get('line', '?'), result.get('message', '')))
     return out
 
 
@@ -113,15 +113,15 @@ def oversized_files(limit=OVERSIZED_LIMIT):
     for name in out.stdout.split('\0'):
         if not name:
             continue
-        p = root / name
-        if not p.is_file():
+        file_path = root / name
+        if not file_path.is_file():
             continue
         try:
-            n = sum(1 for _ in p.open('rb'))
+            line_count = sum(1 for _ in file_path.open('rb'))
         except OSError:
             continue
-        if n > limit:
-            hits.append((name, n))
+        if line_count > limit:
+            hits.append((name, line_count))
     return hits
 
 
@@ -139,8 +139,8 @@ def report(label, findings, fmt):
     if not findings:
         return
     print(f"\n-- {label} ({len(findings)}) --")
-    for f in findings:
-        print(fmt(f))
+    for finding in findings:
+        print(fmt(finding))
 
 
 def gather():
@@ -154,10 +154,10 @@ def gather():
 
 def show():
     counts, statix, deadnix, oversize = gather()
-    report('statix', statix, lambda f: f"{f[0]}:{f[1]}: {f[2]} -- {f[3]}")
-    report('deadnix', deadnix, lambda f: f"{f[0]}:{f[1]}: {f[2]}")
+    report('statix', statix, lambda finding: f"{finding[0]}:{finding[1]}: {finding[2]} -- {finding[3]}")
+    report('deadnix', deadnix, lambda finding: f"{finding[0]}:{finding[1]}: {finding[2]}")
     report('oversized files (>%d lines)' % OVERSIZED_LIMIT, oversize,
-           lambda f: f"{f[0]}: {f[1]} lines")
+           lambda finding: f"{finding[0]}: {finding[1]} lines")
     print(f"\n{counts}")
     return 0
 
@@ -166,26 +166,26 @@ def check():
     counts, statix, deadnix, oversize = gather()
     baseline = load_baseline()
 
-    regressed = {k: (baseline.get(k, 0), v) for k, v in counts.items()
-                 if v > baseline.get(k, 0)}
-    improved  = {k: (baseline.get(k, 0), v) for k, v in counts.items()
-                 if v < baseline.get(k, 0)}
+    regressed = {name: (baseline.get(name, 0), count) for name, count in counts.items()
+                 if count > baseline.get(name, 0)}
+    improved  = {name: (baseline.get(name, 0), count) for name, count in counts.items()
+                 if count < baseline.get(name, 0)}
 
     if regressed:
-        report('statix', statix, lambda f: f"{f[0]}:{f[1]}: {f[2]} -- {f[3]}")
-        report('deadnix', deadnix, lambda f: f"{f[0]}:{f[1]}: {f[2]}")
+        report('statix', statix, lambda finding: f"{finding[0]}:{finding[1]}: {finding[2]} -- {finding[3]}")
+        report('deadnix', deadnix, lambda finding: f"{finding[0]}:{finding[1]}: {finding[2]}")
         report('oversized files (>%d lines)' % OVERSIZED_LIMIT, oversize,
-               lambda f: f"{f[0]}: {f[1]} lines")
+               lambda finding: f"{finding[0]}: {finding[1]} lines")
         print("\nlint: REGRESSION -- this commit raises the baseline:")
-        for k, (was, now) in regressed.items():
-            print(f"  {k}: {was} -> {now}  (+{now - was})")
+        for name, (was, now) in regressed.items():
+            print(f"  {name}: {was} -> {now}  (+{now - was})")
         print(f"\nbaseline file: {BASELINE_PATH.relative_to(repo_root())}")
         return 1
 
     if improved:
         save_baseline(counts)
-        for k, (was, now) in improved.items():
-            print(f"lint: {k} improved: {was} -> {now}; lowered the baseline")
+        for name, (was, now) in improved.items():
+            print(f"lint: {name} improved: {was} -> {now}; lowered the baseline")
         print(f"baseline file rewritten: {BASELINE_PATH.relative_to(repo_root())} "
               f"-- add it to this commit")
         return 0

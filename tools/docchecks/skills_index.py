@@ -27,9 +27,9 @@ def frontmatter(text):
     """{key: value} of the plain `key: value` lines in the leading block.
     Skill frontmatter holds only plain scalars (the skill-files check
     enforces it), so no YAML parser is needed."""
-    m = FRONTMATTER.match(text)
+    match = FRONTMATTER.match(text)
     out = {}
-    for line in (m.group(1).splitlines() if m else []):
+    for line in (match.group(1).splitlines() if match else []):
         key, sep, value = line.partition(': ')
         if sep:
             out[key.strip()] = value.strip()
@@ -42,7 +42,7 @@ def _cell(text):
 
 def skill_rows(root):
     base = root / SKILLS
-    skills = sorted(p for p in base.glob('*/SKILL.md'))
+    skills = sorted(skill_path for skill_path in base.glob('*/SKILL.md'))
     if not skills:
         raise GenError(f'no SKILL.md files under {SKILLS}/')
     for path in skills:

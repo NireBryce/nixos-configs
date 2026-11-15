@@ -21,12 +21,12 @@ class Rewrite(unittest.TestCase):
         self.assertEqual(bpl.rewrite(text), text)
 
     def test_main_rewrites_files_in_place_and_counts(self):
-        with tempfile.TemporaryDirectory() as d:
-            (Path(d) / "a.md").write_text("[x](../../flake/f.nix)")
-            (Path(d) / "b.md").write_text("[y](a.md)")
-            self.assertEqual(bpl.main([d]), 0)
-            self.assertEqual((Path(d) / "a.md").read_text(), f"[x]({bpl.BASE}flake/f.nix)")
-            self.assertEqual((Path(d) / "b.md").read_text(), "[y](a.md)")
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            (Path(tmp_dir) / "a.md").write_text("[x](../../flake/f.nix)")
+            (Path(tmp_dir) / "b.md").write_text("[y](a.md)")
+            self.assertEqual(bpl.main([tmp_dir]), 0)
+            self.assertEqual((Path(tmp_dir) / "a.md").read_text(), f"[x]({bpl.BASE}flake/f.nix)")
+            self.assertEqual((Path(tmp_dir) / "b.md").read_text(), "[y](a.md)")
 
 
 if __name__ == "__main__":

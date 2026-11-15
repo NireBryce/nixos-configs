@@ -27,20 +27,20 @@ class Repo(unittest.TestCase):
         self.git("config", "user.email", "t@t")
         self.git("config", "user.name", "t")
 
-    def git(self, *a):
+    def git(self, *args):
         # Isolated from the user's global config: the session's
         # commit.gpgsign + agent-served signing key must not decide
         # whether a fixture commit can happen at all.
         env = dict(os.environ,
                    GIT_CONFIG_GLOBAL=os.devnull,
                    GIT_CONFIG_SYSTEM=os.devnull)
-        return subprocess.run(["git", "-C", str(self.root), *a], check=True,
+        return subprocess.run(["git", "-C", str(self.root), *args], check=True,
                               capture_output=True, text=True, env=env).stdout
 
     def write(self, path, text):
-        f = self.root / path
-        f.parent.mkdir(parents=True, exist_ok=True)
-        f.write_text(text)
+        target = self.root / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(text)
 
     def read(self, path):
         return (self.root / path).read_text()

@@ -51,27 +51,27 @@ def _units(suite):
     module-level fixture that must run once per process."""
     flat = []
 
-    def walk(s):
-        for t in s:
-            if isinstance(t, unittest.TestSuite):
-                walk(t)
+    def walk(suite):
+        for test in suite:
+            if isinstance(test, unittest.TestSuite):
+                walk(test)
             else:
-                flat.append(t)
+                flat.append(test)
     walk(suite)
 
     units, grouped = [], {}
-    for t in flat:
-        cls = type(t)
+    for test in flat:
+        cls = type(test)
         mod = sys.modules.get(cls.__module__)
         shared = (cls.setUpClass.__func__ is not unittest.TestCase.setUpClass.__func__
                   or cls.tearDownClass.__func__ is not unittest.TestCase.tearDownClass.__func__
                   or hasattr(mod, "setUpModule") or hasattr(mod, "tearDownModule"))
         if not shared:
-            units.append([t])
+            units.append([test])
         elif cls in grouped:
-            grouped[cls].append(t)
+            grouped[cls].append(test)
         else:
-            grouped[cls] = [t]
+            grouped[cls] = [test]
             units.append(grouped[cls])
     return units
 
@@ -83,11 +83,11 @@ def _child(unit, conn):
     unittest.TestSuite(unit).run(result)
     conn.send({
         "run": result.testsRun,
-        "failures": [(str(t), tb) for t, tb in result.failures],
-        "errors": [(str(t), tb) for t, tb in result.errors],
+        "failures": [(str(test), tb) for test, tb in result.failures],
+        "errors": [(str(test), tb) for test, tb in result.errors],
         "skipped": len(result.skipped),
         "expected": len(result.expectedFailures),
-        "unexpected": [str(t) for t in result.unexpectedSuccesses],
+        "unexpected": [str(test) for test in result.unexpectedSuccesses],
     })
     conn.close()
 
@@ -95,8 +95,8 @@ def _child(unit, conn):
 def _crashed(unit, why):
     return {"run": len(unit), "failures": [], "skipped": 0, "expected": 0,
             "unexpected": [],
-            "errors": [(str(t), f"test process {why}; no result was "
-                                f"returned for this unit\n") for t in unit]}
+            "errors": [(str(test), f"test process {why}; no result was "
+                                f"returned for this unit\n") for test in unit]}
 
 
 def _env_int(name, default):
@@ -115,31 +115,31 @@ def run_units(units, jobs, timeout):
     pending = list(range(len(units)))
     while pending or running:
         while pending and len(running) < jobs:
-            i = pending.pop(0)
+            unit_index = pending.pop(0)
             reader, writer = ctx.Pipe(duplex=False)
-            p = ctx.Process(target=_child, args=(units[i], writer))
-            p.start()
+            process = ctx.Process(target=_child, args=(units[unit_index], writer))
+            process.start()
             writer.close()
-            running[reader] = (i, p, time.time() + timeout)
+            running[reader] = (unit_index, process, time.time() + timeout)
         ready = multiprocessing.connection.wait(list(running), timeout=1.0)
         for reader in ready:
-            i, p, _ = running.pop(reader)
+            unit_index, process, _ = running.pop(reader)
             try:
-                results[i] = reader.recv()
+                results[unit_index] = reader.recv()
             except (EOFError, OSError):
-                p.join()
-                results[i] = _crashed(units[i], f"exited with status {p.exitcode}")
+                process.join()
+                results[unit_index] = _crashed(units[unit_index], f"exited with status {process.exitcode}")
             else:
-                p.join()
+                process.join()
             reader.close()
         now = time.time()
-        for reader, (i, p, deadline) in list(running.items()):
+        for reader, (unit_index, process, deadline) in list(running.items()):
             if now > deadline:
-                p.kill()
-                p.join()
+                process.kill()
+                process.join()
                 running.pop(reader)
                 reader.close()
-                results[i] = _crashed(units[i], f"exceeded {timeout}s and was killed")
+                results[unit_index] = _crashed(units[unit_index], f"exceeded {timeout}s and was killed")
     return results
 
 
@@ -162,12 +162,12 @@ def main(module="__main__"):
     results = run_units(units, jobs, _env_int("TEST_UNIT_TIMEOUT", 600))
     took = time.time() - start
 
-    run = sum(r["run"] for r in results)
-    failures = [f for r in results for f in r["failures"]]
-    errors = [e for r in results for e in r["errors"]]
-    unexpected = [u for r in results for u in r["unexpected"]]
-    skipped = sum(r["skipped"] for r in results)
-    expected = sum(r["expected"] for r in results)
+    run = sum(unit_result["run"] for unit_result in results)
+    failures = [failure for unit_result in results for failure in unit_result["failures"]]
+    errors = [error for unit_result in results for error in unit_result["errors"]]
+    unexpected = [unexpected_test for unit_result in results for unexpected_test in unit_result["unexpected"]]
+    skipped = sum(unit_result["skipped"] for unit_result in results)
+    expected = sum(unit_result["expected"] for unit_result in results)
     for kind, items in (("ERROR", errors), ("FAIL", failures)):
         for name, tb in items:
             print("=" * 70, file=out)
@@ -179,12 +179,15 @@ def main(module="__main__"):
     print("-" * 70, file=out)
     print(f"Ran {run} test{'s' if run != 1 else ''} in {took:.3f}s "
           f"({jobs} processes)\n", file=out)
-    extras = [f"{k}={v}" for k, v in (("skipped", skipped),
-                                      ("expected failures", expected)) if v]
+    extras = [f"{label}={entries}"
+              for label, entries in (("skipped", skipped),
+                                     ("expected failures", expected)) if entries]
     if failures or errors or unexpected:
-        counts = [f"{k}={len(v)}" for k, v in (("failures", failures),
-                                                ("errors", errors),
-                                                ("unexpected successes", unexpected)) if v]
+        counts = [f"{label}={len(entries)}"
+                  for label, entries in (("failures", failures),
+                                         ("errors", errors),
+                                         ("unexpected successes", unexpected))
+                  if entries]
         print(f"FAILED ({', '.join(counts + extras)})", file=out)
         sys.exit(1)
     if run == 0:

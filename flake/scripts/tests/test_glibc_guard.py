@@ -39,8 +39,8 @@ class GlibcGuardTests(unittest.TestCase):
 
     def stub(self, name, body):
         path = os.path.join(self.bin, name)
-        with open(path, 'w') as f:
-            f.write('#!/usr/bin/env bash\n' + body)
+        with open(path, 'w') as handle:
+            handle.write('#!/usr/bin/env bash\n' + body)
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
 
     def system(self, name, tag, glibc):
@@ -49,8 +49,8 @@ class GlibcGuardTests(unittest.TestCase):
         root = os.path.join(self.tmp, name)
         os.makedirs(os.path.join(root, 'etc', 'pam.d'))
         if glibc is not None:
-            with open(os.path.join(root, 'etc', 'pam.d', 'login'), 'w') as f:
-                f.write(f'auth sufficient {pam_pkg(tag)}/lib/security/pam_unix.so likeauth\n')
+            with open(os.path.join(root, 'etc', 'pam.d', 'login'), 'w') as handle:
+                handle.write(f'auth sufficient {pam_pkg(tag)}/lib/security/pam_unix.so likeauth\n')
             self.refs[pam_pkg(tag)] = f'/nix/store/{HASH}-glibc-{glibc}'
         return root
 
@@ -67,10 +67,10 @@ class GlibcGuardTests(unittest.TestCase):
                    PATH=self.bin + os.pathsep + os.environ['PATH'],
                    GLIBC_GUARD_BOOTED=booted,
                    GLIBC_GUARD_CURRENT=current)
-        p = subprocess.run([GUARD, '/flake', 'host'], env=env,
+        completed = subprocess.run([GUARD, '/flake', 'host'], env=env,
                            capture_output=True, text=True)
-        self.assertEqual(p.returncode, 0, 'guard must never fail a switch')
-        return p.stderr
+        self.assertEqual(completed.returncode, 0, 'guard must never fail a switch')
+        return completed.stderr
 
     def test_real_case_glibc_242_to_244_warns(self):
         booted = self.system('booted-system', 'c', '2.42-84')

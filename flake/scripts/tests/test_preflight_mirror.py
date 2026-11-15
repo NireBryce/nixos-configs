@@ -70,11 +70,11 @@ def expand(name, lines, depth=0):
         line = raw.lstrip("@").strip()
         if not line or line.startswith("#") or line.startswith("#!"):
             continue
-        for k, v in SUBS.items():
-            line = line.replace(k, v)
-        m = re.match(r"^just\s+([A-Za-z0-9_-]+)\s*$", line)
-        if m:
-            out += expand(m.group(1), lines, depth + 1)
+        for old, new in SUBS.items():
+            line = line.replace(old, new)
+        match = re.match(r"^just\s+([A-Za-z0-9_-]+)\s*$", line)
+        if match:
+            out += expand(match.group(1), lines, depth + 1)
             continue
         out.append(line)
     return out
@@ -94,9 +94,9 @@ def keys_of(line):
     and `flake/scripts/lint.py` the same file) plus a bare `nix flake
     check`."""
     keys = set()
-    for m in re.finditer(r"[A-Za-z0-9_./-]+\.(?:py|sh)\b", line):
-        p = m.group(0)
-        keys.add("flake/" + p if p.startswith("scripts/") else p)
+    for match in re.finditer(r"[A-Za-z0-9_./-]+\.(?:py|sh)\b", line):
+        script_path = match.group(0)
+        keys.add("flake/" + script_path if script_path.startswith("scripts/") else script_path)
     if re.search(r"\bnix flake check\b", line):
         keys.add("nix flake check")
     return keys
@@ -119,9 +119,9 @@ def ci_run_lines(lines):
             else:
                 block_indent = None  # dedent: the block ended
             continue
-        m = re.match(r"^\s*(?:-\s+)?run:\s*(.*)$", line)
-        if m:
-            rest = m.group(1).strip()
+        match = re.match(r"^\s*(?:-\s+)?run:\s*(.*)$", line)
+        if match:
+            rest = match.group(1).strip()
             if rest in ("|", "|-", ">", ">-", "|+", ">+"):
                 block_indent = len(line) - len(line.lstrip())
             elif rest:
@@ -133,44 +133,44 @@ def ci_run_lines(lines):
 
 def main():
     justfile = JUSTFILE.read_text().splitlines()
-    defined = {m.group(1) for line in justfile
-               for m in [HEADER.match(line)] if m}
+    defined = {match.group(1) for line in justfile
+               for match in [HEADER.match(line)] if match}
 
-    referenced = [m.group(1)
+    referenced = [match.group(1)
                   for raw in recipe_body("preflight", justfile)
-                  for m in [re.match(r"^@?just\s+([A-Za-z0-9_-]+)\s*$",
-                                     raw.strip())] if m]
+                  for match in [re.match(r"^@?just\s+([A-Za-z0-9_-]+)\s*$",
+                                     raw.strip())] if match]
     unknown = sorted(set(referenced) - defined)
     if unknown:
         sys.exit(f"preflight-mirror: preflight calls recipe(s) {unknown} "
                  f"that .justfile does not define")
 
-    preflight_keys = set().union(*(keys_of(l)
-                                    for l in expand("preflight", justfile)))
+    preflight_keys = set().union(*(keys_of(command_line)
+                                    for command_line in expand("preflight", justfile)))
     if not preflight_keys:
         sys.exit("preflight-mirror: preflight expanded to no recognizable "
                  "checks -- the justfile parser in this script has rotted")
 
     # Full-line comments carry the workflow's long explanation (and name
     # recipes and scripts in prose); only what actually runs counts.
-    ci_lines = [l for l in WORKFLOW.read_text().splitlines()
-                if not l.lstrip().startswith("#")]
+    ci_lines = [command_line for command_line in WORKFLOW.read_text().splitlines()
+                if not command_line.lstrip().startswith("#")]
     ci_runs = ci_run_lines(ci_lines)
     if not ci_runs:
         sys.exit("preflight-mirror: check.yml yielded no run: lines -- "
                  "the workflow parser in this script has rotted")
-    if not any(re.search(r"\bjust\s+preflight\b", l) for l in ci_runs):
+    if not any(re.search(r"\bjust\s+preflight\b", command_line) for command_line in ci_runs):
         sys.exit("preflight-mirror: check.yml no longer runs `just "
                  "preflight` -- CI would stop gating on the checklist "
                  "agents run locally")
 
-    ci_keys = set().union(set(), *(keys_of(l) for l in ci_runs))
+    ci_keys = set().union(set(), *(keys_of(command_line) for command_line in ci_runs))
     strays = sorted(ci_keys - preflight_keys - CI_ONLY)
     if strays:
         print("check.yml runs checks that preflight does not:",
               file=sys.stderr)
-        for k in strays:
-            print(f"  {k}", file=sys.stderr)
+        for stray in strays:
+            print(f"  {stray}", file=sys.stderr)
         print("Add them to the preflight recipe instead (CI runs it), or, "
               "if one genuinely cannot run locally, to CI_ONLY in "
               "flake/scripts/tests/test_preflight_mirror.py with the reason.",

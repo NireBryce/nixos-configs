@@ -8,11 +8,11 @@ import mdfence  # noqa: E402
 
 
 def fenced(text):
-    return [line for _, line, f in mdfence.iter_lines(text) if f]
+    return [line for _, line, fence_kind in mdfence.iter_lines(text) if fence_kind]
 
 
 def kinds(text):
-    return [k for _, _, k in mdfence.scan_lines(text)]
+    return [kind for _, _, kind in mdfence.scan_lines(text)]
 
 
 class Fences(unittest.TestCase):

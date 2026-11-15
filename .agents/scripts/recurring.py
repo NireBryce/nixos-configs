@@ -140,7 +140,7 @@ GIT_SUBS = ('add', 'branch', 'checkout', 'cherry-pick', 'clone', 'commit',
             'pull', 'push', 'rebase', 'reflog', 'remote', 'reset', 'restore',
             'rev-parse', 'rm', 'show', 'status', 'switch', 'tag')
 SUBCOMMANDS = {
-    'git': {**{c: set() for c in GIT_SUBS},
+    'git': {**{sub: set() for sub in GIT_SUBS},
             'worktree': {'add', 'list', 'prune', 'remove'},
             'stash': {'list', 'pop', 'show'}},
     'gh':  {'pr': {'checks', 'create', 'diff', 'list', 'merge', 'view'},
@@ -192,10 +192,10 @@ REPO = Path(__file__).resolve().parents[2]
 def checkout_root():
     """The main checkout, whatever its directory is called and even when
     this runs from a linked worktree: git's common dir sits inside it."""
-    p = subprocess.run(['git', '-C', str(REPO), 'rev-parse',
+    completed = subprocess.run(['git', '-C', str(REPO), 'rev-parse',
                         '--path-format=absolute', '--git-common-dir'],
                        capture_output=True, text=True)
-    return Path(p.stdout.strip()).parent if p.returncode == 0 else REPO
+    return Path(completed.stdout.strip()).parent if completed.returncode == 0 else REPO
 
 
 def project_dirs():
@@ -209,7 +209,7 @@ def project_dirs():
     enc = re.sub(r'[^A-Za-z0-9-]', '-', str(checkout_root()))
     found = {*PROJECTS.glob('*nixos-configs*'), *PROJECTS.glob(enc),
              *PROJECTS.glob(enc + '-*')}
-    return sorted(d for d in found if d.is_dir())
+    return sorted(project_dir for project_dir in found if project_dir.is_dir())
 
 
 # A longer fragment seen in at least this share of a shorter one's
@@ -235,17 +235,17 @@ def just_recipes():
     is then a placeholder, the old behaviour. Tests replace this, like
     is_command."""
     try:
-        p = subprocess.run(['just', '--summary'], cwd=REPO, capture_output=True,
+        completed = subprocess.run(['just', '--summary'], cwd=REPO, capture_output=True,
                            text=True, timeout=10)
     except (OSError, subprocess.SubprocessError):
         return {}
-    if p.returncode:
+    if completed.returncode:
         return {}
     published = published_recipes()
     if published is None:
         return {}
     vocab = {}
-    for name in p.stdout.split():
+    for name in completed.stdout.split():
         mod, _, recipe = name.rpartition('::')
         if not NAME.match(recipe) or (mod and not NAME.match(mod)):
             continue
@@ -269,10 +269,10 @@ def published_recipes():
     origin/experimental, read with `git show` (text only, nothing run).
     None when git can't read it."""
     def show(path):
-        p = subprocess.run(['git', '-C', str(REPO), 'show',
+        completed = subprocess.run(['git', '-C', str(REPO), 'show',
                             f'origin/experimental:{path}'],
                            capture_output=True, text=True, timeout=10)
-        return p.stdout if p.returncode == 0 else None
+        return completed.stdout if completed.returncode == 0 else None
     try:
         top = show('.justfile')
         if top is None:
@@ -300,15 +300,15 @@ def warn(msg):
 def claude_rows():
     """(session, command) from Claude Code's JSONL transcripts."""
     seen = set()
-    for path in sorted(f for d in project_dirs() for f in d.glob('*.jsonl')):
+    for path in sorted(transcript for project_dir in project_dirs() for transcript in project_dir.glob('*.jsonl')):
         for line in path.read_text(errors='replace').splitlines():
             if '"tool_use"' not in line:
                 continue
             try:
-                e = json.loads(line)
+                event = json.loads(line)
             except ValueError:
                 continue
-            msg = e.get('message') if isinstance(e, dict) else None
+            msg = event.get('message') if isinstance(event, dict) else None
             content = msg.get('content') if isinstance(msg, dict) else None
             for block in content if isinstance(content, list) else []:
                 if (isinstance(block, dict) and block.get('type') == 'tool_use'
@@ -318,7 +318,7 @@ def claude_rows():
                     inp = block.get('input')
                     cmd = inp.get('command') if isinstance(inp, dict) else None
                     if isinstance(cmd, str) and cmd:
-                        yield e.get('sessionId'), cmd
+                        yield event.get('sessionId'), cmd
 
 
 def sqlite_rows(path):
@@ -337,18 +337,18 @@ def sqlite_rows(path):
             "     then json_extract(p.data, '$.type') end = 'tool'"
             " order by p.rowid",       # insertion order: sequences need it
             (str(checkout_root()),)).fetchall()
-    except sqlite3.Error as e:
-        warn(f'{path}: {e}')
+    except sqlite3.Error as error:
+        warn(f'{path}: {error}')
         return
     for session, data in rows:
         try:
-            d = json.loads(data)
+            part = json.loads(data)
         except (TypeError, ValueError):
             continue
-        if (not isinstance(d, dict) or d.get('type') != 'tool'
-                or str(d.get('tool')).lower() != 'bash'):
+        if (not isinstance(part, dict) or part.get('type') != 'tool'
+                or str(part.get('tool')).lower() != 'bash'):
             continue
-        st = d.get('state')
+        st = part.get('state')
         inp = st.get('input') if isinstance(st, dict) else None
         cmd = inp.get('command') if isinstance(inp, dict) else None
         if isinstance(cmd, str) and cmd:
@@ -417,7 +417,7 @@ def strip_heredocs(cmd):
             if line.strip() == tags[0]:
                 tags.pop(0)
             continue
-        tags += [m.group(2) for m in HEREDOC.finditer(line)]
+        tags += [match.group(2) for match in HEREDOC.finditer(line)]
         out.append(HEREDOC.sub(f' {HEREDOC_MARK} ', line))
     return '\n'.join(out)
 
@@ -445,12 +445,12 @@ def tokenize(cmd):
         tokens = list(lex)
     except ValueError:
         return None
-    if 'case' in tokens or any(unbalanced(t) for t in tokens):
+    if 'case' in tokens or any(unbalanced(token) for token in tokens):
         return None
     # A `<<` left after strip_heredocs is a heredoc form HEREDOC doesn't
     # know (`<<$T`, `<<'A B'`), whose body would parse as commands -- or a
     # shift in `$(( ))`. Either way, dropping the command is the safe side.
-    if any(is_punct(t) and '<<' in t.replace('<<<', '') for t in tokens):
+    if any(is_punct(token) and '<<' in token.replace('<<<', '') for token in tokens):
         return None
     return tokens
 
@@ -463,7 +463,7 @@ def unbalanced(tok):
     outer = tok[:1] if tok[:1] in ('"', "'") else None
     if outer and (len(tok) < 2 or tok[-1] != outer):
         return True
-    return any(tok.count(q) % 2 for q in ('"', "'") if q != outer)
+    return any(tok.count(quote) % 2 for quote in ('"', "'") if quote != outer)
 
 
 def is_punct(tok):
@@ -479,9 +479,9 @@ def flag_shape(tok):
         return '-N'
     if SHORT_FLAG.match(tok) or tok in FIND_OPTS:
         return tok
-    m = LONG_FLAG.match(tok)
-    if m:
-        return m.group(1) + ('=' + arg_type(m.group(2)[1:]) if m.group(2) else '')
+    match = LONG_FLAG.match(tok)
+    if match:
+        return match.group(1) + ('=' + arg_type(match.group(2)[1:]) if match.group(2) else '')
     if re.match(r'^-[A-Za-z]', tok):
         return tok[:2] + '<val>'       # `-uadmin` -> `-u<val>`: value was glued on
     return '<word>'                    # `---`: not a flag
@@ -512,11 +512,11 @@ def segment_shape(tokens):
         return '<cmd>'
     subs = just_recipes() if name == 'just' else SUBCOMMANDS.get(name)
     out, args = [name], toks[1:]
-    i, opts_done = 0, False
-    while i < len(args):
-        tok = args[i]
+    index, opts_done = 0, False
+    while index < len(args):
+        tok = args[index]
         if name == 'git' and len(out) == 1 and tok in GIT_ARG_OPTS:
-            i += 2                     # `git -C <dir> log`: reach the subcommand
+            index += 2                     # `git -C <dir> log`: reach the subcommand
             continue
         if not opts_done and tok == '--':
             opts_done = True           # everything after `--` is an argument
@@ -534,7 +534,7 @@ def segment_shape(tokens):
             if typed != out[-1]:
                 out.append(typed)      # runs of one type collapse
             subs = None
-        i += 1
+        index += 1
     return ' '.join(out)
 
 
@@ -565,9 +565,9 @@ def pipelines(cmd):
             cur = ['function']         # `name() {`: a definition, not a call
         if cur and cur[0] in defined:
             cur = ['./fn']             # a call to it: its name is a literal -> <cmd>
-        s = segment_shape(cur) if cur else None
-        if s:
-            pipe.append(s)
+        shape = segment_shape(cur) if cur else None
+        if shape:
+            pipe.append(shape)
         cur = []
         if tok.strip('()\n') not in ('|', '|&') and pipe:
             out.append(pipe)           # anything but a plain pipe ends it
@@ -604,13 +604,13 @@ def filter_name(seg):
 def absorb(counts, min_sessions, top):
     """Rank tuples by session count, dropping any a longer tuple containing
     it nearly matches."""
-    kept = {f: n for f, n in counts.items() if n >= min_sessions}
-    def absorbed(f):
-        return any(len(g) > len(f) and kept[g] >= ABSORB * kept[f]
-                   and any(g[i:i + len(f)] == f for i in range(len(g) - len(f) + 1))
-                   for g in kept)
-    return sorted((f for f in kept if not absorbed(f)),
-                  key=lambda f: (-kept[f], -len(f)))[:top], kept
+    kept = {fragment: count for fragment, count in counts.items() if count >= min_sessions}
+    def absorbed(fragment):
+        return any(len(longer) > len(fragment) and kept[longer] >= ABSORB * kept[fragment]
+                   and any(longer[offset:offset + len(fragment)] == fragment for offset in range(len(longer) - len(fragment) + 1))
+                   for longer in kept)
+    return sorted((fragment for fragment in kept if not absorbed(fragment)),
+                  key=lambda fragment: (-kept[fragment], -len(fragment)))[:top], kept
 
 
 def host():
@@ -627,7 +627,7 @@ KINDS = ('chains', 'pipes', 'just')
 
 
 def empty_obs():
-    return {'sessions': {}, **{k: defaultdict(set) for k in KINDS}}
+    return {'sessions': {}, **{kind: defaultdict(set) for kind in KINDS}}
 
 
 def collect(rows, harness):
@@ -637,70 +637,70 @@ def collect(rows, harness):
     carries, and all ranking needs."""
     obs = empty_obs()
     for session, cmd in rows:
-        h = session_key(harness, session)
-        meta = obs['sessions'].setdefault(h, {'commands': 0, 'batch': False,
+        session_id = session_key(harness, session)
+        meta = obs['sessions'].setdefault(session_id, {'commands': 0, 'batch': False,
                                               'headers': False})
         meta['commands'] += 1
         ps = pipelines(cmd)
-        if any(is_header(p) for p in ps) and len(ps) > 2:
+        if any(is_header(pipeline) for pipeline in ps) and len(ps) > 2:
             meta['headers'] = True
-        producers = [p[0] for p in ps
-                     if not is_header(p) and cmd_name(p[0]) not in ('just', '<cmd>')]
-        if sum(cmd_name(x) in READERS for x in producers) >= 2:
+        producers = [pipeline[0] for pipeline in ps
+                     if not is_header(pipeline) and cmd_name(pipeline[0]) not in ('just', '<cmd>')]
+        if sum(cmd_name(command) in READERS for command in producers) >= 2:
             meta['batch'] = True
-        for p in ps:
-            if cmd_name(p[0]) == 'just':
-                obs['just'][p[0]].add(h)
-            if len(p) > 1 and cmd_name(p[0]) not in ('just', '<cmd>'):
-                obs['pipes']['\t'.join([p[0], *map(filter_name, p[1:])])].add(h)
-        for n in range(2, MAX_LEN + 1):
-            for i in range(len(producers) - n + 1):
-                frag = producers[i:i + n]
-                if not all(cmd_name(x) in READERS for x in frag):
-                    obs['chains']['\t'.join(frag)].add(h)
+        for pipeline in ps:
+            if cmd_name(pipeline[0]) == 'just':
+                obs['just'][pipeline[0]].add(session_id)
+            if len(pipeline) > 1 and cmd_name(pipeline[0]) not in ('just', '<cmd>'):
+                obs['pipes']['\t'.join([pipeline[0], *map(filter_name, pipeline[1:])])].add(session_id)
+        for length in range(2, MAX_LEN + 1):
+            for start in range(len(producers) - length + 1):
+                frag = producers[start:start + length]
+                if not all(cmd_name(command) in READERS for command in frag):
+                    obs['chains']['\t'.join(frag)].add(session_id)
     return obs
 
 
-def merge(a, b):
+def merge(first, second):
     """Union of two observation sets; a session seen in both keeps the
     larger count and either's flags."""
     out = empty_obs()
-    for src in (a, b):
-        for h, m in src['sessions'].items():
-            cur = out['sessions'].setdefault(h, {'commands': 0, 'batch': False,
+    for src in (first, second):
+        for session_id, meta in src['sessions'].items():
+            cur = out['sessions'].setdefault(session_id, {'commands': 0, 'batch': False,
                                                  'headers': False})
-            cur['commands'] = max(cur['commands'], m['commands'])
-            cur['batch'] |= m['batch']
-            cur['headers'] |= m['headers']
+            cur['commands'] = max(cur['commands'], meta['commands'])
+            cur['batch'] |= meta['batch']
+            cur['headers'] |= meta['headers']
         for kind in KINDS:
-            for k, hs in src[kind].items():
-                out[kind][k] |= set(hs)
+            for key, hs in src[kind].items():
+                out[kind][key] |= set(hs)
     return out
 
 
 def to_json(obs):
     return {'sessions': dict(sorted(obs['sessions'].items())),
-            **{kind: {k: sorted(v) for k, v in sorted(obs[kind].items())}
+            **{kind: {key: sorted(value) for key, value in sorted(obs[kind].items())}
                for kind in KINDS}}
 
 
-def from_json(d):
+def from_json(doc):
     """Observations from an export file; ValueError on anything that isn't
     the shape to_json writes, so one bad file is skipped, not fatal."""
     try:
         obs = empty_obs()
-        for h, m in d['sessions'].items():
-            obs['sessions'][str(h)] = {'commands': int(m['commands']),
-                                       'batch': bool(m['batch']),
-                                       'headers': bool(m['headers'])}
+        for session_id, meta in doc['sessions'].items():
+            obs['sessions'][str(session_id)] = {'commands': int(meta['commands']),
+                                       'batch': bool(meta['batch']),
+                                       'headers': bool(meta['headers'])}
         for kind in KINDS:
-            for k, hs in d[kind].items():
-                if not isinstance(k, str) or not isinstance(hs, list):
+            for key, hs in doc[kind].items():
+                if not isinstance(key, str) or not isinstance(hs, list):
                     raise TypeError(kind)
-                obs[kind][k] = set(map(str, hs))
+                obs[kind][key] = set(map(str, hs))
         return obs
-    except (KeyError, TypeError, AttributeError, ValueError) as e:
-        raise ValueError(f'not an export file ({e!r})') from None
+    except (KeyError, TypeError, AttributeError, ValueError) as error:
+        raise ValueError(f'not an export file ({error!r})') from None
 
 
 def git(*args):
@@ -709,14 +709,14 @@ def git(*args):
     try:
         return subprocess.run(['git', '-C', str(LOG_DIR), *args], env=GIT_ENV,
                               capture_output=True, text=True, timeout=60)
-    except (OSError, subprocess.SubprocessError) as e:
-        return subprocess.CompletedProcess(args, 1, '', str(e))
+    except (OSError, subprocess.SubprocessError) as error:
+        return subprocess.CompletedProcess(args, 1, '', str(error))
 
 
 def pull():
-    r = git('pull', '-q', '--rebase')
-    if r.returncode:
-        warn(f'could not pull the command log ({r.stderr.strip()[:120]}); '
+    result = git('pull', '-q', '--rebase')
+    if result.returncode:
+        warn(f'could not pull the command log ({result.stderr.strip()[:120]}); '
              'using the local copy')
 
 
@@ -724,15 +724,15 @@ def load(path):
     """(document, obs) for a current-format export file; ValueError if it
     is malformed or another format."""
     try:
-        d = json.loads(path.read_text())
-    except (OSError, ValueError) as e:
-        raise ValueError(f'unreadable ({e})') from None
-    if not isinstance(d, dict):
+        doc = json.loads(path.read_text())
+    except (OSError, ValueError) as error:
+        raise ValueError(f'unreadable ({error})') from None
+    if not isinstance(doc, dict):
         raise ValueError('not an export file')
-    if d.get('format') != FORMAT:
-        raise ValueError(f'format {d.get("format")!r}, not {FORMAT}: rebuilt '
+    if doc.get('format') != FORMAT:
+        raise ValueError(f'format {doc.get("format")!r}, not {FORMAT}: rebuilt '
                          f'at that host\'s next export')
-    return d, from_json(d)
+    return doc, from_json(doc)
 
 
 def exported():
@@ -740,61 +740,65 @@ def exported():
     host's own included: it holds history the harness may have pruned."""
     for path in sorted(LOG_DIR.glob('*.json')) if LOG_DIR.exists() else []:
         try:
-            d, obs = load(path)
-        except ValueError as e:
-            warn(f'{path.name}: {e}; skipped')
+            doc, obs = load(path)
+        except ValueError as error:
+            warn(f'{path.name}: {error}; skipped')
             continue
-        yield f'{d.get("harness")}@{d.get("host")}', obs, d.get('updated')
+        yield f'{doc.get("harness")}@{doc.get("host")}', obs, doc.get('updated')
 
 
 def rank(obs, min_sessions, top, max_len):
     chains, pipes = defaultdict(set), defaultdict(set)
     variants = defaultdict(Counter)    # untyped key -> typed renderings
-    for k, hs in obs['chains'].items():
-        frag = tuple(k.split('\t'))
+    for entry_key, hs in obs['chains'].items():
+        frag = tuple(entry_key.split('\t'))
         if len(frag) <= max_len:
-            key = tuple(untyped(x) for x in frag)
+            key = tuple(untyped(word) for word in frag)
             chains[key] |= hs
             variants[key][frag] += len(hs)
-    for k, hs in obs['pipes'].items():
-        prod, *filt = k.split('\t')
+    for entry_key, hs in obs['pipes'].items():
+        prod, *filt = entry_key.split('\t')
         typed = (prod, tuple(filt))
-        key = (untyped(prod), tuple(untyped(f) for f in filt))
+        key = (untyped(prod), tuple(untyped(word) for word in filt))
         pipes[key] |= hs
         variants[key][typed] += len(hs)
 
     recipes = defaultdict(set)         # `just agent show` -> sessions
-    for k, hs in obs['just'].items():
+    for entry_key, hs in obs['just'].items():
         head = []
-        for tok in k.split()[1:]:
+        for tok in entry_key.split()[1:]:
             if tok.startswith(('<', '-')):
                 break
             head.append(tok)
-        toks = k.split()               # no recipe: `<word>`, `--summary`, bare
+        toks = entry_key.split()               # no recipe: `<word>`, `--summary`, bare
         recipes[' '.join(head) or (toks[1] if len(toks) > 1 else '(bare)')] |= hs
 
-    seq, seq_n = absorb({f: len(s) for f, s in chains.items()}, min_sessions, top)
+    seq, seq_n = absorb(
+        {chain: len(session_set) for chain, session_set in chains.items()},
+        min_sessions, top)
     by_producer = defaultdict(list)
-    for key, s in pipes.items():
-        if len(s) >= min_sessions:
+    for key, session_set in pipes.items():
+        if len(session_set) >= min_sessions:
             prod, filt = variants[key].most_common(1)[0][0]
-            by_producer[untyped(prod)].append((len(s), prod, ' | '.join(filt)))
-    producers = sorted(by_producer, key=lambda p: -max(n for n, *_ in by_producer[p]))[:top]
+            by_producer[untyped(prod)].append((len(session_set), prod, ' | '.join(filt)))
+    producers = sorted(
+        by_producer,
+        key=lambda producer: -max(count for count, *_ in by_producer[producer]))[:top]
     meta = obs['sessions'].values()
     return {
         'sessions': len(obs['sessions']),
-        'commands': sum(m['commands'] for m in meta),
-        'header_sessions': sum(m['headers'] for m in meta),
-        'batch_read_sessions': sum(m['batch'] for m in meta),
-        'sequences': [{'sessions': seq_n[f],
-                       'chain': list(variants[f].most_common(1)[0][0])}
-                      for f in seq],
-        'just': [{'sessions': len(hs), 'recipe': k} for k, hs in
+        'commands': sum(meta_entry['commands'] for meta_entry in meta),
+        'header_sessions': sum(meta_entry['headers'] for meta_entry in meta),
+        'batch_read_sessions': sum(meta_entry['batch'] for meta_entry in meta),
+        'sequences': [{'sessions': seq_n[fragment],
+                       'chain': list(variants[fragment].most_common(1)[0][0])}
+                      for fragment in seq],
+        'just': [{'sessions': len(hs), 'recipe': entry_key} for entry_key, hs in
                  sorted(recipes.items(), key=lambda kv: (-len(kv[1]), kv[0]))],
-        'pipelines': [{'producer': max(by_producer[p])[1], 'filters': [
-            {'sessions': n, 'filters': f}
-            for n, _, f in sorted(by_producer[p], reverse=True)[:4]]}
-            for p in producers],
+        'pipelines': [{'producer': max(by_producer[producer])[1], 'filters': [
+            {'sessions': count, 'filters': fragment}
+            for count, _, fragment in sorted(by_producer[producer], reverse=True)[:4]]}
+            for producer in producers],
     }
 
 
@@ -805,57 +809,57 @@ def analyze(min_sessions, top, max_len, sync=True):
              ' as `just <word>`')
     obs, sources = empty_obs(), []
     for harness, rows in HARNESSES.items():
-        o = collect(rows(), harness)
+        observations = collect(rows(), harness)
         sources.append({'source': f'{harness}@{host()}', 'local': True,
-                        'sessions': len(o['sessions'])})
-        obs = merge(obs, o)
+                        'sessions': len(observations['sessions'])})
+        obs = merge(obs, observations)
     if (LOG_DIR / '.git').exists():
         if sync:
             pull()
         today = datetime.date.today()
-        for label, o, updated in exported():
+        for label, observations, updated in exported():
             try:
                 age = (today - datetime.date.fromisoformat(updated)).days
             except (TypeError, ValueError):
                 age = None
             sources.append({'source': label, 'local': False,
-                            'sessions': len(o['sessions']), 'age_days': age,
+                            'sessions': len(observations['sessions']), 'age_days': age,
                             'stale': age is None or age > STALE_DAYS})
-            obs = merge(obs, o)
+            obs = merge(obs, observations)
     else:
         warn('command log not set up on this host (`just agent recurring setup`);'
              ' local sessions only')
     return {'sources': sources, **rank(obs, min_sessions, top, max_len)}
 
 
-def report(a):
-    pct = lambda n: f'{100 * n // max(a["sessions"], 1)}%'
-    def src(x):
-        if x['local']:
-            return f'{x["source"]} {x["sessions"]}'
-        age = '?' if x['age_days'] is None else f'{x["age_days"]}d'
-        return f'{x["source"]} {x["sessions"]} ({age}{" STALE" if x["stale"] else ""})'
-    local = [src(x) for x in a['sources'] if x['local']]
-    other = [src(x) for x in a['sources'] if not x['local']]
-    print(f'{a["sessions"]} sessions, {a["commands"]} commands')
+def report(analysis):
+    pct = lambda count: f'{100 * count // max(analysis["sessions"], 1)}%'
+    def src(entry):
+        if entry['local']:
+            return f'{entry["source"]} {entry["sessions"]}'
+        age = '?' if entry['age_days'] is None else f'{entry["age_days"]}d'
+        return f'{entry["source"]} {entry["sessions"]} ({age}{" STALE" if entry["stale"] else ""})'
+    local = [src(entry) for entry in analysis['sources'] if entry['local']]
+    other = [src(entry) for entry in analysis['sources'] if not entry['local']]
+    print(f'{analysis["sessions"]} sessions, {analysis["commands"]} commands')
     print(f'  local:    {", ".join(local)}')
     print(f'  exported: {", ".join(other) or "(none)"}\n')
     print('SEQUENCES  commands run one after another -- script candidates')
-    for s in a['sequences'] or [{'sessions': 0, 'chain': ['(none)']}]:
-        print(f'  {s["sessions"]:3d}  ' + '  ->  '.join(s['chain'])[:150])
+    for sequence in analysis['sequences'] or [{'sessions': 0, 'chain': ['(none)']}]:
+        print(f'  {sequence["sessions"]:3d}  ' + '  ->  '.join(sequence['chain'])[:150])
     print(f'\nBATCH READS  several reads in one call (cat/sed/ls/grep...): '
-          f'{a["batch_read_sessions"]} sessions ({pct(a["batch_read_sessions"])}); '
-          f'with echo/printf headers between: {a["header_sessions"]} '
-          f'({pct(a["header_sessions"])})')
+          f'{analysis["batch_read_sessions"]} sessions ({pct(analysis["batch_read_sessions"])}); '
+          f'with echo/printf headers between: {analysis["header_sessions"]} '
+          f'({pct(analysis["header_sessions"])})')
     print('\nPIPELINES  filters attached per producer -- mostly plain Unix')
-    for p in a['pipelines']:
-        fs = ', '.join(f'| {f["filters"]} ({f["sessions"]})' for f in p['filters'])
-        print(f'  {p["producer"][:40]:40s} {fs}'[:160])
+    for pipeline in analysis['pipelines']:
+        fs = ', '.join(f'| {filter_entry["filters"]} ({filter_entry["sessions"]})' for filter_entry in pipeline['filters'])
+        print(f'  {pipeline["producer"][:40]:40s} {fs}'[:160])
     print('\nJUST  sessions calling each recipe -- helper adoption'
           ' (<word>: not a recipe here)')
-    rows = [f'{j["sessions"]:4d} {j["recipe"]}' for j in a['just']]
-    for i in range(0, len(rows), 4):
-        print('  ' + ''.join(f'{x:30s}' for x in rows[i:i + 4]).rstrip())
+    rows = [f'{just_entry["sessions"]:4d} {just_entry["recipe"]}' for just_entry in analysis['just']]
+    for start in range(0, len(rows), 4):
+        print('  ' + ''.join(f'{entry:30s}' for entry in rows[start:start + 4]).rstrip())
     if not rows:
         print('  (none)')
 
@@ -863,8 +867,8 @@ def report(a):
 def show_session(prefix):
     """Audit view: what one session's commands reduce to. Prefix match on
     the session id, so the first 8 characters are enough."""
-    rows = [' | '.join(shape(c)) or '(dropped)' for s, c in commands()
-            if s and s.startswith(prefix)]
+    rows = [' | '.join(shape(command)) or '(dropped)' for session_id, command in commands()
+            if session_id and session_id.startswith(prefix)]
     print(f'{len(rows)} commands in session {prefix}')
     for row in rows:
         print('  ' + row[:150])
@@ -875,10 +879,10 @@ def setup():
         print(f'already set up: {LOG_DIR}')
         return 0
     LOG_DIR.parent.mkdir(parents=True, exist_ok=True)
-    r = subprocess.run(['git', 'clone', '-q', REMOTE, str(LOG_DIR)], env=GIT_ENV,
+    result = subprocess.run(['git', 'clone', '-q', REMOTE, str(LOG_DIR)], env=GIT_ENV,
                        capture_output=True, text=True, timeout=60)
-    if r.returncode:
-        print(f'clone failed: {r.stderr.strip()} -- does this host have a forge '
+    if result.returncode:
+        print(f'clone failed: {result.stderr.strip()} -- does this host have a forge '
               f'key? (wiki/homelab/forgejo-for-agents.md)', file=sys.stderr)
         return 1
     print(f'cloned {REMOTE} to {LOG_DIR}')
@@ -901,8 +905,8 @@ def export():
         if path.exists():
             try:
                 obs = merge(load(path)[1], obs)
-            except ValueError as e:
-                warn(f'{path.name}: {e}; rebuilding from live data')
+            except ValueError as error:
+                warn(f'{path.name}: {error}; rebuilding from live data')
         elif not obs['sessions']:
             continue                   # nothing here, nothing before
         # Rewritten even with no new sessions, so `updated` means "this
@@ -918,13 +922,13 @@ def export():
         return 0
     git('add', '--', *files)
     if git('diff', '--cached', '--quiet', '--', *files).returncode:
-        r = git('commit', '-qm', f'{host()}: export {datetime.date.today()}', '--', *files)
-        if r.returncode:
-            print(f'export failed: commit: {r.stderr.strip()[:200]}')
+        result = git('commit', '-qm', f'{host()}: export {datetime.date.today()}', '--', *files)
+        if result.returncode:
+            print(f'export failed: commit: {result.stderr.strip()[:200]}')
             return 1
-    r = git('push', '-q')
-    status = '' if r.returncode == 0 else \
-        f' (committed locally; push failed, next export retries: {r.stderr.strip()[:120]})'
+    result = git('push', '-q')
+    status = '' if result.returncode == 0 else \
+        f' (committed locally; push failed, next export retries: {result.stderr.strip()[:120]})'
     print(f'exported {", ".join(written)} sessions from {host()}{status}')
     return 0
 
@@ -947,12 +951,12 @@ def main():
         return export()
     if args.session:
         return show_session(args.session)
-    a = analyze(args.min_sessions, args.top, min(args.max_len, MAX_LEN),
+    analysis = analyze(args.min_sessions, args.top, min(args.max_len, MAX_LEN),
                 sync=not args.no_sync)
     if args.json:
-        print(json.dumps(a, indent=1))
+        print(json.dumps(analysis, indent=1))
     else:
-        report(a)
+        report(analysis)
 
 
 if __name__ == '__main__':

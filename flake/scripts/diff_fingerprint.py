@@ -10,46 +10,46 @@ import json
 import sys
 
 
-def report(b, a):
+def report(before, after):
     """Lines describing how fingerprint `b` (before) became `a` (after)."""
     out = []
-    if b["toplevel"] == a["toplevel"]:
+    if before["toplevel"] == after["toplevel"]:
         out.append("  toplevel drvPath IDENTICAL -- byte-for-byte, no behaviour change")
-        out.append(f"    {a['toplevel']}")
+        out.append(f"    {after['toplevel']}")
         return out
 
     out.append("  toplevel drvPath DIFFERS")
-    out.append(f"    before {b['toplevel']}")
-    out.append(f"    after  {a['toplevel']}")
+    out.append(f"    before {before['toplevel']}")
+    out.append(f"    after  {after['toplevel']}")
     out.append("")
 
     changed = False
-    for k in b:
-        if k == "toplevel" or b[k] == a[k]:
+    for key in before:
+        if key == "toplevel" or before[key] == after[key]:
             continue
         changed = True
-        bv, av = b[k], a[k]
+        bv, av = before[key], after[key]
         if isinstance(bv, list) and sorted(map(str, bv)) == sorted(map(str, av)):
-            out.append(f"  {k}: SAME SET, ORDER ONLY ({len(bv)} items)")
+            out.append(f"  {key}: SAME SET, ORDER ONLY ({len(bv)} items)")
             continue
         if isinstance(bv, list):
             bs, as_ = set(map(str, bv)), set(map(str, av))
             if bs - as_:
-                out.append(f"  {k}: removed {sorted(bs - as_)}")
+                out.append(f"  {key}: removed {sorted(bs - as_)}")
             if as_ - bs:
-                out.append(f"  {k}: added   {sorted(as_ - bs)}")
+                out.append(f"  {key}: added   {sorted(as_ - bs)}")
         elif isinstance(bv, dict):
             # only the keys that moved -- printing both dicts whole is
             # unreadable, and homeFileHashes has dozens of entries
             for kk in sorted(set(bv) | set(av)):
                 if kk not in av:
-                    out.append(f"  {k}: removed {kk!r}")
+                    out.append(f"  {key}: removed {kk!r}")
                 elif kk not in bv:
-                    out.append(f"  {k}: added   {kk!r}")
+                    out.append(f"  {key}: added   {kk!r}")
                 elif bv[kk] != av[kk]:
-                    out.append(f"  {k}: changed {kk!r}")
+                    out.append(f"  {key}: changed {kk!r}")
         else:
-            out.append(f"  {k}: {bv!r} -> {av!r}")
+            out.append(f"  {key}: {bv!r} -> {av!r}")
 
     if not changed:
         out.append("  no attribute in the fingerprint differs.")
@@ -59,11 +59,11 @@ def report(b, a):
 
 
 def main(argv):
-    with open(argv[1]) as f:
-        b = json.load(f)
-    with open(argv[2]) as f:
-        a = json.load(f)
-    print("\n".join(report(b, a)))
+    with open(argv[1]) as handle:
+        before = json.load(handle)
+    with open(argv[2]) as handle:
+        after = json.load(handle)
+    print("\n".join(report(before, after)))
     return 0
 
 

@@ -37,9 +37,9 @@ class StagedChecks(unittest.TestCase):
         self.addCleanup(setattr, oc, "REPO", self._repo)
 
     def problems(self, path, text):
-        f = self.root / path
-        f.parent.mkdir(parents=True, exist_ok=True)
-        f.write_text(text)
+        nix_file = self.root / path
+        nix_file.parent.mkdir(parents=True, exist_ok=True)
+        nix_file.write_text(text)
         subprocess.run(["git", "-C", str(self.root), "add", path], check=True)
         return oc.check_staged_file(path)
 
@@ -109,7 +109,7 @@ class PreflightClassification(unittest.TestCase):
         self.assertEqual(oc.run_wiki_lint(), [])
 
     def test_something_actually_runs(self):
-        self.assertGreater(sum(1 for a, _, _ in self.steps if a), 5)
+        self.assertGreater(sum(1 for argv, _, _ in self.steps if argv), 5)
 
 
 class StepEnvironment(unittest.TestCase):
@@ -117,17 +117,17 @@ class StepEnvironment(unittest.TestCase):
         # Hooks export these; a step that ran `git init` or `git commit`
         # with them set would act on the real repository.
         probe = "import os; print(os.environ.get('GIT_DIR'), os.environ.get('GIT_INDEX_FILE'))"
-        old = {k: os.environ.get(k) for k in ("GIT_DIR", "GIT_INDEX_FILE")}
+        old = {name: os.environ.get(name) for name in ("GIT_DIR", "GIT_INDEX_FILE")}
         os.environ["GIT_DIR"] = "/nonexistent/.git"
         os.environ["GIT_INDEX_FILE"] = "/nonexistent/index"
         try:
             rc, out = oc.run_one([sys.executable, "-c", probe])
         finally:
-            for k, v in old.items():
-                if v is None:
-                    os.environ.pop(k, None)
+            for name, value in old.items():
+                if value is None:
+                    os.environ.pop(name, None)
                 else:
-                    os.environ[k] = v
+                    os.environ[name] = value
         self.assertEqual((rc, out.strip()), (0, "None None"))
 
 
@@ -135,24 +135,24 @@ class WithNixToolsContract(unittest.TestCase):
     def test_exits_75_when_there_is_neither_the_tools_nor_nix(self):
         script = REPO / "flake/scripts/with-nix-tools.sh"
         bash = shutil.which("bash")
-        with tempfile.TemporaryDirectory() as d:
-            env = {"PATH": d}      # an empty directory: no statix, no nix
-            r = subprocess.run([bash, str(script), ".", "true"], env=env,
+        with tempfile.TemporaryDirectory() as directory:
+            env = {"PATH": directory}      # an empty directory: no statix, no nix
+            result = subprocess.run([bash, str(script), ".", "true"], env=env,
                                capture_output=True, text=True)
-        self.assertEqual(r.returncode, 75, r.stderr)
+        self.assertEqual(result.returncode, 75, result.stderr)
 
     def test_passes_the_commands_own_status_through_when_tools_exist(self):
         script = REPO / "flake/scripts/with-nix-tools.sh"
         bash = shutil.which("bash")
-        with tempfile.TemporaryDirectory() as d:
+        with tempfile.TemporaryDirectory() as directory:
             for tool in ("statix", "deadnix"):
-                p = pathlib.Path(d, tool)
-                p.write_text("#!/bin/sh\n")
-                p.chmod(0o755)
-            env = {"PATH": f"{d}:{os.path.dirname(bash)}:/usr/bin:/bin"}
-            r = subprocess.run([bash, str(script), ".", "sh", "-c", "exit 3"],
+                tool_path = pathlib.Path(directory, tool)
+                tool_path.write_text("#!/bin/sh\n")
+                tool_path.chmod(0o755)
+            env = {"PATH": f"{directory}:{os.path.dirname(bash)}:/usr/bin:/bin"}
+            result = subprocess.run([bash, str(script), ".", "sh", "-c", "exit 3"],
                                env=env, capture_output=True, text=True)
-        self.assertEqual(r.returncode, 3, r.stderr)
+        self.assertEqual(result.returncode, 3, result.stderr)
 
 
 if __name__ == "__main__":

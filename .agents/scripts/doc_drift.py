@@ -46,7 +46,7 @@ def change_log(root):
 def commits_after(hist, path, date, dir_files):
     """Set of shas touching `path` (a file, or a directory) after `date`."""
     keys = dir_files(path)
-    return {sha for k in keys for d, sha in hist.get(k, ()) if d > date}
+    return {sha for key in keys for entry_date, sha in hist.get(key, ()) if entry_date > date}
 
 
 def rank(root):
@@ -54,13 +54,13 @@ def rank(root):
     index = docscope.Index(root)
     hist = change_log(root)
     by_dir = defaultdict(list)
-    for f in hist:
-        parts = f.split("/")
-        for i in range(1, len(parts)):
-            by_dir["/".join(parts[:i])].append(f)
+    for file_name in hist:
+        parts = file_name.split("/")
+        for depth in range(1, len(parts)):
+            by_dir["/".join(parts[:depth])].append(file_name)
 
-    def dir_files(p):
-        return by_dir[p] if p in index.dirs else [p]
+    def dir_files(path):
+        return by_dir[path] if path in index.dirs else [path]
 
     rows = []
     for rel in docscope.docs(root):
@@ -72,15 +72,15 @@ def rank(root):
         paths = docscope.cited((root / rel).read_text(errors="replace"), index)
         # Directories shallower than MIN_DIR_DEPTH (flake/modules) are
         # "everything changed", not a signal about this doc.
-        paths = {p for p in paths if p != rel and not p.endswith(".md")
-                 and (p in index.files or p.count("/") + 1 >= MIN_DIR_DEPTH)}
-        per = {p: commits_after(hist, p, date, dir_files) for p in paths}
+        paths = {candidate for candidate in paths if candidate != rel and not candidate.endswith(".md")
+                 and (candidate in index.files or candidate.count("/") + 1 >= MIN_DIR_DEPTH)}
+        per = {candidate: commits_after(hist, candidate, date, dir_files) for candidate in paths}
         allc = set().union(*per.values()) if per else set()
-        top = sorted(per, key=lambda p: (-len(per[p]), p))[:3]
+        top = sorted(per, key=lambda candidate: (-len(per[candidate]), candidate))[:3]
         rows.append(dict(doc=rel, date=date, src=src, cited=len(paths),
                          commits=len(allc),
-                         top=[(p, len(per[p])) for p in top if per[p]]))
-    rows.sort(key=lambda r: (-r["commits"], -r["cited"], r["doc"]))
+                         top=[(candidate, len(per[candidate])) for candidate in top if per[candidate]]))
+    rows.sort(key=lambda row: (-row["commits"], -row["cited"], row["doc"]))
     return rows
 
 
@@ -88,15 +88,15 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--top", type=int, default=20)
     ap.add_argument("--root", default=str(docscope.ROOT))
-    a = ap.parse_args(argv)
-    rows = rank(a.root)
+    args = ap.parse_args(argv)
+    rows = rank(args.root)
     print(f"{'commits':>7} {'cited':>5}  {'modified':<12} doc  [most-changed cited paths]")
-    for r in rows[:a.top]:
-        mark = "" if r["src"] == "line" else "*"
-        top = ", ".join(f"{p} ({n})" for p, n in r["top"])
-        print(f"{r['commits']:>7} {r['cited']:>5}  {r['date'] + mark:<12} "
-              f"{r['doc']}  [{top}]")
-    print(f"\n{min(a.top, len(rows))} of {len(rows)} docs; * = date from last "
+    for row in rows[:args.top]:
+        mark = "" if row["src"] == "line" else "*"
+        top = ", ".join(f"{path} ({count})" for path, count in row["top"])
+        print(f"{row['commits']:>7} {row['cited']:>5}  {row['date'] + mark:<12} "
+              f"{row['doc']}  [{top}]")
+    print(f"\n{min(args.top, len(rows))} of {len(rows)} docs; * = date from last "
           "git commit (no `_Last modified:_` line); *.md changes not counted.")
     return 0
 

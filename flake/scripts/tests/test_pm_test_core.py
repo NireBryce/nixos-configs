@@ -29,12 +29,12 @@ class PmTestCoreTests(unittest.TestCase):
         self.write('state', '')
 
     def write(self, name, text):
-        with open(os.path.join(self.sys, name), 'w') as f:
-            f.write(text)
+        with open(os.path.join(self.sys, name), 'w') as handle:
+            handle.write(text)
 
     def read(self, path):
-        with open(path) as f:
-            return f.read()
+        with open(path) as handle:
+            return handle.read()
 
     def run_script(self, *args):
         env = dict(os.environ, PM_TEST_SYS=self.sys, PM_TEST_LOG=self.log,
@@ -43,12 +43,12 @@ class PmTestCoreTests(unittest.TestCase):
                               capture_output=True)
 
     def test_clean_run_logs_every_cycle_and_restores_none(self):
-        r = self.run_script('3')
-        self.assertEqual(r.returncode, 0, r.stderr)
+        result = self.run_script('3')
+        self.assertEqual(result.returncode, 0, result.stderr)
         log = self.read(self.log)
-        for i in (1, 2, 3):
-            self.assertIn(f'cycle {i}/3 suspending', log)
-            self.assertIn(f'cycle {i}/3 resumed', log)
+        for cycle in (1, 2, 3):
+            self.assertIn(f'cycle {cycle}/3 suspending', log)
+            self.assertIn(f'cycle {cycle}/3 resumed', log)
         self.assertIn('done, 3/3 clean', log)
         self.assertEqual(self.read(os.path.join(self.sys, 'pm_test')), 'none\n')
 
@@ -56,17 +56,17 @@ class PmTestCoreTests(unittest.TestCase):
         # `state` as a directory makes `echo mem > state` fail on cycle 1.
         os.remove(os.path.join(self.sys, 'state'))
         os.mkdir(os.path.join(self.sys, 'state'))
-        r = self.run_script('3')
-        self.assertNotEqual(r.returncode, 0)
+        result = self.run_script('3')
+        self.assertNotEqual(result.returncode, 0)
         self.assertIn('cycle 1/3 suspending', self.read(self.log))
         self.assertNotIn('resumed', self.read(self.log))
         self.assertEqual(self.read(os.path.join(self.sys, 'pm_test')), 'none\n')
 
     def test_refuses_when_not_deep(self):
         self.write('mem_sleep', '[s2idle] deep\n')
-        r = self.run_script('3')
-        self.assertEqual(r.returncode, 1)
-        self.assertIn('not [deep]', r.stderr)
+        result = self.run_script('3')
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('not [deep]', result.stderr)
         self.assertFalse(os.path.exists(self.log))
 
     def test_rejects_bad_cycle_count(self):

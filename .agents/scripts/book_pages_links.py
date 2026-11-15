@@ -23,24 +23,24 @@ LINK = re.compile(r"\]\(\.\./\.\./([^)\s]*)\)")
 
 
 def rewrite(text, base=BASE):
-    return LINK.sub(lambda m: f"]({base}{m.group(1)})", text)
+    return LINK.sub(lambda match: f"]({base}{match.group(1)})", text)
 
 
 def main(argv):
     base = BASE
     if "--base" in argv:
-        i = argv.index("--base")
-        base = argv[i + 1]
-        argv = argv[:i] + argv[i + 2:]
+        base_index = argv.index("--base")
+        base = argv[base_index + 1]
+        argv = argv[:base_index] + argv[base_index + 2:]
     if len(argv) != 1:
         print(__doc__)
         return 2
     changed = 0
-    for p in Path(argv[0]).rglob("*.md"):
-        old = p.read_text()
+    for page in Path(argv[0]).rglob("*.md"):
+        old = page.read_text()
         new = rewrite(old, base)
         if new != old:
-            p.write_text(new)
+            page.write_text(new)
             changed += 1
     print(f"book_pages_links: rewrote links in {changed} file(s)")
     return 0

@@ -48,33 +48,33 @@ LINK = re.compile(r"\]\(([^)\s]+)\)")
 
 def strip_code(text):
     """Blank out fenced blocks and inline code, keeping line numbers."""
-    def blank(m):
-        return re.sub(r"[^\n]", " ", m.group(0))
+    def blank(match):
+        return re.sub(r"[^\n]", " ", match.group(0))
     text = re.sub(r"```.*?```", blank, text, flags=re.S)
     return re.sub(r"`[^`\n]*`", blank, text)
 
 
 def slug(heading):
-    h = re.sub(r"[`*_]", "", heading).strip().lower()
-    h = re.sub(r"[^\w\- ]", "", h)
-    return h.replace(" ", "-")
+    heading_slug = re.sub(r"[`*_]", "", heading).strip().lower()
+    heading_slug = re.sub(r"[^\w\- ]", "", heading_slug)
+    return heading_slug.replace(" ", "-")
 
 
 def headings(path):
     out = set()
     for line in strip_code_keep_headings(path.read_text()).splitlines():
-        m = re.match(r"^#{1,6}\s+(.*?)\s*#*$", line)
-        if m:
-            out.add(slug(m.group(1)))
+        match = re.match(r"^#{1,6}\s+(.*?)\s*#*$", line)
+        if match:
+            out.add(slug(match.group(1)))
     return out
 
 
 def strip_code_keep_headings(text):
-    return re.sub(r"```.*?```", lambda m: "\n" * m.group(0).count("\n"), text, flags=re.S)
+    return re.sub(r"```.*?```", lambda match: "\n" * match.group(0).count("\n"), text, flags=re.S)
 
 
 def chapters(src):
-    return sorted(p for p in src.glob("*.md") if p.name != "SUMMARY.md")
+    return sorted(chapter for chapter in src.glob("*.md") if chapter.name != "SUMMARY.md")
 
 
 def check(src):
@@ -84,62 +84,62 @@ def check(src):
     for name in sorted(listed):
         if not (src / name).exists():
             findings.append(f"summary  SUMMARY.md lists {name}, which does not exist")
-    for p in chapters(src):
-        if p.name not in listed:
-            findings.append(f"summary  {p.name} is not listed in SUMMARY.md")
-    for p in chapters(src):
-        text = p.read_text()
+    for chapter in chapters(src):
+        if chapter.name not in listed:
+            findings.append(f"summary  {chapter.name} is not listed in SUMMARY.md")
+    for chapter in chapters(src):
+        text = chapter.read_text()
         raw_lines = text.splitlines()
         scan = strip_code(text).splitlines()
-        for n, (raw, line) in enumerate(zip(raw_lines, scan), 1):
+        for line_number, (raw, line) in enumerate(zip(raw_lines, scan), 1):
             if "book-lint: ignore" in raw:
                 continue
-            for m in LINK.finditer(line):
-                target = m.group(1)
+            for match in LINK.finditer(line):
+                target = match.group(1)
                 if target.startswith(("http:", "https:", "mailto:")):
                     continue
                 path, _, frag = target.partition("#")
                 if not path:
-                    if frag and slug(frag) not in headings(p) and frag not in headings(p):
-                        findings.append(f"anchor   {p.name}:{n} #{frag} matches no heading here")
+                    if frag and slug(frag) not in headings(chapter) and frag not in headings(chapter):
+                        findings.append(f"anchor   {chapter.name}:{line_number} #{frag} matches no heading here")
                     continue
-                dest = (p.parent / path).resolve()
+                dest = (chapter.parent / path).resolve()
                 if not dest.exists():
-                    findings.append(f"link     {p.name}:{n} {target} does not exist")
+                    findings.append(f"link     {chapter.name}:{line_number} {target} does not exist")
                 elif frag and dest.suffix == ".md" and frag not in headings(dest):
-                    findings.append(f"anchor   {p.name}:{n} {target}: no heading with that slug")
-            for m in DATE.finditer(line):
-                findings.append(f"volatile {p.name}:{n} date {m.group(0)}: say what changed, not when")
-            for m in COUNT.finditer(line):
-                if m.group(1).lower() == "two" and m.group(2).lower() in ("files", "modules"):
+                    findings.append(f"anchor   {chapter.name}:{line_number} {target}: no heading with that slug")
+            for match in DATE.finditer(line):
+                findings.append(f"volatile {chapter.name}:{line_number} date {match.group(0)}: say what changed, not when")
+            for match in COUNT.finditer(line):
+                if match.group(1).lower() == "two" and match.group(2).lower() in ("files", "modules"):
                     continue
-                findings.append(f"volatile {p.name}:{n} count \"{m.group(0)}\": point at the file or command that lists them")
+                findings.append(f"volatile {chapter.name}:{line_number} count \"{match.group(0)}\": point at the file or command that lists them")
     return findings
 
 
 def prose(src, top=8):
     paras, sents, filler, vague = [], [], {}, {}
-    for p in chapters(src):
-        body = strip_code(p.read_text())
+    for chapter in chapters(src):
+        body = strip_code(chapter.read_text())
         for para in re.split(r"\n\s*\n", body):
             para = para.strip()
             if not para or para.startswith(("|", "#", ">", "<!--")) or re.match(r"^(\d+\.|[-*])\s", para):
                 continue
             flat = " ".join(para.split())
-            paras.append((len(flat.split()), p.name, flat[:70]))
-            for s in re.split(r"(?<=[.!?])\s+", flat):
-                sents.append((len(s.split()), p.name, s[:80]))
-                if VAGUE_OPEN.match(s):
-                    vague[p.name] = vague.get(p.name, 0) + 1
-            for m in FILLER.finditer(flat):
-                filler[(p.name, m.group(1).lower())] = filler.get((p.name, m.group(1).lower()), 0) + 1
+            paras.append((len(flat.split()), chapter.name, flat[:70]))
+            for sentence in re.split(r"(?<=[.!?])\s+", flat):
+                sents.append((len(sentence.split()), chapter.name, sentence[:80]))
+                if VAGUE_OPEN.match(sentence):
+                    vague[chapter.name] = vague.get(chapter.name, 0) + 1
+            for match in FILLER.finditer(flat):
+                filler[(chapter.name, match.group(1).lower())] = filler.get((chapter.name, match.group(1).lower()), 0) + 1
     print(f"{len(chapters(src))} chapters")
     print(f"\nlongest paragraphs (words):")
-    for w, f, t in sorted(paras, reverse=True)[:top]:
-        print(f"  {w:4} {f}: {t}")
+    for word_count, file_name, snippet in sorted(paras, reverse=True)[:top]:
+        print(f"  {word_count:4} {file_name}: {snippet}")
     print(f"\nlongest sentences (words):")
-    for w, f, t in sorted(sents, reverse=True)[:top]:
-        print(f"  {w:4} {f}: {t}")
+    for word_count, file_name, snippet in sorted(sents, reverse=True)[:top]:
+        print(f"  {word_count:4} {file_name}: {snippet}")
     print("\nfiller phrases:", dict(sorted(filler.items(), key=lambda kv: -kv[1])[:top]) or "none")
     print("sentences opening with This/It/That/These/There, by chapter:", dict(sorted(vague.items(), key=lambda kv: -kv[1])) or "none")
     return 0
@@ -149,16 +149,16 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("cmd", choices=("check", "prose"))
     ap.add_argument("--book", default=str(ROOT / "book"))
-    a = ap.parse_args(argv)
-    src = Path(a.book) / "src"
+    args = ap.parse_args(argv)
+    src = Path(args.book) / "src"
     if not src.is_dir():
         print(f"book_lint: no {src}", file=sys.stderr)
         return 2
-    if a.cmd == "prose":
+    if args.cmd == "prose":
         return prose(src)
     findings = check(src)
-    for f in findings:
-        print(f)
+    for finding in findings:
+        print(finding)
     print(f"book_lint: {len(findings)} finding(s)" if findings else "book_lint: no findings")
     return 1 if findings else 0
 

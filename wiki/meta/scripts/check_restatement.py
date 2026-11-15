@@ -58,12 +58,12 @@ WORD = re.compile(r"[a-z0-9_]['a-z0-9_.-]*")
 SIBLING_SUFFIX = "-for-agents.md"
 
 
-def is_sibling_pair(a, b):
+def is_sibling_pair(first, second):
     """True when these two paths are a `<page>.md` / `<page>-for-agents.md`
     pair. Only the pair itself -- a sibling against some OTHER page's source
     is an ordinary hit and stays ranked."""
-    for x, y in ((a, b), (b, a)):
-        if x.endswith(SIBLING_SUFFIX) and x[: -len(SIBLING_SUFFIX)] + ".md" == y:
+    for candidate, other in ((first, second), (second, first)):
+        if candidate.endswith(SIBLING_SUFFIX) and candidate[: -len(SIBLING_SUFFIX)] + ".md" == other:
             return True
     return False
 
@@ -78,12 +78,12 @@ def doc_paths():
     # keeping the sorted-first name; the symlink's content is not a second
     # copy anyone would edit separately, so it has nothing to restate.
     seen = set()
-    for p in sorted((ROOT / ".agents" / "skills").rglob("*.md")) + \
+    for doc_path in sorted((ROOT / ".agents" / "skills").rglob("*.md")) + \
              sorted((ROOT / "wiki").rglob("*.md")):
-        real = os.path.realpath(p)
+        real = os.path.realpath(doc_path)
         if real not in seen:
             seen.add(real)
-            yield p
+            yield doc_path
 
 
 def normalize(path):
@@ -108,7 +108,7 @@ def normalize(path):
             continue
         for word in WORD.findall(line.lower()):
             tagged.append((word, lineno))
-    return tagged, [w for w, _ in tagged]
+    return tagged, [tagged_word for tagged_word, _ in tagged]
 
 
 def spans_from_shared(shared_pairs):
@@ -139,24 +139,24 @@ def main():
     # shingle -> {file: [start positions]}
     index = collections.defaultdict(lambda: collections.defaultdict(list))
     for name, (tagged, _) in files.items():
-        words = [w for w, _ in tagged]
-        for i in range(len(words) - NGRAM + 1):
-            index[tuple(words[i : i + NGRAM])][name].append(i)
+        words = [token for token, _ in tagged]
+        for offset in range(len(words) - NGRAM + 1):
+            index[tuple(words[offset : offset + NGRAM])][name].append(offset)
 
     # pair -> list of (pos_a, pos_b) shared shingles
     pairs = collections.defaultdict(list)
     for positions in index.values():
         names = sorted(positions)
-        for i, a in enumerate(names):
-            for b in names[i + 1 :]:
-                for pa in positions[a]:
-                    for pb in positions[b]:
-                        pairs[(a, b)].append((pa, pb))
+        for offset, first_name in enumerate(names):
+            for second_name in names[offset + 1 :]:
+                for pa in positions[first_name]:
+                    for pb in positions[second_name]:
+                        pairs[(first_name, second_name)].append((pa, pb))
 
     def rel(pair):
-        a, b = pair
+        first_name, second_name = pair
         spans = spans_from_shared(pairs[pair])
-        words = sum(n + NGRAM - 1 for _, _, n in spans)
+        words = sum(span_length + NGRAM - 1 for _, _, span_length in spans)
         return words, spans
 
     hits, sibling_hits = [], []
@@ -188,13 +188,13 @@ def main():
             f"as by-design (--siblings to rank them in); most-overlapping "
             f"is {worst[1][0]} ↔ {worst[1][1]} at ~{worst[0]}w"
         )
-    for total, (a, b), spans in shown:
-        print(f"\n{a}  ↔  {b}  — ~{total}w in {len(spans)} span(s)")
-        words_a, lines_a = files[a][1], files[a][0]
-        for pa, pb, n in sorted(spans, key=lambda s: -(s[2] + NGRAM - 1))[:3]:
-            length = n + NGRAM - 1
+    for total, (first_name, second_name), spans in shown:
+        print(f"\n{first_name}  ↔  {second_name}  — ~{total}w in {len(spans)} span(s)")
+        words_a, lines_a = files[first_name][1], files[first_name][0]
+        for pa, pb, span_length in sorted(spans, key=lambda span: -(span[2] + NGRAM - 1))[:3]:
+            length = span_length + NGRAM - 1
             text = " ".join(words_a[pa : pa + length])
-            print(f"  {length:>3}w  {a}:{lines_a[pa][1]}  {b}:{files[b][0][pb][1]}")
+            print(f"  {length:>3}w  {first_name}:{lines_a[pa][1]}  {second_name}:{files[second_name][0][pb][1]}")
             print(f"       “{text[:110]}”")
 
 
