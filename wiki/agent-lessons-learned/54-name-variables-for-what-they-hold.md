@@ -20,10 +20,12 @@ Cleaning this up across the Python in `flake/scripts/`, `.agents/scripts/` and
 `tools/docchecks/` took hundreds of renames. Three things went wrong on the
 way, each caught only by a test or `ruff`, never by the rename itself:
 
-- An AST rename by position missed names inside f-strings that span lines
-  (`f"{articles[n].name}"`), and missed an `import x as n` alias. `py_compile`
-  accepted both; the error would have been a `NameError` at runtime. `ruff
-  check --select F821` found them.
+- An AST rename by position missed names that follow a non-ASCII character on
+  the same line (`f"§{n} ... {articles[n].name}"`), and missed an `import x as
+  n` alias. `ast` column offsets are UTF-8 byte offsets, so slicing the line as
+  text lands on the wrong characters; edit the line as bytes. `py_compile`
+  accepted both misses; the error would have been a `NameError` at runtime.
+  `ruff check --select F821` found them.
 - A helper took a keyword argument by its old name (`feature(n=2)`) and
   another swallowed it silently through `**over`. The tests failed only
   because the fixture then built the wrong number of commits.
