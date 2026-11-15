@@ -173,7 +173,8 @@ command that touches it, from `.agents/lessons-map.toml`.
   `.agents/rules/homelab.md`.
 - Any `.nix` edit: `${...}` in a `''` string interpolates, even in a comment;
   freeform `settings` swallow wrong keys — `.agents/rules/nix.md`.
-- Scripts and recipes: no Python buried in bash — `.agents/rules/scripts.md`.
+- Scripts and recipes: no Python buried in bash; no one-character variable
+  names — `.agents/rules/scripts.md`.
 - Agent settings, guard hooks, `permissions.allow` —
   `.agents/rules/agent-config.md`.
 - Tailnet access, tags, the policy file, a port that times out —
@@ -305,6 +306,12 @@ running, so the trailer records only what it knows. Claude's form is
 `Co-Authored-By: Claude`. `.githooks/commit-msg` auto-corrects only the
 `Claude <model> <email>` shape, so write any other agent's trailer correctly
 the first time.
+
+**Name variables for what they hold.** No one-character names in any
+language: `result`, `repo`, `match`, `path`, not `r`, `p`, `m`. `_` for an
+ignored value is the only exception. Code is read far more often than
+written, and a letter makes the reader trace back to its assignment to learn
+what it is. `just short-names` enforces it for Python (§54).
 
 **Say which kind of module.** A *module file* is a `.nix` file under
 `flake/modules/` in the dirs-as-categories shape. A *NixOS module* (or *Home

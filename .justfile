@@ -100,6 +100,18 @@ comment-wrap *args:
 comment-wrap-test:
     python3 {{scripts}}/tests/test_comment_wrap.py
 
+# Fails when a Python file has one-character variable names beyond its entry in
+# short-names-baseline.json (none for a file not listed there). `list <file>`
+# prints each site; `update` lowers the baseline after a cleanup. In preflight
+# and CI. Rule: .agents/rules/scripts.md
+short-names *args:
+    python3 {{scripts}}/short_names.py {{args}}
+
+# Fixture test for short_names.py: each kind of site it must catch. Pure
+# stdlib; runs in preflight and CI
+short-names-test:
+    python3 {{scripts}}/tests/test_short_names.py
+
 # Draw the module tree: just module-graph tree|hosts|dot|html [--category X] [--depth N]
 # [--categories-only] [--wrap N]. tree/hosts print Mermaid, dot prints Graphviz
 # (`just module-graph dot --view hosts | nix shell nixpkgs#graphviz -c dot -Tsvg`).
@@ -278,6 +290,8 @@ preflight:
     @just factcheck-test
     @python3 wiki/meta/scripts/test_mdfence.py
     @just branches-test
+    @just short-names-test
+    @just short-names
     @just keybindings-test
     @just cod-desc-test
     @just trailers-test
