@@ -287,6 +287,14 @@ can return non-zero; before believing a count, know what it counts (§22,
 commit (§1). When an existing check fires on new work, fix its model before
 reaching for its escape flag (§23).
 
+**List the choices you made that the user did not ask for.** End the report
+on a task with a short "Choices I made that you didn't ask for" list: a
+default picked, scope added or dropped, a behavior that differs from the
+obvious one. One line each, with how to reverse it. The user can't object to
+a decision they never saw, and the diff doesn't show which parts were
+judgment calls. Write "none" when there were none; leave out choices the
+request or this file already dictates.
+
 **Then** run the preflight as skill `ship` step 0 describes (`just
 preflight` is what CI runs), and load skill `wiki-sync` for any wiki page the
 change made stale.
@@ -336,6 +344,12 @@ need to act on the text.
   statement works, and no triplets chosen for rhythm.
 - Don't narrate your own process ("I found", "we discovered"). State the
   result; for an incident, one dated line of facts.
+- Keep chat replies short and put long detail where it isn't re-read: the PR
+  body, a wiki page or a scratchpad file. Everything in chat is re-read on
+  every later call. After a very large turn (a long audit, a big diff or a
+  long command log), have a subagent with `model: "haiku"` read the file or
+  output and return the summary, and check any claim you act on against the
+  source. Don't delegate the choices list; it needs your own judgment.
 - Existing text is fixed when you edit that passage (skill `boyscouting`),
   not in a sweep that buries the real change.
 
