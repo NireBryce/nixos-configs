@@ -33,6 +33,6 @@ paths:
   Python file that gains one; `just short-names list <file>` shows where. Files
   not yet cleaned are in `flake/scripts/short-names-baseline.json`, whose counts
   may only fall: after cleaning one, `just short-names update`. When renaming,
-  edit by syntax tree rather than text, then run `ruff check --select F821` and
-  the file's tests, and grep for callers passing the old parameter name as a
-  keyword (§54).
+  edit by syntax tree rather than text (`just agent rename-names`), then run
+  `ruff check --select F821` and the file's tests, and grep for callers passing
+  the old parameter name as a keyword (`rename-names callers` does; §54).

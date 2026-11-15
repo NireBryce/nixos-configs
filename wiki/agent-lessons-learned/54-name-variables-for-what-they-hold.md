@@ -45,7 +45,9 @@ This covers loop variables, comprehension variables, lambda parameters and
 
 Rename by the syntax tree, not by text, then run `ruff check --select F821`
 and the file's tests, and grep for keyword callers of any renamed parameter
-(a keyword argument names the old parameter). Read the diff of every line a
+(a keyword argument names the old parameter). `just agent rename-names` does
+the rename (`rename`), lists the names to choose from (`list`) and finds the
+keyword callers (`callers`). Read the diff of every line a
 bulk rename touched; where one letter had more than one meaning, name each
 function's use separately.
 
