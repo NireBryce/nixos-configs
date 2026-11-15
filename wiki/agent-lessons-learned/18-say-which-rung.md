@@ -12,7 +12,7 @@ _Last modified: 2026-09-29_
 say which you have. Treat an undated "verified" in this repo as *evaluates*.
 
 **And scope the claim.** For most of the port I wrote "nothing in this
-repository has ever been built or switched", which is false and reached seven
+repository has ever been built or switched", which is false and reached seven <!-- count-ok: incident record, not a repo count -->
 files before the user caught it. `origin/main` was deployed and already flake-parts;
 what was unproven was this branch's 172 commits on top. "This has never worked"
 and "this is a large untested delta on something that works" call for different

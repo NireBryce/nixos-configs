@@ -73,8 +73,11 @@
         # static check and generator for the agent hook configs
         # (.polymorph/basecamp/; `nix run .#polymorph`). Experimental and
         # unvetted upstream; it runs only as a check here, never in a hook.
+        # Pinned to the rev before upstream dropped the `check` subcommand:
+        # polymorph-check failed with "invalid choice: check" after the
+        # 2026-11-14 lock bump. Unpin once the recipe matches upstream.
         polymorph = {
-            url = "github:NireBryce/polymorph";
+            url = "github:NireBryce/polymorph/297dbcaeec27885aca3b4ebd917c78658cf481ac";
             inputs.nixpkgs.follows = "nixpkgs";
         };
 

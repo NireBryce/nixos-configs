@@ -68,7 +68,7 @@ with unrelated `ts-hive` uses) → `/mnt/restic-backup` (dedicated). As of
 2026-08-31 the module didn't use that mount at all — see [backup](backup.md)'s
 SFTP section — and `storage-NFS.nix` sat there unused on all three Linux
 hosts until it was **deleted 2026-09-14**. Nothing referenced
-`/mnt/restic-backup` after the SFTP move, and leaving it meant three hosts
+`/mnt/restic-backup` after the SFTP move, and leaving it meant three hosts <!-- count-ok: incident record, not a repo count -->
 held IP-trusted NFS write access to the backup repository — the exact
 property (NFS export trust is host-IP based, not keyed) that moving to SFTP
 was meant to end. If general `ts-hive` access is ever wanted again, it wants a
