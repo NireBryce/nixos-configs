@@ -458,16 +458,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1793937019,
-        "narHash": "sha256-VAJshNdraWoeGZakcurAcgm09eyiAAPnoFZFvAbWo+0=",
+        "lastModified": 1793512955,
+        "narHash": "sha256-eEhFBuALXPCLSjB3IUopRoi1S1UpYqARyN/8oLFEo6o=",
         "owner": "NireBryce",
         "repo": "polymorph",
-        "rev": "e9d6fe96b5e4519e35a12f4dcd72f926580c2a36",
+        "rev": "297dbcaeec27885aca3b4ebd917c78658cf481ac",
         "type": "github"
       },
       "original": {
         "owner": "NireBryce",
         "repo": "polymorph",
+        "rev": "297dbcaeec27885aca3b4ebd917c78658cf481ac",
         "type": "github"
       }
     },
