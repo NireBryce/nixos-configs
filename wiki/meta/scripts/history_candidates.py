@@ -105,17 +105,17 @@ def sections(text):
     before the first heading is not a section -- nothing above the first
     `##` is ever a candidate to move."""
     marks = list(HEADING.finditer(text))
-    for i, m in enumerate(marks):
-        end = marks[i + 1].start() if i + 1 < len(marks) else len(text)
-        yield m.group(2).strip(), text[m.start():end], text[:m.start()].count('\n') + 1
+    for index, mark in enumerate(marks):
+        end = marks[index + 1].start() if index + 1 < len(marks) else len(text)
+        yield mark.group(2).strip(), text[mark.start():end], text[:mark.start()].count('\n') + 1
 
 
 def score(heading, body):
     hits, total = [], 0
     for weight, label, rx in MARKERS:
-        n = len(rx.findall(body))
-        if n:
-            total += weight * min(n, 3)
+        hit_count = len(rx.findall(body))
+        if hit_count:
+            total += weight * min(hit_count, 3)
             hits.append(label)
         if rx.search(heading):
             total += weight
@@ -154,33 +154,33 @@ def main():
 
     root = pathlib.Path(__file__).resolve().parents[3]
     pages = ([root / args.page] if args.page
-             else sorted(p for p in (root / 'wiki').rglob('*.md')
-                         if not SKIP.search(p.relative_to(root).as_posix())))
+             else sorted(page for page in (root / 'wiki').rglob('*.md')
+                         if not SKIP.search(page.relative_to(root).as_posix())))
 
     rows = []
-    for p in pages:
-        if not p.exists():
-            print(f"no such page: {p}", file=sys.stderr)
+    for page in pages:
+        if not page.exists():
+            print(f"no such page: {page}", file=sys.stderr)
             return 2
-        text = p.read_text()
+        text = page.read_text()
         for heading, body, line in sections(text):
             if heading in ('Contents', 'See also'):
                 continue
-            s, hits = score(heading, body)
-            if s >= args.min:
-                rows.append((s, p.relative_to(root), line, heading,
+            page_score, hits = score(heading, body)
+            if page_score >= args.min:
+                rows.append((page_score, page.relative_to(root), line, heading,
                              body.count('\n'), hits))
 
-    rows.sort(key=lambda r: -r[0])
+    rows.sort(key=lambda row: -row[0])
     if not rows:
         print("no candidate sections")
         return 0
 
-    for s, rel, line, heading, lines, hits in rows:
+    for page_score, rel, line, heading, lines, hits in rows:
         dest, exists = destination(rel, root)
         where = (f"-> {dest.name}{'' if exists else ' (would be new)'}"
                  if dest else "-> NO SINGLE DESTINATION, see skill step 4")
-        print(f"[{s:>2}] {rel}:{line}  ({lines} lines)  {where}")
+        print(f"[{page_score:>2}] {rel}:{line}  ({lines} lines)  {where}")
         print(f"     {heading}")
         print(f"     markers: {', '.join(sorted(set(hits))) or '-'}")
     print(f"\n{len(rows)} candidate sections. Reporting only -- most of these "

@@ -38,85 +38,85 @@ IDENT_CHAR = re.compile(r"[A-Za-z0-9_'-]")
 
 def findings(text):
     """Yield (line, snippet) for each shell-shaped `${` in a `''` string."""
-    i, n = 0, len(text)
+    pos, length = 0, len(text)
     # Each frame: the state to return to when the interpolation's closing
     # brace arrives, plus that interpolation's brace depth.
     state = "code"
     stack = []  # list of [return_state, depth]
-    while i < n:
-        c = text[i]
-        two = text[i:i + 2]
+    while pos < length:
+        char = text[pos]
+        two = text[pos:pos + 2]
         if state == "code":
-            if c == "#":
-                j = text.find("\n", i)
-                i = n if j < 0 else j
+            if char == "#":
+                found = text.find("\n", pos)
+                pos = length if found < 0 else found
                 continue
             if two == "/*":
-                j = text.find("*/", i + 2)
-                i = n if j < 0 else j + 2
+                found = text.find("*/", pos + 2)
+                pos = length if found < 0 else found + 2
                 continue
-            if c == '"':
-                state, i = "dq", i + 1
+            if char == '"':
+                state, pos = "dq", pos + 1
                 continue
-            if two == "''" and not (i and IDENT_CHAR.match(text[i - 1])):
-                state, i = "ind", i + 2
+            if two == "''" and not (pos and IDENT_CHAR.match(text[pos - 1])):
+                state, pos = "ind", pos + 2
                 continue
             if two == "${":
                 if stack:
                     stack[-1][1] += 1
-                i += 2
+                pos += 2
                 continue
-            if c == "{" and stack:
+            if char == "{" and stack:
                 stack[-1][1] += 1
-            elif c == "}" and stack:
+            elif char == "}" and stack:
                 if stack[-1][1] == 0:
                     state = stack.pop()[0]
                 else:
                     stack[-1][1] -= 1
-            i += 1
+            pos += 1
         elif state == "dq":
-            if c == "\\":
-                i += 2
+            if char == "\\":
+                pos += 2
             elif two == "$$":
-                i += 2
+                pos += 2
             elif two == "${":
                 stack.append(["dq", 0])
-                state, i = "code", i + 2
-            elif c == '"':
-                state, i = "code", i + 1
+                state, pos = "code", pos + 2
+            elif char == '"':
+                state, pos = "code", pos + 1
             else:
-                i += 1
+                pos += 1
         else:  # ind
-            if text.startswith("'''", i) or text.startswith("''$", i):
-                i += 3
-            elif text.startswith("''\\", i):
-                i += 4
+            if text.startswith("'''", pos) or text.startswith("''$", pos):
+                pos += 3
+            elif text.startswith("''\\", pos):
+                pos += 4
             elif two == "''":
-                state, i = "code", i + 2
+                state, pos = "code", pos + 2
             elif two == "$$":
-                i += 2
+                pos += 2
             elif two == "${":
-                if SHELLISH.match(text, i + 2):
-                    line = text.count("\n", 0, i) + 1
-                    eol = text.find("\n", i)
-                    end = text.find("}", i, n if eol < 0 else eol)
-                    yield line, text[i:end + 1] if end >= 0 else text[i:i + 20]
+                if SHELLISH.match(text, pos + 2):
+                    line = text.count("\n", 0, pos) + 1
+                    eol = text.find("\n", pos)
+                    end = text.find("}", pos, length if eol < 0 else eol)
+                    yield line, text[pos:end + 1] if end >= 0 else text[pos:pos + 20]
                     # Read on as the literal shell text it was meant to be:
                     # lexing `${#arr}` as Nix would open a comment at `#`
                     # and derail everything after this one real error.
-                    i = end + 1 if end >= 0 else i + 2
+                    pos = end + 1 if end >= 0 else pos + 2
                     continue
                 stack.append(["ind", 0])
-                state, i = "code", i + 2
+                state, pos = "code", pos + 2
             else:
-                i += 1
+                pos += 1
 
 
 def main(paths):
     for path in paths:
         try:
-            with open(path, encoding="utf-8", errors="replace") as f:
-                text = f.read()
+            with open(path, encoding="utf-8", errors="replace") as handle:
+                text = handle.read()
         except OSError:
             continue
         for line, snippet in findings(text):

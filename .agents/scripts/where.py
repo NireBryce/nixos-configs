@@ -47,9 +47,9 @@ def run(cmd, timeout=30):
     """(returncode, stdout, stderr); a missing program or a timeout is a
     failed result, never a traceback."""
     try:
-        p = subprocess.run(cmd, capture_output=True, text=True, env=ENV,
+        completed = subprocess.run(cmd, capture_output=True, text=True, env=ENV,
                            timeout=timeout)
-        return p.returncode, p.stdout.rstrip("\n"), p.stderr.strip()
+        return completed.returncode, completed.stdout.rstrip("\n"), completed.stderr.strip()
     except FileNotFoundError:
         return 127, "", f"{cmd[0]}: not on PATH"
     except subprocess.TimeoutExpired:
@@ -115,10 +115,10 @@ def pr_line(pr, branch):
                         "--json", PR_FIELDS], timeout=20)
     if rc == 0:
         try:
-            d = json.loads(out)
-            return (f"PR: #{d.get('number')} {d.get('state')} "
-                    f"{d.get('mergeStateStatus')} {d.get('baseRefName')} <- "
-                    f"{d.get('headRefName')}\n  {d.get('title')}\n  {d.get('url')}")
+            pr_data = json.loads(out)
+            return (f"PR: #{pr_data.get('number')} {pr_data.get('state')} "
+                    f"{pr_data.get('mergeStateStatus')} {pr_data.get('baseRefName')} <- "
+                    f"{pr_data.get('headRefName')}\n  {pr_data.get('title')}\n  {pr_data.get('url')}")
         except (ValueError, AttributeError):
             return "PR: gh answered with something other than JSON"
     if rc == 127:

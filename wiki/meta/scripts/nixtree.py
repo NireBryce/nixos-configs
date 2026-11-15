@@ -61,9 +61,9 @@ def all_categories(root):
     is cached -- keyed on every file's path, mtime and size, so a fixture
     tree a test edits between calls is read afresh."""
     modules = root / 'flake' / 'modules'
-    files = [p for p in modules.rglob('*.nix') if _visible(p, modules)]
+    files = [nix_file for nix_file in modules.rglob('*.nix') if _visible(nix_file, modules)]
     key = (str(pathlib.Path(root).resolve()),
-           tuple((str(p), s.st_mtime_ns, s.st_size) for p in files for s in [p.stat()]))
+           tuple((str(nix_file), file_stat.st_mtime_ns, file_stat.st_size) for nix_file in files for file_stat in [nix_file.stat()]))
     if key not in _CATEGORIES:
         _CATEGORIES.clear()
         _CATEGORIES[key] = _read_categories(modules, files)
@@ -74,24 +74,24 @@ def _read_categories(modules, files):
     # Paths as strings relative to modules/: pathlib's ancestor checks were
     # most of wiki-lint's time.
     base = len(str(modules)) + 1
-    texts = {p: COMMENT.sub('', p.read_text()) for p in files}      # each file read once
-    rel = {p: str(p)[base:] for p in files}
-    module_dirs = {rel[p].rpartition('/')[0] for p in files if module_classes(p, texts[p])}
+    texts = {nix_file: COMMENT.sub('', nix_file.read_text()) for nix_file in files}      # each file read once
+    rel = {nix_file: str(nix_file)[base:] for nix_file in files}
+    module_dirs = {rel[nix_file].rpartition('/')[0] for nix_file in files if module_classes(nix_file, texts[nix_file])}
     flags_in, folders = {}, set()
-    for p in files:
-        d = rel[p].rpartition('/')[0]
-        flags_in.setdefault(d, set()).update(FLAG.findall(texts[p]))
-        while d:
-            folders.add(d)
-            d = d.rpartition('/')[0]
+    for nix_file in files:
+        dir_name = rel[nix_file].rpartition('/')[0]
+        flags_in.setdefault(dir_name, set()).update(FLAG.findall(texts[nix_file]))
+        while dir_name:
+            folders.add(dir_name)
+            dir_name = dir_name.rpartition('/')[0]
     cats = {}
-    for d in sorted(folders):
-        if '/' not in d:
+    for dir_name in sorted(folders):
+        if '/' not in dir_name:
             continue                                   # an area
-        flags = flags_in.get(d, set())
+        flags = flags_in.get(dir_name, set())
         if flags == {'true'} or (flags != {'false'}
-                                 and any(m.startswith(d + '/') for m in module_dirs)):
-            cats[d.rpartition('/')[2]] = modules / d
+                                 and any(module_dir.startswith(dir_name + '/') for module_dir in module_dirs)):
+            cats[dir_name.rpartition('/')[2]] = modules / dir_name
     return cats
 
 
@@ -108,30 +108,30 @@ def static_document(root):
     modules with their classes, includes and enables -- for drawing without
     nix and for `just modules` to compare against the evaluated one."""
     modules = root / 'flake' / 'modules'
-    rel = lambda p: p.relative_to(modules).as_posix()
+    rel = lambda nix_file: nix_file.relative_to(modules).as_posix()
     doc = {'version': 1, 'classes': list(CLASS_KEYS), 'folders': [], 'defaults': [], 'admin': [],
-           'categories': {n: {'dir': rel(d), 'members': [], 'nested': [], 'flag': None}
-                          for n, d in all_categories(root).items()},
+           'categories': {category_name: {'dir': rel(category_dir), 'members': [], 'nested': [], 'flag': None}
+                          for category_name, category_dir in all_categories(root).items()},
            'modules': {}, 'includes': {}, 'enables': {}}
-    for p in sorted(modules.rglob('*.nix')):
-        if not _visible(p, modules):
+    for nix_file in sorted(modules.rglob('*.nix')):
+        if not _visible(nix_file, modules):
             continue
-        classes = module_classes(p)
+        classes = module_classes(nix_file)
         if not classes:
             continue
-        name = module_name(p)
-        doc['modules'][name] = {'path': rel(p), 'classes': [c for c in CLASS_KEYS if c in classes]}
-        text = COMMENT.sub('', p.read_text())
+        name = module_name(nix_file)
+        doc['modules'][name] = {'path': rel(nix_file), 'classes': [class_key for class_key in CLASS_KEYS if class_key in classes]}
+        text = COMMENT.sub('', nix_file.read_text())
         for kind, pattern in (('includes', INCLUDES), ('enables', ENABLES)):
             for cls, names in pattern.findall(text):
                 doc[kind].setdefault(name, {})[cls] = re.findall(r'"([\w-]+)"', names)
     return doc
 
 
-def categories_under(root, d):
+def categories_under(root, category_dir):
     """The categories nested anywhere under category directory `d`."""
-    prefix = str(d) + '/'
-    return [c for c in all_categories(root).values() if str(c).startswith(prefix)]
+    prefix = str(category_dir) + '/'
+    return [category for category in all_categories(root).values() if str(category).startswith(prefix)]
 
 
 def nested_category_names(categories, name):
@@ -145,9 +145,9 @@ def nested_category_names(categories, name):
     """
     if name not in categories:
         return {name}
-    d = categories[name]
-    modules = next(a for a in d.parents if a.name == 'modules')
-    return {name} | {c.name for c in categories_under(modules.parent.parent, d)}
+    category_dir = categories[name]
+    modules = next(ancestor for ancestor in category_dir.parents if ancestor.name == 'modules')
+    return {name} | {category.name for category in categories_under(modules.parent.parent, category_dir)}
 
 def find_categories(root):
     """category name -> its directory, for every category under
@@ -160,8 +160,8 @@ def find_categories(root):
     """
     modules = root / 'flake' / 'modules'
     areas = ('general-config', 'hardware-config', 'homelab-config', 'users-config')
-    return {n: d for n, d in all_categories(root).items()
-            if d.relative_to(modules).parts[0] in areas}
+    return {category_name: category_dir for category_name, category_dir in all_categories(root).items()
+            if category_dir.relative_to(modules).parts[0] in areas}
 
 
 # `nire-durandal = mkHost "x86_64-linux" ...;` / `nire-lysithea = mkDarwinHost
@@ -179,8 +179,8 @@ def actual_hosts(root):
 table both derive
     from it, so a host added to hosts.nix appears in both with no edit here.
     """
-    p = root / 'flake' / 'modules' / 'host-config' / 'hosts.nix'
-    text = COMMENT.sub('', p.read_text())
+    hosts_file = root / 'flake' / 'modules' / 'host-config' / 'hosts.nix'
+    text = COMMENT.sub('', hosts_file.read_text())
     return {name: ('darwin' if ctor == 'mkDarwinHost' else 'nixos')
             for name, ctor in HOST_LINE.findall(text)}
 
@@ -196,9 +196,9 @@ def category_classes(category_dir):
     presence of a declaration under the tree does.
     """
     classes = set()
-    for p in category_dir.rglob('*.nix'):
-        if _visible(p, category_dir):
-            classes |= module_classes(p)
+    for nix_file in category_dir.rglob('*.nix'):
+        if _visible(nix_file, category_dir):
+            classes |= module_classes(nix_file)
     return classes
 
 
@@ -209,16 +209,16 @@ def host_imports(root, categories, hosts):
     compute rows for."""
     out = {}
     for host in hosts:
-        p = root / 'flake' / 'modules' / 'host-config' / f'{host}-configuration.nix'
-        if not p.exists():
-            print(f"WARN  expected host file missing: {p}")
+        config_path = root / 'flake' / 'modules' / 'host-config' / f'{host}-configuration.nix'
+        if not config_path.exists():
+            print(f"WARN  expected host file missing: {config_path}")
             continue
-        text = COMMENT.sub('', p.read_text())
+        text = COMMENT.sub('', config_path.read_text())
         literal = set()
         for _, names in INCLUDES.findall(text):
             literal.update(re.findall(r'"([\w-]+)"', names))
         effective = set()
-        for n in literal:
-            effective |= nested_category_names(categories, n)
+        for literal_name in literal:
+            effective |= nested_category_names(categories, literal_name)
         out[host] = effective
     return out

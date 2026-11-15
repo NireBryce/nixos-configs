@@ -16,13 +16,13 @@ def kernel_params(boot_json):
     return " ".join(boot_json["org.nixos.bootspec.v1"].get("kernelParams", []))
 
 
-def users_report(d):
+def users_report(data):
     """Lines describing mutableUsers and each login-capable account."""
-    out = [f"mutableUsers: {d.get('mutableUsers')}", ""]
+    out = [f"mutableUsers: {data.get('mutableUsers')}", ""]
     # Select on having a password source, plus root -- not on isNormalUser,
     # which users-groups.json does not carry. Filtering on it silently
     # omitted the only account you can actually log into.
-    for user in d["users"]:
+    for user in data["users"]:
         has_pw = user.get("hashedPasswordFile") or user.get("hashedPassword")
         if not (has_pw or user["name"] == "root"):
             continue
@@ -31,7 +31,7 @@ def users_report(d):
             src = f"file {user['hashedPasswordFile']}"
         elif user.get("hashedPassword"):
             src = "hashedPassword set in the config"
-        elif not d.get("mutableUsers"):
+        elif not data.get("mutableUsers"):
             # update-users-groups.pl writes "!" to /etc/shadow for a user with
             # no password source when mutableUsers is false: login by password
             # is locked, not passwordless.
@@ -46,12 +46,12 @@ def users_report(d):
 
 def main(argv):
     if len(argv) == 3 and argv[1] == "kernel-params":
-        with open(argv[2]) as f:
-            print(kernel_params(json.load(f)))
+        with open(argv[2]) as handle:
+            print(kernel_params(json.load(handle)))
         return 0
     if len(argv) == 3 and argv[1] == "users":
-        with open(argv[2]) as f:
-            print("\n".join(users_report(json.load(f))))
+        with open(argv[2]) as handle:
+            print("\n".join(users_report(json.load(handle))))
         return 0
     print("usage: deployed_baseline.py kernel-params <boot.json> | users <users-groups.json>", file=sys.stderr)
     return 2

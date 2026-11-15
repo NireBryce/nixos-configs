@@ -27,47 +27,47 @@ WIKI_AREAS = ("config-structure", "homelab", "experiments", "agent-lessons-learn
 
 
 def words(root, rel):
-    p = Path(root) / rel
-    return 0 if p.is_symlink() else len(p.read_text(errors="replace").split())
+    doc_path = Path(root) / rel
+    return 0 if doc_path.is_symlink() else len(doc_path.read_text(errors="replace").split())
 
 
 def units(root, docs):
     """[{files, words}]: files that must stay together (sibling sets, symlink + target)."""
     root = Path(root)
-    parent = {d: d for d in docs}
+    parent = {doc_name: doc_name for doc_name in docs}
 
-    def find(x):
-        while parent[x] != x:
-            parent[x] = parent[parent[x]]
-            x = parent[x]
-        return x
+    def find(doc):
+        while parent[doc] != doc:
+            parent[doc] = parent[parent[doc]]
+            doc = parent[doc]
+        return doc
 
-    def union(a, b):
-        if a in parent and b in parent:
-            parent[find(a)] = find(b)
+    def union(first, second):
+        if first in parent and second in parent:
+            parent[find(first)] = find(second)
 
-    for d in docs:
-        p = root / d
-        if p.is_symlink():
-            union(d, (Path(d).parent / p.readlink()).as_posix()
-                  if not p.readlink().is_absolute() else d)
-        stem = d[:-3] if d.endswith(".md") else d
-        for s in SUFFIXES:
-            if stem.endswith(s):
-                union(d, stem[:-len(s)] + ".md")
+    for doc_name in docs:
+        doc_path = root / doc_name
+        if doc_path.is_symlink():
+            union(doc_name, (Path(doc_name).parent / doc_path.readlink()).as_posix()
+                  if not doc_path.readlink().is_absolute() else doc_name)
+        stem = doc_name[:-3] if doc_name.endswith(".md") else doc_name
+        for suffix in SUFFIXES:
+            if stem.endswith(suffix):
+                union(doc_name, stem[:-len(suffix)] + ".md")
     groups = {}
-    for d in docs:
-        groups.setdefault(find(d), []).append(d)
-    return [dict(files=sorted(f)) for f in groups.values()]
+    for doc_name in docs:
+        groups.setdefault(find(doc_name), []).append(doc_name)
+    return [dict(files=sorted(unit_files)) for unit_files in groups.values()]
 
 
 def rule_area(root, rel):
     text = (Path(root) / rel).read_text(errors="replace")
-    m = re.match(r"---\n(.*?)\n---", text, re.S)
-    globs = re.findall(r'^\s*-\s*"?([^"\n]+)"?', m.group(1), re.M) if m else []
-    for a in WIKI_AREAS:
-        if any(a.removesuffix("-config") in g for g in globs):
-            return a
+    match = re.match(r"---\n(.*?)\n---", text, re.S)
+    globs = re.findall(r'^\s*-\s*"?([^"\n]+)"?', match.group(1), re.M) if match else []
+    for area in WIKI_AREAS:
+        if any(area.removesuffix("-config") in glob for glob in globs):
+            return area
     return "rule:" + Path(rel).stem
 
 
@@ -82,37 +82,37 @@ def area(root, rel):
     return "core"
 
 
-def partition(root, n):
+def partition(root, group_count):
     docs = docscope.docs(root)
     us = units(root, docs)
-    for u in us:
-        u["words"] = sum(words(root, f) for f in u["files"])
-        u["area"] = area(root, u["files"][0])
-    target = sum(u["words"] for u in us) / n
-    groups = [dict(words=0, files=[], areas=set()) for _ in range(n)]
-    for u in sorted(us, key=lambda u: (-u["words"], u["files"][0])):
-        same = [g for g in groups if u["area"] in g["areas"]
-                and g["words"] + u["words"] <= target * 1.15]
-        g = min(same or groups, key=lambda g: g["words"])
-        g["words"] += u["words"]
-        g["files"] += u["files"]
-        g["areas"].add(u["area"])
+    for unit in us:
+        unit["words"] = sum(words(root, file_name) for file_name in unit["files"])
+        unit["area"] = area(root, unit["files"][0])
+    target = sum(unit["words"] for unit in us) / group_count
+    groups = [dict(words=0, files=[], areas=set()) for _ in range(group_count)]
+    for unit in sorted(us, key=lambda unit: (-unit["words"], unit["files"][0])):
+        same = [group for group in groups if unit["area"] in group["areas"]
+                and group["words"] + unit["words"] <= target * 1.15]
+        group = min(same or groups, key=lambda group: group["words"])
+        group["words"] += unit["words"]
+        group["files"] += unit["files"]
+        group["areas"].add(unit["area"])
     return docs, us, groups
 
 
 def verify(docs, groups, us=None):
     """List of problems; empty means every doc is in exactly one group."""
     seen, problems = {}, []
-    for i, g in enumerate(groups):
-        for f in g["files"]:
-            if f in seen:
-                problems.append(f"{f}: assigned twice (groups {seen[f]} and {i})")
-            seen[f] = i
-    problems += [f"{d}: unassigned" for d in docs if d not in seen]
-    problems += [f"{f}: not an in-scope doc" for f in seen if f not in set(docs)]
-    for u in us or []:
-        if len({seen.get(f) for f in u["files"]}) > 1:
-            problems.append(f"unit split across groups: {u['files']}")
+    for group_index, group in enumerate(groups):
+        for file_name in group["files"]:
+            if file_name in seen:
+                problems.append(f"{file_name}: assigned twice (groups {seen[file_name]} and {group_index})")
+            seen[file_name] = group_index
+    problems += [f"{doc}: unassigned" for doc in docs if doc not in seen]
+    problems += [f"{file_name}: not an in-scope doc" for file_name in seen if file_name not in set(docs)]
+    for unit in us or []:
+        if len({seen.get(file_name) for file_name in unit["files"]}) > 1:
+            problems.append(f"unit split across groups: {unit['files']}")
     return problems
 
 
@@ -120,18 +120,18 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--agents", type=int, default=5)
     ap.add_argument("--root", default=str(docscope.ROOT))
-    a = ap.parse_args(argv)
-    docs, us, groups = partition(a.root, a.agents)
-    for i, g in enumerate(groups, 1):
-        print(f"group {i}: {g['words']} words, {len(g['files'])} files "
-              f"(areas: {', '.join(sorted(g['areas'])) or '-'})")
-        for f in sorted(g["files"]):
-            print(f"  {f}")
+    args = ap.parse_args(argv)
+    docs, us, groups = partition(args.root, args.agents)
+    for group_number, group in enumerate(groups, 1):
+        print(f"group {group_number}: {group['words']} words, {len(group['files'])} files "
+              f"(areas: {', '.join(sorted(group['areas'])) or '-'})")
+        for file_name in sorted(group["files"]):
+            print(f"  {file_name}")
     problems = verify(docs, groups, us)
-    for p in problems:
-        print(f"SELF-CHECK FAILED: {p}", file=sys.stderr)
-    print(f"\n{len(docs)} docs, {sum(g['words'] for g in groups)} words, "
-          f"{a.agents} groups; self-check {'FAILED' if problems else 'ok'}")
+    for problem in problems:
+        print(f"SELF-CHECK FAILED: {problem}", file=sys.stderr)
+    print(f"\n{len(docs)} docs, {sum(group['words'] for group in groups)} words, "
+          f"{args.agents} groups; self-check {'FAILED' if problems else 'ok'}")
     return 1 if problems else 0
 
 

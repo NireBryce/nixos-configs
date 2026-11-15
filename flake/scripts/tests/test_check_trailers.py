@@ -107,20 +107,20 @@ class RangeTests(unittest.TestCase):
     def test_old_wrong_trailer_outside_range_passes(self):
         self.commit("new\n\nCo-Authored-By: Claude")
         self.commit("other agent\n\nCo-Authored-By: ZCode")
-        r = self.check()
-        self.assertEqual(r.returncode, 0, r.stderr)
-        self.assertIn("2 commit(s)", r.stdout)
+        result = self.check()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("2 commit(s)", result.stdout)
 
     def test_wrong_trailer_in_range_fails_naming_it(self):
         self.commit("fine\n\nCo-Authored-By: Claude")
         self.commit("bad one\n\nCo-Authored-By: Claude Opus 5 "
                     "<noreply@anthropic.com>")
         bad = self.git("rev-parse", "HEAD").strip()
-        r = self.check()
-        self.assertEqual(r.returncode, 1)
-        self.assertIn(bad[:12], r.stderr)
-        self.assertIn("bad one", r.stderr)
-        self.assertNotIn("fine", r.stderr)
+        result = self.check()
+        self.assertEqual(result.returncode, 1)
+        self.assertIn(bad[:12], result.stderr)
+        self.assertIn("bad one", result.stderr)
+        self.assertNotIn("fine", result.stderr)
 
     def test_full_history_would_fail(self):
         # Sanity: the base commit really is a finding, so the passing

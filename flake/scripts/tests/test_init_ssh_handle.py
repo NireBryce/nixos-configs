@@ -65,7 +65,7 @@ class InitSshHandle(unittest.TestCase):
         self.assertEqual(dest.read_text(), self.wanted_priv)
         self.assertEqual(oct(dest.stat().st_mode & 0o777), "0o600")
         self.assertIn(" wanted", (self.ssh / "id_ed25519_sk.pub").read_text())
-        self.assertEqual(sorted(p.name for p in self.ssh.iterdir()),
+        self.assertEqual(sorted(entry.name for entry in self.ssh.iterdir()),
                          ["id_ed25519_sk", "id_ed25519_sk.pub"])
         self.assertNotIn("PRIVATE KEY", out.stderr)
 

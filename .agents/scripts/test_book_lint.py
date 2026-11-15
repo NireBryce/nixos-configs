@@ -30,7 +30,7 @@ class Book(unittest.TestCase):
         (self.src / name).write_text(text)
 
     def summary(self, *names):
-        self.write("SUMMARY.md", "# Summary\n\n" + "".join(f"- [{n}]({n})\n" for n in names))
+        self.write("SUMMARY.md", "# Summary\n\n" + "".join(f"- [{name}]({name})\n" for name in names))
 
     def findings(self):
         return book_lint.check(self.src)
@@ -46,14 +46,14 @@ class Links(Book):
     def test_a_missing_file_is_found(self):
         self.summary("a.md")
         self.write("a.md", "# A\n\n[gone](gone.md)\n")
-        self.assertTrue(any(f.startswith("link") and "gone.md" in f for f in self.findings()))
+        self.assertTrue(any(finding.startswith("link") and "gone.md" in finding for finding in self.findings()))
 
     def test_a_bad_anchor_is_found_and_a_good_one_is_not(self):
         self.summary("a.md", "b.md")
         self.write("a.md", "# A\n\n[x](b.md#nope) [y](b.md#real-heading)\n")
         self.write("b.md", "# B\n\n## Real `heading`\n")
         found = self.findings()
-        self.assertEqual(len([f for f in found if f.startswith("anchor")]), 1)
+        self.assertEqual(len([finding for finding in found if finding.startswith("anchor")]), 1)
         self.assertIn("#nope", found[0])
 
     def test_links_inside_code_are_not_checked(self):
@@ -74,7 +74,7 @@ class Volatile(Book):
     def check_one(self, line):
         self.summary("a.md")
         self.write("a.md", f"# A\n\n{line}\n")
-        return [f for f in self.findings() if f.startswith("volatile")]
+        return [finding for finding in self.findings() if finding.startswith("volatile")]
 
     def test_dates_and_counts_of_hosts_hooks_and_files_are_found(self):
         self.assertTrue(self.check_one("Changed on 2026-10-28."))
@@ -121,8 +121,8 @@ class Cli(Book):
 
 class Render(unittest.TestCase):
     def test_inlines_css_and_drops_scripts(self):
-        with tempfile.TemporaryDirectory() as d:
-            out = Path(d)
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            out = Path(tmp_dir)
             (out / "css").mkdir()
             (out / "css" / "general-abc.css").write_text("body{color:red}")
             (out / "css" / "chrome-abc.css").write_text(".x{y:z}")
@@ -137,10 +137,10 @@ class Render(unittest.TestCase):
         self.assertIn("<h1>Hi</h1>", html)
 
     def test_a_missing_print_html_says_how_to_build(self):
-        with tempfile.TemporaryDirectory() as d:
-            with self.assertRaises(SystemExit) as e:
-                book_render.render(d)
-        self.assertIn("mdbook build", str(e.exception))
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with self.assertRaises(SystemExit) as error:
+                book_render.render(tmp_dir)
+        self.assertIn("mdbook build", str(error.exception))
 
 
 if __name__ == "__main__":

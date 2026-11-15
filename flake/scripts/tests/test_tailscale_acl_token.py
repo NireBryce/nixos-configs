@@ -43,8 +43,8 @@ class GetToken(unittest.TestCase):
              mock.patch.object(acl.sys.stdin, "isatty", return_value=tty):
             try:
                 token = acl.get_token()
-            except SystemExit as e:
-                return calls, e
+            except SystemExit as error:
+                return calls, error
         return calls, token
 
     def test_user_key_works_without_sudo(self):

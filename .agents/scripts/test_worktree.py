@@ -92,14 +92,14 @@ class Base(unittest.TestCase):
                               capture_output=True)
 
     def new(self, branch, *more):
-        r = self.run_("new", branch, "--root", str(self.root), *more)
-        self.assertEqual(r.returncode, 0, r.stderr)
-        return Path(r.stdout.strip())
+        result = self.run_("new", branch, "--root", str(self.root), *more)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return Path(result.stdout.strip())
 
     def worktrees(self):
-        return [l[9:] for l in git(self.repo, "worktree", "list",
+        return [line[9:] for line in git(self.repo, "worktree", "list",
                                    "--porcelain").splitlines()
-                if l.startswith("worktree ")]
+                if line.startswith("worktree ")]
 
     def branches(self):
         return git(self.repo, "branch", "--format=%(refname:short)").split()
@@ -107,37 +107,37 @@ class Base(unittest.TestCase):
 
 class New(Base):
     def test_creates_and_prints_only_the_path(self):
-        r = self.run_("new", "feat/a-b", "--root", str(self.root))
-        self.assertEqual(r.returncode, 0, r.stderr)
-        self.assertEqual(r.stdout, f"{self.root / 'wt-a-b'}\n")
-        p = self.root / "wt-a-b"
-        self.assertEqual(git(p, "branch", "--show-current"), "feat/a-b")
-        self.assertEqual(git(p, "rev-parse", "HEAD"),
+        result = self.run_("new", "feat/a-b", "--root", str(self.root))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, f"{self.root / 'wt-a-b'}\n")
+        worktree_path = self.root / "wt-a-b"
+        self.assertEqual(git(worktree_path, "branch", "--show-current"), "feat/a-b")
+        self.assertEqual(git(worktree_path, "rev-parse", "HEAD"),
                          git(self.repo, "rev-parse", "origin/experimental"))
 
     def test_env_root_and_base(self):
         commit(self.repo, "local-only")  # local experimental ahead of origin
         env = dict(self.env, AGENT_SCRATCH=str(self.root))
-        r = self.run_("new", "plain", "experimental", env=env)
-        self.assertEqual(r.returncode, 0, r.stderr)
-        p = self.root / "wt-plain"
-        self.assertEqual(r.stdout.strip(), str(p))
-        self.assertEqual(git(p, "rev-parse", "HEAD"),
+        result = self.run_("new", "plain", "experimental", env=env)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        worktree_path = self.root / "wt-plain"
+        self.assertEqual(result.stdout.strip(), str(worktree_path))
+        self.assertEqual(git(worktree_path, "rev-parse", "HEAD"),
                          git(self.repo, "rev-parse", "experimental"))
 
     def test_refuses_existing_branch_path_or_remote(self):
         self.new("feat/a")
-        r = self.run_("new", "feat/a", "--root", str(self.root))
-        self.assertEqual(r.returncode, 1)
-        self.assertIn("refs/heads/feat/a already exists", r.stderr)
-        r = self.run_("new", "fix/a", "--root", str(self.root))  # same dir
-        self.assertEqual(r.returncode, 1)
-        self.assertIn("wt-a already exists", r.stderr)
+        result = self.run_("new", "feat/a", "--root", str(self.root))
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("refs/heads/feat/a already exists", result.stderr)
+        result = self.run_("new", "fix/a", "--root", str(self.root))  # same dir
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("wt-a already exists", result.stderr)
         self.assertNotIn("fix/a", self.branches())
         git(self.repo, "push", "-q", "origin", "experimental:refs/heads/feat/r")
-        r = self.run_("new", "feat/r", "--root", str(self.root))
-        self.assertEqual(r.returncode, 1)
-        self.assertIn("refs/remotes/origin/feat/r already exists", r.stderr)
+        result = self.run_("new", "feat/r", "--root", str(self.root))
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("refs/remotes/origin/feat/r already exists", result.stderr)
 
 
 class Prune(Base):
@@ -177,14 +177,14 @@ class Prune(Base):
                          *more)
 
     def line(self, out, path):
-        return next(l for l in out.splitlines() if f"  {path}  " in l)
+        return next(out_line for out_line in out.splitlines() if f"  {path}  " in out_line)
 
     def test_dry_run_reports_and_removes_nothing(self):
         before = self.worktrees()
-        r = self.prune()
-        self.assertEqual(r.returncode, 0, r.stderr)
+        result = self.prune()
+        self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(self.worktrees(), before)
-        out = r.stdout
+        out = result.stdout
         self.assertTrue(self.line(out, self.landed).startswith("remove"))
         self.assertIn("1 ahead, landed; not on origin", self.line(out, self.landed))
         self.assertIn("NOT landed; on origin", self.line(out, self.open_))
@@ -198,44 +198,44 @@ class Prune(Base):
         self.assertIn("3 removable; nothing done", out)
 
     def test_yes_removes_exactly_the_safe_ones(self):
-        r = self.prune("--yes")
-        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        result = self.prune("--yes")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         left = set(self.worktrees())
-        for p in (self.landed, self.fresh, self.detached):
-            self.assertNotIn(str(p), left)
-            self.assertFalse(p.exists())
-        for p in (self.open_, self.dirty, self.pushed, self.outside, self.repo):
-            self.assertIn(str(p), left)
-        b = self.branches()
-        self.assertNotIn("feat/landed", b)
-        self.assertNotIn("feat/fresh", b)
+        for worktree_path in (self.landed, self.fresh, self.detached):
+            self.assertNotIn(str(worktree_path), left)
+            self.assertFalse(worktree_path.exists())
+        for worktree_path in (self.open_, self.dirty, self.pushed, self.outside, self.repo):
+            self.assertIn(str(worktree_path), left)
+        branch_names = self.branches()
+        self.assertNotIn("feat/landed", branch_names)
+        self.assertNotIn("feat/fresh", branch_names)
         for kept in ("feat/open", "feat/dirty", "feat/pushed", "feat/outside"):
-            self.assertIn(kept, b)
+            self.assertIn(kept, branch_names)
         self.assertEqual((self.dirty / "base").read_text(), "changed\n")
 
     def test_never_removes_a_protected_branch(self):
         # a clean worktree on main/master/experimental that otherwise reads
         # as fresh or landed must keep its worktree AND its branch
         for name in ("main", "master"):
-            p = self.root / f"wt-prot-{name}"
-            git(self.repo, "worktree", "add", "-q", str(p), "-b", name,
+            worktree_path = self.root / f"wt-prot-{name}"
+            git(self.repo, "worktree", "add", "-q", str(worktree_path), "-b", name,
                 "origin/experimental")
-            r = self.prune("--yes")
-            self.assertTrue(self.line(r.stdout, p).startswith("keep"), r.stdout)
-            self.assertIn("protected", self.line(r.stdout, p))
-            self.assertTrue(p.exists())
+            result = self.prune("--yes")
+            self.assertTrue(self.line(result.stdout, worktree_path).startswith("keep"), result.stdout)
+            self.assertIn("protected", self.line(result.stdout, worktree_path))
+            self.assertTrue(worktree_path.exists())
             self.assertIn(name, self.branches())
 
     def test_min_age_protects_a_new_worktree(self):
-        r = self.run_("prune", "--root", str(self.root), "--yes")  # default 60m
-        self.assertIn("touched 0m ago", self.line(r.stdout, self.fresh))
+        result = self.run_("prune", "--root", str(self.root), "--yes")  # default 60m
+        self.assertIn("touched 0m ago", self.line(result.stdout, self.fresh))
         self.assertTrue(self.fresh.exists())
         self.assertFalse(self.landed.exists())
 
     def test_never_removes_the_worktree_it_runs_in(self):
-        r = self.run_("prune", "--root", str(self.root), "--min-age", "0",
+        result = self.run_("prune", "--root", str(self.root), "--min-age", "0",
                       "--yes", cwd=self.fresh)
-        self.assertIn("the worktree this runs in", r.stdout)
+        self.assertIn("the worktree this runs in", result.stdout)
         self.assertTrue(self.fresh.exists())
 
 
@@ -263,9 +263,9 @@ class PreflightEach(Base):
                          env=dict(self.env, PREFLIGHT_EACH_CMD=check))
 
     def test_one_line_per_commit_and_failure_tail(self):
-        r = self.each(self.CHECK)
-        self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
-        lines = r.stdout.splitlines()
+        result = self.each(self.CHECK)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        lines = result.stdout.splitlines()
         self.assertIn("3 commits in origin/experimental..HEAD", lines[0])
         self.assertRegex(lines[1], r"^ok   [0-9a-f]{8} feat: one  \(3 steps, \d+s\)$")
         self.assertRegex(lines[2], r"^FAIL [0-9a-f]{8} feat: breaks it")
@@ -274,14 +274,14 @@ class PreflightEach(Base):
         self.assertEqual(self.worktrees(), [str(self.repo)])
 
     def test_all_green_and_range(self):
-        r = self.each(self.CHECK, "HEAD~3..HEAD~2")
-        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertEqual(len(r.stdout.splitlines()), 2)
+        result = self.each(self.CHECK, "HEAD~3..HEAD~2")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(len(result.stdout.splitlines()), 2)
         self.assertEqual(self.worktrees(), [str(self.repo)])
 
     def test_empty_and_bad_range(self):
-        r = self.each(self.CHECK, "HEAD..HEAD")
-        self.assertEqual((r.returncode, r.stdout.strip()), (0, "no commits in HEAD..HEAD"))
+        result = self.each(self.CHECK, "HEAD..HEAD")
+        self.assertEqual((result.returncode, result.stdout.strip()), (0, "no commits in HEAD..HEAD"))
         self.assertEqual(self.each(self.CHECK, "nope..nada").returncode, 2)
 
     def interrupt(self, sig, *args, group=False, jobs=1):
@@ -289,21 +289,21 @@ class PreflightEach(Base):
         exist (to the pid, or the whole process group as a terminal's ^C
         does), and assert it exits 130 promptly with none left."""
         before = self.worktrees()
-        p = subprocess.Popen([str(EACH), *args], cwd=self.repo, text=True,
+        proc = subprocess.Popen([str(EACH), *args], cwd=self.repo, text=True,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              env=dict(self.env, PREFLIGHT_EACH_CMD="sleep 30"),
                              start_new_session=group)
-        p.stdout.readline()  # the header: the worktrees exist by now
+        proc.stdout.readline()  # the header: the worktrees exist by now
         self.assertEqual(len(self.worktrees()), len(before) + jobs)
         time.sleep(0.3)      # let the checks start
         t0 = time.time()
         if group:
-            os.killpg(p.pid, sig)
+            os.killpg(proc.pid, sig)
         else:
-            p.send_signal(sig)
-        _, err = p.communicate(timeout=15)
+            proc.send_signal(sig)
+        _, err = proc.communicate(timeout=15)
         self.assertLess(time.time() - t0, 15)
-        self.assertEqual(p.returncode, 130, err)
+        self.assertEqual(proc.returncode, 130, err)
         self.assertIn("interrupted", err)
         self.assertEqual(self.worktrees(), before)
         self.assertEqual(list(self.t.glob("tmp/preflight-each.*")), [])
@@ -331,27 +331,27 @@ class PreflightEach(Base):
     def test_check_that_ignores_sigterm_is_killed_before_cleanup(self):
         self.setup_tmpdir()
         pidfile = self.t / "pid"
-        p = subprocess.Popen(
+        proc = subprocess.Popen(
             [str(EACH)], cwd=self.repo, text=True, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             env=dict(self.env, PREFLIGHT_EACH_CMD=(
                 f"trap '' TERM INT HUP; echo $$ > {pidfile}; exec sleep 30")))
-        p.stdout.readline()
+        proc.stdout.readline()
         while not pidfile.exists() or not pidfile.read_text().strip():
             time.sleep(0.05)
         pid = int(pidfile.read_text())
-        p.send_signal(signal.SIGINT)
-        p.communicate(timeout=20)
-        self.assertEqual(p.returncode, 130)
+        proc.send_signal(signal.SIGINT)
+        proc.communicate(timeout=20)
+        self.assertEqual(proc.returncode, 130)
         with self.assertRaises(ProcessLookupError):
             os.kill(pid, 0)
         self.assertEqual(self.worktrees(), [str(self.repo)])
 
     # -- the stale-worktree sweep ------------------------------------------
     def dead_pid(self):
-        p = subprocess.Popen(["true"])
-        p.wait()
-        return p.pid
+        proc = subprocess.Popen(["true"])
+        proc.wait()
+        return proc.pid
 
     def marked(self, name, pid, host=None, boot=None, start=123, repo=None):
         """A worktree marked as preflight-each's own: locked with its
@@ -376,9 +376,9 @@ class PreflightEach(Base):
         other_host = self.marked(f"preflight-each.{dead}.host", dead, host="elsewhere")
         alive = self.marked(f"preflight-each.{os.getpid()}.live", os.getpid(),
                             start=_proc_start(os.getpid()))
-        r = self.each(self.CHECK, "HEAD~1..HEAD")
-        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertIn("removed 1 worktree(s) left by a killed run", r.stderr)
+        result = self.each(self.CHECK, "HEAD~1..HEAD")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("removed 1 worktree(s) left by a killed run", result.stderr)
         self.assertFalse(stale.exists())
         for kept in (other_boot, other_host, alive):
             self.assertTrue(kept.exists())
@@ -403,10 +403,10 @@ class PreflightEach(Base):
         nested = self.marked(f"sub/preflight-each.{dead}.nested", dead)
         # Huge numbers in the name and the reason: skipped, no crash.
         huge = self.marked("preflight-each.9999999999.huge", 10**30)
-        r = self.each(self.CHECK, "HEAD~1..HEAD")
-        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertNotIn("Traceback", r.stderr)
-        self.assertNotIn("removed", r.stderr)
+        result = self.each(self.CHECK, "HEAD~1..HEAD")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+        self.assertNotIn("removed", result.stderr)
         for kept in (user, lonely, nested, huge):
             self.assertIn(str(kept), self.worktrees())
         self.assertEqual((user / "base").read_text(), "user's edit\n")
@@ -425,40 +425,40 @@ class PreflightEach(Base):
         (main / ".git" / "preflight-each.json").write_text(json.dumps(
             {"host": socket.gethostname(), "boot": boot, "pid": dead,
              "start": 1, "path": str(main), "pgids": []}))
-        r = self.run_(cwd=main, script=EACH,
+        result = self.run_(cwd=main, script=EACH,
                       env=dict(self.env, PREFLIGHT_EACH_CMD=self.CHECK))
-        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertTrue((main / "m").exists())
-        self.assertNotIn("removed", r.stderr)
+        self.assertNotIn("removed", result.stderr)
 
     def test_sigkilled_run_takes_its_jobs_down_and_is_swept_next_time(self):
         pidfile = self.t / "pid"
-        p = subprocess.Popen(
+        proc = subprocess.Popen(
             [str(EACH)], cwd=self.repo, text=True, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             env=dict(self.env, PREFLIGHT_EACH_CMD=f"echo $$ > {pidfile}; exec sleep 30"))
-        p.stdout.readline()
+        proc.stdout.readline()
         while not pidfile.exists() or not pidfile.read_text().strip():
             time.sleep(0.05)
         job = int(pidfile.read_text())
-        p.kill()
-        p.communicate(timeout=10)
+        proc.kill()
+        proc.communicate(timeout=10)
         deadline = time.time() + 5   # PR_SET_PDEATHSIG: the kernel TERMs it
         while time.time() < deadline and _proc_start(job) is not None:
             time.sleep(0.05)
         self.assertIsNone(_proc_start(job))
         self.assertEqual(len(self.worktrees()), 2)   # left behind, marked
-        r = self.each(self.CHECK, "HEAD~1..HEAD")
-        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertIn("removed 1 worktree(s) left by a killed run", r.stderr)
+        result = self.each(self.CHECK, "HEAD~1..HEAD")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("removed 1 worktree(s) left by a killed run", result.stderr)
         self.assertEqual(self.worktrees(), [str(self.repo)])
         self.assertEqual(list((self.t / "tmp").glob("preflight-each.*")), [])
 
     def test_job_member_outliving_its_leader_is_killed(self):
         pidfile = self.t / "member"
-        r = self.each(f"sh -c 'trap \"\" TERM; exec sleep 30' & echo $! > {pidfile}; "
+        result = self.each(f"sh -c 'trap \"\" TERM; exec sleep 30' & echo $! > {pidfile}; "
                       + self.CHECK, "HEAD~1..HEAD")
-        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIsNone(_proc_start(int(pidfile.read_text())))
         self.assertEqual(self.worktrees(), [str(self.repo)])
 
@@ -466,14 +466,14 @@ class PreflightEach(Base):
         # The first commit is the slowest, so with 3 jobs it finishes last;
         # its line must still print first.
         slow = 'if [ -e bad ] || [ -e one ]; then :; else sleep 1; fi; ' + self.CHECK
-        r = self.each(slow, "--jobs", "3")
-        self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
-        heads = [l for l in r.stdout.splitlines() if not l.startswith("     ")]
+        result = self.each(slow, "--jobs", "3")
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        heads = [out_line for out_line in result.stdout.splitlines() if not out_line.startswith("     ")]
         self.assertIn("(3 worktrees)", heads[0])
         self.assertRegex(heads[1], r"^ok   [0-9a-f]{8} feat: one ")
         self.assertRegex(heads[2], r"^FAIL [0-9a-f]{8} feat: breaks it")
         self.assertRegex(heads[3], r"^ok   [0-9a-f]{8} fix: unbreak")
-        self.assertIn("     boom", r.stdout.splitlines())
+        self.assertIn("     boom", result.stdout.splitlines())
         self.assertEqual(self.worktrees(), [str(self.repo)])
 
     def test_jobs_clamped_by_memory(self):
@@ -483,13 +483,13 @@ class PreflightEach(Base):
                    PREFLIGHT_EACH_MEMINFO=str(meminfo))
         # No flake/ here, so every commit counts as its own tree: 2 jobs
         # need 2 checks + 2 rests, more than 7 GiB; 1 job fits.
-        r = self.run_("--jobs", "2", script=EACH, env=env)
-        self.assertIn("--jobs 2 reduced to 1: MemAvailable 7.0 GiB", r.stderr)
-        self.assertIn("(worktree ", r.stdout.splitlines()[0])
+        result = self.run_("--jobs", "2", script=EACH, env=env)
+        self.assertIn("--jobs 2 reduced to 1: MemAvailable 7.0 GiB", result.stderr)
+        self.assertIn("(worktree ", result.stdout.splitlines()[0])
         meminfo.write_text("MemAvailable: 1024 kB\n")  # never below one job
-        r = self.run_("--jobs", "3", script=EACH, env=env)
-        self.assertIn("reduced to 1", r.stderr)
-        self.assertEqual(r.returncode, 1)  # still ran, still found `bad`
+        result = self.run_("--jobs", "3", script=EACH, env=env)
+        self.assertIn("reduced to 1", result.stderr)
+        self.assertEqual(result.returncode, 1)  # still ran, still found `bad`
         self.assertEqual(self.run_("--jobs", "0", script=EACH, env=env).returncode, 2)
 
     def test_jobs_capped_when_meminfo_unreadable_or_malformed(self):
@@ -499,12 +499,12 @@ class PreflightEach(Base):
                 meminfo.unlink(missing_ok=True)
                 if text is not None:
                     meminfo.write_text(text)
-                r = self.run_("--jobs", "3", script=EACH, env=dict(
+                result = self.run_("--jobs", "3", script=EACH, env=dict(
                     self.env, PREFLIGHT_EACH_CMD=self.CHECK,
                     PREFLIGHT_EACH_MEMINFO=str(meminfo)))
-                self.assertIn("--jobs 3 reduced to 1: can't read MemAvailable", r.stderr)
-                self.assertNotIn("Traceback", r.stderr)
-                self.assertIn("(worktree ", r.stdout.splitlines()[0])
+                self.assertIn("--jobs 3 reduced to 1: can't read MemAvailable", result.stderr)
+                self.assertNotIn("Traceback", result.stderr)
+                self.assertIn("(worktree ", result.stdout.splitlines()[0])
 
     def test_jobs_clamped_by_cgroup_headroom(self):
         root = self.t / "cg"
@@ -516,12 +516,12 @@ class PreflightEach(Base):
         env = dict(self.env, PREFLIGHT_EACH_CMD=self.CHECK,
                    PREFLIGHT_EACH_CGROUP_ROOT=str(root),
                    PREFLIGHT_EACH_PROC_CGROUP=str(self.t / "proc-cgroup"))
-        r = self.run_("--jobs", "3", script=EACH, env=env)
-        self.assertIn("reduced to 1: cgroup memory.max headroom 7.0 GiB", r.stderr)
+        result = self.run_("--jobs", "3", script=EACH, env=env)
+        self.assertIn("reduced to 1: cgroup memory.max headroom 7.0 GiB", result.stderr)
         (root / "a" / "memory.max").write_text(f"{100 * 2**30}\n")
-        r = self.run_("--jobs", "3", script=EACH, env=env)
-        self.assertNotIn("reduced", r.stderr)
-        self.assertIn("(3 worktrees)", r.stdout.splitlines()[0])
+        result = self.run_("--jobs", "3", script=EACH, env=env)
+        self.assertNotIn("reduced", result.stderr)
+        self.assertIn("(3 worktrees)", result.stdout.splitlines()[0])
 
     def test_check_cached_by_flake_tree(self):
         # flake tree A, then a doc-only commit (still A), then B, whose
@@ -545,14 +545,14 @@ class PreflightEach(Base):
         for jobs in ("1", "4"):
             with self.subTest(jobs=jobs):
                 ran.unlink(missing_ok=True)
-                r = self.each(check, "--jobs", jobs)
-                self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+                result = self.each(check, "--jobs", jobs)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                 shas = git(self.repo, "rev-list", "--reverse",
                            "origin/experimental..HEAD").split()
-                s = [x[:8] for x in shas]
+                short_shas = [sha[:8] for sha in shas]
                 self.assertEqual(sorted(ran.read_text().splitlines()), sorted([
-                    f"{s[0]} ran", f"{s[1]} cached {s[0]}",
-                    f"{s[2]} ran", f"{s[3]} ran"]))
+                    f"{short_shas[0]} ran", f"{short_shas[1]} cached {short_shas[0]}",
+                    f"{short_shas[2]} ran", f"{short_shas[3]} ran"]))
                 self.assertEqual(self.worktrees(), [str(self.repo)])
 
 
@@ -567,16 +567,16 @@ class PreflightBrief(Base):
     def brief(self, steps, recipes="", env=None):
         (self.repo / ".justfile").write_text(
             "preflight:\n    # a comment line, not a step\n"
-            + "".join(f"    @{s}\n" for s in steps) + "\n" + recipes)
+            + "".join(f"    @{step}\n" for step in steps) + "\n" + recipes)
         return subprocess.run([str(BRIEF)], cwd=self.repo, text=True,
                               capture_output=True,
                               env=dict(self.env, **(env or {})))
 
     def test_green_in_recipe_order_with_notes(self):
-        r = self.brief(["sleep 0.5; echo REVIEW a; echo REVIEW b",
+        result = self.brief(["sleep 0.5; echo REVIEW a; echo REVIEW b",
                         "echo 'NOTE: hello'", "echo fast"])
-        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        lines = r.stdout.splitlines()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        lines = result.stdout.splitlines()
         self.assertRegex(lines[0], r"^ok    sleep 0\.5.*\s+\d+s  \(2 REVIEW notes\)$")
         self.assertRegex(lines[1], r"^ok    echo 'NOTE: hello'")
         self.assertEqual(lines[2], "      NOTE: hello")
@@ -585,55 +585,55 @@ class PreflightBrief(Base):
 
     def test_failure_tail_stops_the_rest_and_skips_lint(self):
         t0 = time.time()
-        r = self.brief(["echo ok-one",
+        result = self.brief(["echo ok-one",
                         "sleep 30",
                         "sleep 1; for i in $(seq 1 40); do echo line$i; done; exit 3",
                         "just lint"],
                        recipes="lint:\n    @touch linted\n")
         self.assertLess(time.time() - t0, 15)   # sleep 30 was stopped
-        self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
-        out = r.stdout.splitlines()
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        out = result.stdout.splitlines()
         self.assertRegex(out[0], r"^ok    echo ok-one")
         self.assertRegex(out[1], r"^stop  sleep 30 .*\(stopped: sleep 1; for i in")
         self.assertRegex(out[2], r"^FAIL  sleep 1; for i in")
         self.assertIn("line40", out)
         self.assertIn("line11", out)        # the last 30 lines
         self.assertNotIn("line10", out)
-        self.assertRegex(r.stdout, r"skip  just lint .*\(not run: sleep 1; for i in")
+        self.assertRegex(result.stdout, r"skip  just lint .*\(not run: sleep 1; for i in")
         self.assertRegex(out[-1], r"^preflight FAILED: 1 of 4 steps")
         self.assertFalse((self.repo / "linted").exists())
 
     def test_lint_runs_after_the_others(self):
-        r = self.brief(["sleep 0.5; touch first", "just lint"],
+        result = self.brief(["sleep 0.5; touch first", "just lint"],
                        recipes="lint:\n    @test -e first\n")
-        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_cached_check(self):
         recipes = "check:\n    @touch checked\n"
         status = self.t / "status.json"
-        r = self.brief(["just check", "echo x"], recipes,
+        result = self.brief(["just check", "echo x"], recipes,
                        env={"PREFLIGHT_CACHED_CHECK": "abcd1234",
                             "PREFLIGHT_STATUS_FILE": str(status)})
-        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertRegex(r.stdout, r"ok    just check .*\(cached: same flake tree as abcd1234\)")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertRegex(result.stdout, r"ok    just check .*\(cached: same flake tree as abcd1234\)")
         self.assertFalse((self.repo / "checked").exists())
         self.assertEqual(json.loads(status.read_text()),
                          {"just check": "cached", "echo x": "ok"})
-        r = self.brief(["just check"], recipes,
+        result = self.brief(["just check"], recipes,
                        env={"PREFLIGHT_STATUS_FILE": str(status)})
-        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertTrue((self.repo / "checked").exists())
         self.assertEqual(json.loads(status.read_text()), {"just check": "ok"})
 
     def test_test_jobs_split_across_concurrent_suites(self):
-        r = self.brief(["echo \"NOTE: a-test $TEST_JOBS\"",
+        result = self.brief(["echo \"NOTE: a-test $TEST_JOBS\"",
                         "echo \"NOTE: b-test $TEST_JOBS\"", "true"],
                        env={"TEST_JOBS": "8"})
-        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertIn("      NOTE: a-test 4", r.stdout.splitlines())
-        r = self.brief(["echo \"NOTE: test $TEST_JOBS\""] * 1 + ["echo test2"] * 7,
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("      NOTE: a-test 4", result.stdout.splitlines())
+        result = self.brief(["echo \"NOTE: test $TEST_JOBS\""] * 1 + ["echo test2"] * 7,
                        env={"TEST_JOBS": "8"})
-        self.assertIn("      NOTE: test 2", r.stdout.splitlines())   # floor of 2
+        self.assertIn("      NOTE: test 2", result.stdout.splitlines())   # floor of 2
 
     def test_step_that_cannot_start_fails_without_hanging(self):
         # PATH holds what preflight-brief itself needs, but no bash.
@@ -642,31 +642,31 @@ class PreflightBrief(Base):
         for tool in ("just", "git", "python3", "env"):
             (bin_ / tool).symlink_to(shutil.which(tool))
         (self.repo / ".justfile").write_text("preflight:\n    @echo hi\n")
-        r = subprocess.run(["python3", str(BRIEF)], cwd=self.repo, text=True,
+        result = subprocess.run(["python3", str(BRIEF)], cwd=self.repo, text=True,
                            capture_output=True, timeout=30,
                            env=dict(self.env, PATH=str(bin_)))
-        self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
-        self.assertRegex(r.stdout, r"FAIL  echo hi")
-        self.assertIn("could not start", r.stdout)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertRegex(result.stdout, r"FAIL  echo hi")
+        self.assertIn("could not start", result.stdout)
 
     def test_repeated_signals_stop_every_step_once(self):
         (self.repo / ".justfile").write_text(
             "preflight:\n    @sleep 30\n    @sleep 31\n")
-        p = subprocess.Popen([str(BRIEF)], cwd=self.repo, text=True,
+        proc = subprocess.Popen([str(BRIEF)], cwd=self.repo, text=True,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              env=self.env)
         time.sleep(1.0)
         for _ in range(3):
-            p.send_signal(signal.SIGTERM)
-            p.send_signal(signal.SIGINT)
-        _, err = p.communicate(timeout=20)
-        self.assertEqual(p.returncode, 130, err)
+            proc.send_signal(signal.SIGTERM)
+            proc.send_signal(signal.SIGINT)
+        _, err = proc.communicate(timeout=20)
+        self.assertEqual(proc.returncode, 130, err)
         self.assertEqual(err.count("interrupted"), 1)
 
     def test_step_member_outliving_its_leader_is_killed(self):
         pidfile = self.t / "member"
-        r = self.brief([f"sh -c 'trap \"\" TERM; exec sleep 30' & echo $! > {pidfile}"])
-        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        result = self.brief([f"sh -c 'trap \"\" TERM; exec sleep 30' & echo $! > {pidfile}"])
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIsNone(_proc_start(int(pidfile.read_text())))
 
 

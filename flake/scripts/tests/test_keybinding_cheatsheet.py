@@ -74,9 +74,9 @@ class ChordNormalizationTests(unittest.TestCase):
         self.assertEqual(chord('^[[3~').render(), 'Delete')
 
     def test_undecodable_sequence_survives_as_raw(self):
-        c = chord('^[OX')            # SS3 X is not a key this decoder knows
-        self.assertFalse(c.decoded)
-        self.assertEqual(c.render(), '^[OX')
+        decoded = chord('^[OX')            # SS3 X is not a key this decoder knows
+        self.assertFalse(decoded.decoded)
+        self.assertEqual(decoded.render(), '^[OX')
 
     def test_non_keys_are_rejected(self):
         # pasted-table header cells must not parse as chords
@@ -92,7 +92,7 @@ class KittySourceTests(unittest.TestCase):
 
     def test_parses_map_entries_with_kitty_mod_resolved(self):
         out = kbc.parse_kitty_source(self.DEFINITION_PY, 'kitty', 'upstream test')
-        self.assertEqual([(b.chord.render(), b.action) for b in out],
+        self.assertEqual([(binding.chord.render(), binding.action) for binding in out],
                          [('Ctrl+Shift+Enter', 'new_window_with_cwd'),
                           ('Ctrl+C', 'copy_or_interrupt')])
 
@@ -110,7 +110,7 @@ class MarkdownTableTests(unittest.TestCase):
     def test_pipe_table_header_skipped(self):
         out = kbc.parse_markdown_table(self.PIPE_TABLE, 'kitty', 'upstream test')
         self.assertEqual(len(out), 2)
-        self.assertNotIn('Shortcut', [b.chord.render() for b in out])
+        self.assertNotIn('Shortcut', [binding.chord.render() for binding in out])
 
     def test_action_column_on_either_side(self):
         reversed_rows = "| ctrl+shift+c | copy_to_clipboard |\n" \
@@ -123,16 +123,16 @@ class MarkdownTableTests(unittest.TestCase):
         # the wrap-around rule makes the other cell the action
         text = "Copy to clipboard  ctrl+shift+c\nPaste from clipboard  ctrl+shift+v\n"
         out = kbc.parse_markdown_table(text, 'kitty', 'upstream test')
-        self.assertEqual(sorted(b.chord.render() for b in out),
+        self.assertEqual(sorted(binding.chord.render() for binding in out),
                          ['Ctrl+Shift+C', 'Ctrl+Shift+V'])
-        self.assertEqual(sorted(b.action for b in out),
+        self.assertEqual(sorted(binding.action for binding in out),
                          ['Copy to clipboard', 'Paste from clipboard'])
 
     def test_html_table(self):
         text = ('<table><tr><th>Shortcut</th><th>Action</th></tr>'
                 '<tr><td>ctrl+shift+c</td><td>copy_to_clipboard</td></tr></table>')
         out = kbc.parse_html_table(text, 'kitty', 'upstream test')
-        self.assertEqual([(b.chord.render(), b.action) for b in out],
+        self.assertEqual([(binding.chord.render(), binding.action) for binding in out],
                          [('Ctrl+Shift+C', 'copy_to_clipboard')])
 
     def test_sniffer(self):
@@ -164,7 +164,7 @@ class BindkeyTests(unittest.TestCase):
         return kbc.parse_bindkey(self.FIXTURE, 'zsh', 'upstream test')
 
     def by_render(self):
-        return {b.chord.render(): b for b in self.parsed()}
+        return {binding.chord.render(): binding for binding in self.parsed()}
 
     def test_bindkey_d_wipes_everything_before_it(self):
         # overwrite-mode was bound only before `-d`: dead in the live config,
@@ -173,7 +173,7 @@ class BindkeyTests(unittest.TestCase):
 
     def test_dynamic_terminfo_key_skipped(self):
         self.assertNotIn('beginning-of-line',
-                         [b.chord.render() for b in self.parsed()])
+                         [binding.chord.render() for binding in self.parsed()])
 
     def test_widget_binding_survives_the_wipe(self):
         rows = self.by_render()
@@ -207,7 +207,7 @@ class BleBindTests(unittest.TestCase):
         self.assertEqual(len(out), 4)
 
     def test_modes_and_actions(self):
-        by = {(b.mode, b.chord.render()): b for b in
+        by = {(binding.mode, binding.chord.render()): binding for binding in
               kbc.parse_ble_bind(self.FIXTURE, 'bash', 'upstream test')}
         self.assertEqual(by[('emacs', 'Ctrl+R')].action,
                          '__atuin_history --keymap-mode=emacs')
@@ -215,7 +215,7 @@ class BleBindTests(unittest.TestCase):
                          '__atuin_history --keymap-mode=vim-insert')
 
     def test_dash_widget_is_an_unbind(self):
-        by = {(b.mode, b.chord.render()): b for b in
+        by = {(binding.mode, binding.chord.render()): binding for binding in
               kbc.parse_ble_bind(self.FIXTURE, 'bash', 'upstream test')}
         self.assertTrue(by[('emacs', 'Ctrl+V')].unbound)
         self.assertTrue(by[('vi_imap', 'Ctrl+V')].unbound)
@@ -268,7 +268,7 @@ class RepoReaderTests(unittest.TestCase):
 
     def test_kitty_overrides(self):
         out = kbc.read_repo_kitty()
-        by_render = {b.chord.render(): b.action for b in out}
+        by_render = {binding.chord.render(): binding.action for binding in out}
         self.assertEqual(by_render.get('Ctrl+Shift+S'), 'copy_to_clipboard')
         self.assertEqual(by_render.get('Ctrl+Shift+V'), 'paste_from_clipboard')
         self.assertEqual(by_render.get('Cmd+C'), 'copy_or_interrupt')
@@ -276,7 +276,7 @@ class RepoReaderTests(unittest.TestCase):
 
     def test_zsh_overrides_honour_the_bindkey_d_wipe(self):
         out = kbc.read_repo_zsh()
-        by_render = {b.chord.render(): b for b in out}
+        by_render = {binding.chord.render(): binding for binding in out}
         self.assertEqual(by_render['Home'].action, 'beginning-of-line')
         self.assertTrue(by_render['Ctrl+V'].unbound)      # freed for zellij
         self.assertTrue(by_render['Alt+V'].unbound)
@@ -284,7 +284,7 @@ class RepoReaderTests(unittest.TestCase):
 
     def test_bash_overrides(self):
         out = kbc.read_repo_bash()
-        by = {(b.mode, b.chord.render()): b for b in out}
+        by = {(binding.mode, binding.chord.render()): binding for binding in out}
         self.assertIn('__atuin_history', by[('emacs', 'Ctrl+R')].action)
         self.assertIn('__atuin_history', by[('vi_imap', 'Ctrl+R')].action)
         self.assertTrue(by[('emacs', 'Ctrl+V')].unbound)

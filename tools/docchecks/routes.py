@@ -33,37 +33,37 @@ DEFAULT_KEPT = r'path\s+/([\w-]+)\s+/\1/\*'
 DEFAULT_STRIPPED = r'handle_path\s+/([\w-]+)/\*'
 
 
-def routes(root, s):
+def routes(root, section):
     """path-prefix name -> True if the proxy strips it before reaching the
     app -- read straight out of the configured sources rather than
     assumed."""
     out = {}
-    for rel in s.get('sources', []):
-        p = root / rel
-        if not p.exists():
+    for rel in section.get('sources', []):
+        source_path = root / rel
+        if not source_path.exists():
             continue
-        text = p.read_text()
+        text = source_path.read_text()
         out.update({name: False
-                    for name in re.findall(s.get('kept-path', DEFAULT_KEPT),
+                    for name in re.findall(section.get('kept-path', DEFAULT_KEPT),
                                            text)})
         out.update({name: True
                     for name in re.findall(
-                        s.get('stripped-path', DEFAULT_STRIPPED), text)})
+                        section.get('stripped-path', DEFAULT_STRIPPED), text)})
     return out
 
 
 @check('routes', order=70)
 def check_routes(root, cfg):
-    s = cfg.section('routes')
-    known = routes(root, s)
-    domain = s.get('base-domain', '')
+    section = cfg.section('routes')
+    known = routes(root, section)
+    domain = section.get('base-domain', '')
     domain_rx = (re.escape(domain) + r'/([\w-]+)/') if domain else r'(?!x)x'
     mention = re.compile(domain_rx + r'|`\.\.\./([\w-]+)/`')
-    primary = (s.get('sources') or ['the proxy config'])[0]
+    primary = (section.get('sources') or ['the proxy config'])[0]
     findings = []
     for path in cfg.scope('docs'):
-        for m in mention.finditer(path.read_text()):
-            name = m.group(1) or m.group(2)
+        for match in mention.finditer(path.read_text()):
+            name = match.group(1) or match.group(2)
             if name not in known:
                 findings.append(Finding(
                     'UNKNOWN ROUTE', str(path),

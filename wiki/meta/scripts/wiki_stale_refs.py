@@ -58,7 +58,7 @@ import sys
 
 EXTS = ('.nix', '.py', '.sh', '.md', '.yaml', '.yml', '.json', '.toml')
 BACKTICK_FILE = re.compile(
-    r'`([\w./-]+(?:' + '|'.join(re.escape(e) for e in EXTS) + r'))`')
+    r'`([\w./-]+(?:' + '|'.join(re.escape(ext) for ext in EXTS) + r'))`')
 
 
 def repo_root(argv):
@@ -85,7 +85,7 @@ def normalize(token):
     """Drop leading `.`/`..` segments (`../flake/doc/foo.md` ->
     `flake/doc/foo.md`) so a relative link written from a nested page still
     suffix-matches the repo-relative tracked path."""
-    return '/'.join(p for p in token.split('/') if p not in ('.', '..'))
+    return '/'.join(part for part in token.split('/') if part not in ('.', '..'))
 
 
 def resolves(token, tracked):
@@ -94,18 +94,18 @@ def resolves(token, tracked):
     actually uses (see this module's docstring)."""
     name = normalize(token)
     suffix = '/' + name
-    return any(t == name or t.endswith(suffix) for t in tracked)
+    return any(tracked_file == name or tracked_file.endswith(suffix) for tracked_file in tracked)
 
 
 def find_stale(root):
     """path (str) -> sorted list of backtick tokens that don't resolve."""
     tracked = tracked_paths(root)
     out = {}
-    for f in doc_files(root):
-        misses = sorted({m.group(1) for m in BACKTICK_FILE.finditer(f.read_text())
-                          if not resolves(m.group(1), tracked)})
+    for doc_file in doc_files(root):
+        misses = sorted({match.group(1) for match in BACKTICK_FILE.finditer(doc_file.read_text())
+                          if not resolves(match.group(1), tracked)})
         if misses:
-            out[str(f.relative_to(root))] = misses
+            out[str(doc_file.relative_to(root))] = misses
     return out
 
 
@@ -117,11 +117,11 @@ def main():
         print("wiki_stale_refs: no candidates")
         return
 
-    total = sum(len(v) for v in stale.values())
+    total = sum(len(tokens_list) for tokens_list in stale.values())
     for path, tokens in stale.items():
         print(f"{path}:")
-        for t in tokens:
-            print(f"    `{t}`")
+        for token in tokens:
+            print(f"    `{token}`")
     print(f"\n{total} candidate mention{'s' if total != 1 else ''} across "
           f"{len(stale)} file{'s' if len(stale) != 1 else ''} -- read this "
           f"module's own docstring before treating any of these as a bug; "

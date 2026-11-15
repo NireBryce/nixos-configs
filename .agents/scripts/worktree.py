@@ -58,16 +58,16 @@ PROTECTED = {"main", "master", "experimental"}
 
 
 def git(*args, cwd=None, check=True):
-    r = subprocess.run(["git", *([] if cwd is None else ["-C", str(cwd)]), *args],
+    result = subprocess.run(["git", *([] if cwd is None else ["-C", str(cwd)]), *args],
                        capture_output=True, text=True)
-    if check and r.returncode != 0:
-        sys.exit(f"git {' '.join(args)} failed:\n{r.stderr.strip()}")
-    return r.stdout.strip() if check else r
+    if check and result.returncode != 0:
+        sys.exit(f"git {' '.join(args)} failed:\n{result.stderr.strip()}")
+    return result.stdout.strip() if check else result
 
 
-def root_of(a):
-    r = a.root or os.environ.get("AGENT_SCRATCH") or "/tmp"
-    return Path(os.path.realpath(r))
+def root_of(args):
+    root_arg = args.root or os.environ.get("AGENT_SCRATCH") or "/tmp"
+    return Path(os.path.realpath(root_arg))
 
 
 def dir_name(branch):
@@ -76,30 +76,30 @@ def dir_name(branch):
 
 
 def fetch():
-    r = subprocess.run(["git", "fetch", "-q", "--prune", "origin"],
+    result = subprocess.run(["git", "fetch", "-q", "--prune", "origin"],
                        capture_output=True, text=True)
-    if r.returncode != 0:
-        print(f"warning: git fetch origin failed: {r.stderr.strip()}",
+    if result.returncode != 0:
+        print(f"warning: git fetch origin failed: {result.stderr.strip()}",
               file=sys.stderr)
 
 
-def cmd_new(a):
-    root = root_of(a)
-    path = root / dir_name(a.branch)
-    if not re.fullmatch(r"[A-Za-z0-9._/-]+", a.branch) or git(
-            "check-ref-format", "--branch", a.branch, check=False).returncode:
-        sys.exit(f"refusing: {a.branch!r} is not a usable branch name")
+def cmd_new(args):
+    root = root_of(args)
+    path = root / dir_name(args.branch)
+    if not re.fullmatch(r"[A-Za-z0-9._/-]+", args.branch) or git(
+            "check-ref-format", "--branch", args.branch, check=False).returncode:
+        sys.exit(f"refusing: {args.branch!r} is not a usable branch name")
     fetch()
-    for ref in (f"refs/heads/{a.branch}", f"refs/remotes/origin/{a.branch}"):
+    for ref in (f"refs/heads/{args.branch}", f"refs/remotes/origin/{args.branch}"):
         if git("rev-parse", "-q", "--verify", ref, check=False).returncode == 0:
             sys.exit(f"refusing: {ref} already exists")
     if path.exists() or path.is_symlink():
         sys.exit(f"refusing: {path} already exists")
     root.mkdir(parents=True, exist_ok=True)
-    r = subprocess.run(["git", "worktree", "add", "-q", str(path), "-b",
-                        a.branch, a.base], capture_output=True, text=True)
-    if r.returncode != 0:
-        sys.exit(f"git worktree add failed:\n{r.stderr.strip()}")
+    result = subprocess.run(["git", "worktree", "add", "-q", str(path), "-b",
+                        args.branch, args.base], capture_output=True, text=True)
+    if result.returncode != 0:
+        sys.exit(f"git worktree add failed:\n{result.stderr.strip()}")
     print(path)
     return 0
 
@@ -129,8 +129,8 @@ def linked_worktrees():
 def age_minutes(path):
     """Minutes since the worktree's HEAD/index last changed."""
     gitdir = git("rev-parse", "--absolute-git-dir", cwd=path)
-    times = [os.path.getmtime(p) for p in (Path(gitdir) / "HEAD",
-                                           Path(gitdir) / "index") if p.exists()]
+    times = [os.path.getmtime(head_or_index) for head_or_index in (Path(gitdir) / "HEAD",
+                                           Path(gitdir) / "index") if head_or_index.exists()]
     return (time.time() - max(times)) / 60 if times else 0
 
 
@@ -144,28 +144,28 @@ class Landed:
         if self.ids is None:
             branches.TRUNK = BASE
             self.ids = branches.trunk_patch_ids(self.depth)
-        pids = [branches.patch_id(c) for c in commits]
-        readable = [p for p in pids if p]
-        return bool(readable) and all(p in self.ids for p in readable)
+        pids = [branches.patch_id(commit) for commit in commits]
+        readable = [patch for patch in pids if patch]
+        return bool(readable) and all(patch in self.ids for patch in readable)
 
 
-def verdict(w, landed, min_age):
+def verdict(worktree, landed, min_age):
     """-> (removable, description)."""
-    path, b = w["path"], w["branch"]
-    if b in PROTECTED:
+    path, branch = worktree["path"], worktree["branch"]
+    if branch in PROTECTED:
         # prune deletes the branch with -D after removing the worktree, and
         # "PR merged" is looked up by head name, which promotion PRs share.
-        return False, f"protected branch {b}; never pruned"
+        return False, f"protected branch {branch}; never pruned"
     dirty = bool(git("status", "--porcelain", cwd=path))
     ahead = git("rev-list", f"{BASE}..HEAD", cwd=path).split()
-    pushed = b is not None and git("rev-parse", "-q", "--verify",
-                                   f"refs/remotes/origin/{b}",
+    pushed = branch is not None and git("rev-parse", "-q", "--verify",
+                                   f"refs/remotes/origin/{branch}",
                                    check=False).returncode == 0
     if ahead:
         why = "landed" if landed.check(ahead) else "NOT landed"
-    elif b is None:
+    elif branch is None:
         why = "landed"  # detached at or behind the trunk: nothing to lose
-    elif branches.pr_merged(b):
+    elif branches.pr_merged(branch):
         why = "landed (PR merged)"
     elif not pushed:
         age = age_minutes(path)
@@ -173,57 +173,57 @@ def verdict(w, landed, min_age):
                else f"fresh, but touched {age:.0f}m ago (< --min-age {min_age})")
     else:
         why = "pushed, nothing ahead"
-    desc = (f"{'dirty' if dirty else 'clean'}  {b or '(detached)'}  "
+    desc = (f"{'dirty' if dirty else 'clean'}  {branch or '(detached)'}  "
             f"{len(ahead)} ahead, {why}; "
             + ("on origin" if pushed else "not on origin"))
     ok = not dirty and why in ("landed", "landed (PR merged)", "fresh")
     return ok, desc
 
 
-def cmd_prune(a):
-    root = root_of(a)
+def cmd_prune(args):
+    root = root_of(args)
     here = os.path.realpath(git("rev-parse", "--show-toplevel"))
     fetch()
-    landed = Landed(a.depth)
-    todo, n = [], 0
-    for w in linked_worktrees():
-        real = os.path.realpath(w["path"])
+    landed = Landed(args.depth)
+    todo, candidates = [], 0
+    for worktree in linked_worktrees():
+        real = os.path.realpath(worktree["path"])
         if not real.startswith(str(root) + os.sep):
             continue
-        n += 1
-        if w["prunable"]:
-            print(f"keep    {w['path']}  missing on disk (git worktree prune clears it)")
+        candidates += 1
+        if worktree["prunable"]:
+            print(f"keep    {worktree['path']}  missing on disk (git worktree prune clears it)")
             continue
-        if w["locked"] or real == here:
-            print(f"keep    {w['path']}  "
-                  + ("locked" if w["locked"] else "the worktree this runs in"))
+        if worktree["locked"] or real == here:
+            print(f"keep    {worktree['path']}  "
+                  + ("locked" if worktree["locked"] else "the worktree this runs in"))
             continue
-        ok, desc = verdict(w, landed, a.min_age)
-        print(f"{'remove' if ok else 'keep  '}  {w['path']}  {desc}", flush=True)
+        ok, desc = verdict(worktree, landed, args.min_age)
+        print(f"{'remove' if ok else 'keep  '}  {worktree['path']}  {desc}", flush=True)
         if ok:
-            todo.append(w)
-    if not n:
+            todo.append(worktree)
+    if not candidates:
         print(f"no linked worktrees under {root}")
         return 0
     if not todo:
         print("\nnothing to remove")
         return 0
-    if not a.yes:
+    if not args.yes:
         print(f"\n{len(todo)} removable; nothing done. Re-run with --yes.")
         return 0
     failed = 0
-    for w in todo:
-        r = git("worktree", "remove", w["path"], check=False)
-        if r.returncode:
+    for worktree in todo:
+        result = git("worktree", "remove", worktree["path"], check=False)
+        if result.returncode:
             failed += 1
-            print(f"FAILED  git worktree remove {w['path']}: {r.stderr.strip()}")
+            print(f"FAILED  git worktree remove {worktree['path']}: {result.stderr.strip()}")
             continue
-        print(f"removed {w['path']}")
-        if w["branch"]:
-            r = git("branch", "-D", w["branch"], check=False)
-            print(f"deleted branch {w['branch']}" if r.returncode == 0 else
-                  f"FAILED  git branch -D {w['branch']}: {r.stderr.strip()}")
-            failed += bool(r.returncode)
+        print(f"removed {worktree['path']}")
+        if worktree["branch"]:
+            result = git("branch", "-D", worktree["branch"], check=False)
+            print(f"deleted branch {worktree['branch']}" if result.returncode == 0 else
+                  f"FAILED  git branch -D {worktree['branch']}: {result.stderr.strip()}")
+            failed += bool(result.returncode)
     return 1 if failed else 0
 
 
@@ -231,19 +231,19 @@ def main(argv=None):
     ap = argparse.ArgumentParser(prog="worktree.py",
                                  description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
-    p = sub.add_parser("new")
-    p.add_argument("branch")
-    p.add_argument("base", nargs="?", default=BASE)
-    p.add_argument("--root")
-    p.set_defaults(fn=cmd_new)
-    p = sub.add_parser("prune")
-    p.add_argument("--yes", action="store_true")
-    p.add_argument("--root")
-    p.add_argument("--min-age", type=float, default=60, metavar="MIN")
-    p.add_argument("--depth", type=int, default=400)
-    p.set_defaults(fn=cmd_prune)
-    a = ap.parse_args(argv)
-    return a.fn(a)
+    subparser = sub.add_parser("new")
+    subparser.add_argument("branch")
+    subparser.add_argument("base", nargs="?", default=BASE)
+    subparser.add_argument("--root")
+    subparser.set_defaults(fn=cmd_new)
+    subparser = sub.add_parser("prune")
+    subparser.add_argument("--yes", action="store_true")
+    subparser.add_argument("--root")
+    subparser.add_argument("--min-age", type=float, default=60, metavar="MIN")
+    subparser.add_argument("--depth", type=int, default=400)
+    subparser.set_defaults(fn=cmd_prune)
+    args = ap.parse_args(argv)
+    return args.fn(args)
 
 
 if __name__ == "__main__":

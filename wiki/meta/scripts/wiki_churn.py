@@ -69,27 +69,27 @@ def churn(root, since=None):
 
     def flush():
         for path in touched_this_commit:
-            s = stats[path]
-            s['commits'] += 1
+            file_stats = stats[path]
+            file_stats['commits'] += 1
             # git log walks newest-first, so the first date seen for a path
             # is its most recent touch and the last date seen is its oldest.
-            if s['last_date'] is None:
-                s['last_date'] = date
-            s['first_date'] = date
+            if file_stats['last_date'] is None:
+                file_stats['last_date'] = date
+            file_stats['first_date'] = date
 
     for line in out.splitlines():
-        m = COMMIT_LINE.match(line)
-        if m:
+        match = COMMIT_LINE.match(line)
+        if match:
             flush()
-            date = m.group('date')
+            date = match.group('date')
             touched_this_commit = set()
             continue
-        m = NUMSTAT_LINE.match(line)
-        if m and m.group('path').startswith('wiki/'):
-            path = m.group('path')
+        match = NUMSTAT_LINE.match(line)
+        if match and match.group('path').startswith('wiki/'):
+            path = match.group('path')
             touched_this_commit.add(path)
-            added = m.group('added')
-            deleted = m.group('deleted')
+            added = match.group('added')
+            deleted = match.group('deleted')
             # '-' means git considers the file binary; not a real case for
             # wiki/*.md, but numstat's own escape hatch, so honor it as 0
             # rather than crashing on int().
@@ -115,9 +115,9 @@ def main():
             else repo_root(sys.argv))
 
     stats = churn(root, since=args.since)
-    rows = [(path, s) for path, s in stats.items()
-            if s['commits'] >= args.min_commits]
-    rows.sort(key=lambda r: (r[1]['commits'], r[1]['added'] + r[1]['deleted']),
+    rows = [(path, file_stats) for path, file_stats in stats.items()
+            if file_stats['commits'] >= args.min_commits]
+    rows.sort(key=lambda row: (row[1]['commits'], row[1]['added'] + row[1]['deleted']),
                reverse=True)
 
     if not rows:
@@ -127,10 +127,10 @@ def main():
 
     width = max(len(path) for path, _ in rows[:args.top])
     print(f"{'page':{width}}  {'commits':>7}  {'+/-':>9}  {'first':>10}  {'last':>10}")
-    for path, s in rows[:args.top]:
-        churn_str = f"+{s['added']}/-{s['deleted']}"
-        print(f"{path:{width}}  {s['commits']:>7}  {churn_str:>9}  "
-              f"{s['first_date']:>10}  {s['last_date']:>10}")
+    for path, file_stats in rows[:args.top]:
+        churn_str = f"+{file_stats['added']}/-{file_stats['deleted']}"
+        print(f"{path:{width}}  {file_stats['commits']:>7}  {churn_str:>9}  "
+              f"{file_stats['first_date']:>10}  {file_stats['last_date']:>10}")
 
     if len(rows) > args.top:
         print(f"... and {len(rows) - args.top} more page"

@@ -58,8 +58,8 @@ def bash_pretooluse_hooks(settings_path=SETTINGS):
         matcher = group.get("matcher", "")
         if "Bash" not in matcher.split("|"):
             continue
-        out += [h["command"] for h in group.get("hooks", [])
-                if h.get("type") == "command"]
+        out += [hook["command"] for hook in group.get("hooks", [])
+                if hook.get("type") == "command"]
     return out
 
 
@@ -92,8 +92,8 @@ def clean(text, limit=2000):
     """Printable text only. Hook reasons quote the agent's command and repo
     paths, so they can carry terminal escape sequences; a log line must not
     be able to rewrite the screen or hide the verdict."""
-    text = "".join(c if (c.isprintable() or c in "\n\t") else "?"
-                   for c in text)
+    text = "".join(char if (char.isprintable() or char in "\n\t") else "?"
+                   for char in text)
     return text[:limit] + (" [truncated]" if len(text) > limit else "")
 
 
@@ -147,16 +147,16 @@ def run_hooks(command, cwd, session, hooks=None, env=None,
         name = hook.strip().strip('"').rsplit("/", 1)[-1][:60]
         try:
             script = resolve_hook(hook, hook_root)
-        except ValueError as e:
-            results.append((name, "error", f"refused to run: {e}"))
+        except ValueError as error:
+            results.append((name, "error", f"refused to run: {error}"))
             continue
         try:
             proc = subprocess.run(
                 [str(script)], input=body, text=True,
                 capture_output=True, env=env, cwd=str(cwd),
                 timeout=HOOK_TIMEOUT)
-        except (OSError, subprocess.TimeoutExpired) as e:
-            results.append((name, "error", f"could not run: {e}"))
+        except (OSError, subprocess.TimeoutExpired) as error:
+            results.append((name, "error", f"could not run: {error}"))
             continue
         level, text = judge(name, proc)
         # A hook that says it did NOT check (no jq) is an error, not a pass.

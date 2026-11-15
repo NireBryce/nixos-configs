@@ -24,7 +24,7 @@ def wiki_md(root, pattern='*.md'):
     can't reintroduce that by globbing directly.
     """
     return sorted(
-        p for p in root.joinpath('wiki').rglob(pattern) if not p.is_symlink()
+        page for page in root.joinpath('wiki').rglob(pattern) if not page.is_symlink()
     )
 
 
@@ -64,9 +64,9 @@ def last_modified(text):
     reports a page missing the line at all; this just can't compare without
     it."""
     for line in text.splitlines()[:6]:
-        m = LAST_MODIFIED_LINE.match(line)
-        if m:
-            return datetime.date.fromisoformat(m.group(1))
+        match = LAST_MODIFIED_LINE.match(line)
+        if match:
+            return datetime.date.fromisoformat(match.group(1))
     return None
 
 
@@ -105,4 +105,4 @@ def check(name, order=None):
 
 def registered():
     """[(name, fn)] in run order."""
-    return [(n, fn) for n, (_, _, fn) in sorted(CHECKS.items(), key=lambda kv: kv[1][:2])]
+    return [(check_name, fn) for check_name, (_, _, fn) in sorted(CHECKS.items(), key=lambda kv: kv[1][:2])]

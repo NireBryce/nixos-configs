@@ -79,10 +79,10 @@ class Where(unittest.TestCase):
         self.state.write_text(json.dumps(st))
 
     def where(self, *args, env=None):
-        p = subprocess.run([sys.executable, str(WHERE), *args], cwd=self.repo,
+        completed = subprocess.run([sys.executable, str(WHERE), *args], cwd=self.repo,
                            env=env or self.env, text=True, capture_output=True)
-        self.assertEqual(p.returncode, 0, p.stderr)
-        return p.stdout
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        return completed.stdout
 
     def snapshot(self):
         """Everything where.py must leave alone (remote-tracking refs are
@@ -157,15 +157,15 @@ class Where(unittest.TestCase):
         self.assertEqual(self.log.read_text(), "")
 
     def test_outside_a_repo_and_bad_usage(self):
-        d = self.t / "plain"
-        d.mkdir()
-        p = subprocess.run([sys.executable, str(WHERE)], cwd=d, env=self.env,
+        plain_dir = self.t / "plain"
+        plain_dir.mkdir()
+        completed = subprocess.run([sys.executable, str(WHERE)], cwd=plain_dir, env=self.env,
                            text=True, capture_output=True)
-        self.assertEqual(p.returncode, 2)
-        p = subprocess.run([sys.executable, str(WHERE), "1", "2"],
+        self.assertEqual(completed.returncode, 2)
+        completed = subprocess.run([sys.executable, str(WHERE), "1", "2"],
                            cwd=self.repo, env=self.env, text=True,
                            capture_output=True)
-        self.assertEqual(p.returncode, 2)
+        self.assertEqual(completed.returncode, 2)
 
 
 if __name__ == "__main__":

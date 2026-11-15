@@ -61,25 +61,25 @@ def _signal_group(pgid, sig):
 
 def stop(procs, grace=3.0, settle=5.0):
     procs = list(procs)
-    for p in procs:
-        _signal_group(p.pid, signal.SIGTERM)
+    for proc in procs:
+        _signal_group(proc.pid, signal.SIGTERM)
     deadline = time.time() + grace
-    for p in procs:
+    for proc in procs:
         try:
-            p.wait(max(0.0, deadline - time.time()))
+            proc.wait(max(0.0, deadline - time.time()))
         except subprocess.TimeoutExpired:
             pass
-    for p in procs:
-        _signal_group(p.pid, signal.SIGKILL)
+    for proc in procs:
+        _signal_group(proc.pid, signal.SIGKILL)
     deadline = time.time() + settle
-    for p in procs:
+    for proc in procs:
         try:
-            p.wait(max(0.0, deadline - time.time()))
+            proc.wait(max(0.0, deadline - time.time()))
         except subprocess.TimeoutExpired:
             pass
-    left = [p.pid for p in procs]
+    left = [proc.pid for proc in procs]
     while left and time.time() < deadline:
-        left = [g for g in left if group_alive(g)]
+        left = [pgid for pgid in left if group_alive(pgid)]
         if left:
             time.sleep(0.05)
     return left
@@ -89,8 +89,8 @@ def proc_start(pid):
     """Start time of `pid` in clock ticks since boot (/proc/<pid>/stat
     field 22), or None if there is no such process or no /proc."""
     try:
-        with open(f"/proc/{pid}/stat") as f:
-            st = f.read()
-        return int(st[st.rindex(")") + 2:].split()[19])
+        with open(f"/proc/{pid}/stat") as stat_file:
+            stat_text = stat_file.read()
+        return int(stat_text[stat_text.rindex(")") + 2:].split()[19])
     except (OSError, ValueError, IndexError, OverflowError):
         return None

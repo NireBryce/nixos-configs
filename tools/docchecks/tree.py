@@ -35,8 +35,8 @@ def roster(root):
     needs no edit here."""
     hosts = actual_hosts(root)
     short = lambda name: name.removeprefix(PREFIX)
-    return ([short(n) for n in hosts],
-            {short(n) for n, cls in hosts.items() if cls == 'nixos'})
+    return ([short(host_name) for host_name in hosts],
+            {short(host_name) for host_name, cls in hosts.items() if cls == 'nixos'})
 
 
 def host_imports(root, categories, hosts=None):

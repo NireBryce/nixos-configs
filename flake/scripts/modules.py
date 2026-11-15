@@ -77,19 +77,19 @@ def graph(root, run=subprocess.run):
     """flake.moduleGraph for the flake around <modules-dir>, or exit with why."""
     flake = pathlib.Path(root).resolve().parent
     try:
-        r = run(['nix', 'eval', '--json', f'path:{flake}#moduleGraph'],
+        result = run(['nix', 'eval', '--json', f'path:{flake}#moduleGraph'],
                 capture_output=True, text=True)
     except FileNotFoundError:
         sys.exit('error: nix is not installed; these checks read what the flake evaluates to')
-    if r.returncode:
-        lines = r.stderr.strip().splitlines()
-        sys.exit(f'error: nix eval of moduleGraph failed: {lines[-1] if lines else r.returncode}')
-    return json.loads(r.stdout)
+    if result.returncode:
+        lines = result.stderr.strip().splitlines()
+        sys.exit(f'error: nix eval of moduleGraph failed: {lines[-1] if lines else result.returncode}')
+    return json.loads(result.stdout)
 
 
 def ancestors(path):
-    p = pathlib.PurePosixPath(path)
-    return [str(a) for a in p.parents if str(a) != '.']
+    pure_path = pathlib.PurePosixPath(path)
+    return [str(ancestor) for ancestor in pure_path.parents if str(ancestor) != '.']
 
 
 def untracked(root):
@@ -127,9 +127,9 @@ def orphans(doc, expected=()):
     Used by `add`, not by `check`. `expected` names modules that are orphans
     on purpose (the one `add` just created).
     """
-    hits = [n for n in (doc.get('orphans') or []) if n not in expected]
-    for n in hits:
-        print(f"ORPHAN     {n!r} is reached by no `includes`/`enables`, so no host gets it")
+    hits = [orphan for orphan in (doc.get('orphans') or []) if orphan not in expected]
+    for orphan in hits:
+        print(f"ORPHAN     {orphan!r} is reached by no `includes`/`enables`, so no host gets it")
     if hits:
         see('orphan')
     return hits
@@ -143,13 +143,13 @@ def options(root):
     don't count.
     """
     hits = []
-    for f in sorted(pathlib.Path(root).rglob('*.nix')):
-        if f.name.endswith('-options.nix') or f.name in OPTIONS_EXEMPT:
+    for nix_file in sorted(pathlib.Path(root).rglob('*.nix')):
+        if nix_file.name.endswith('-options.nix') or nix_file.name in OPTIONS_EXEMPT:
             continue
-        code = [ln for ln in f.read_text().splitlines() if not ln.lstrip().startswith('#')]
+        code = [ln for ln in nix_file.read_text().splitlines() if not ln.lstrip().startswith('#')]
         if any(DECLARES_OPTION.search(ln) for ln in code):
-            hits.append(str(f))
-            print(f"OPTIONS    {f} declares an option but is not named <topic>-options.nix")
+            hits.append(str(nix_file))
+            print(f"OPTIONS    {nix_file} declares an option but is not named <topic>-options.nix")
     if hits:
         see('options')
     return hits
@@ -171,20 +171,24 @@ def static_document(root):
 def drift(doc, static):
     """Where the file-only reading disagrees with the evaluated graph."""
     views = {
-        'category': lambda d: {n: c['dir'] for n, c in d['categories'].items()},
-        'module':   lambda d: {n: (m['path'], sorted(m['classes'])) for n, m in d['modules'].items()},
-        'includes': lambda d: d.get('includes') or {},
-        'enables':  lambda d: d.get('enables') or {},
+        'category': lambda graph_doc: {
+            entry_name: category['dir']
+            for entry_name, category in graph_doc['categories'].items()},
+        'module':   lambda graph_doc: {
+            entry_name: (module['path'], sorted(module['classes']))
+            for entry_name, module in graph_doc['modules'].items()},
+        'includes': lambda graph_doc: graph_doc.get('includes') or {},
+        'enables':  lambda graph_doc: graph_doc.get('enables') or {},
     }
     hits = []
     for kind, view in views.items():
-        a, b = view(doc), view(static)
-        for name in sorted(set(a) | set(b)):
-            if a.get(name) != b.get(name):
-                hits.append(f"DRIFT      {kind} {name!r}: evaluated {a.get(name)!r}, "
-                            f"read from the files {b.get(name)!r}")
-    for h in hits:
-        print(h)
+        evaluated, from_files = view(doc), view(static)
+        for name in sorted(set(evaluated) | set(from_files)):
+            if evaluated.get(name) != from_files.get(name):
+                hits.append(f"DRIFT      {kind} {name!r}: evaluated {evaluated.get(name)!r}, "
+                            f"read from the files {from_files.get(name)!r}")
+    for hit in hits:
+        print(hit)
     if hits:
         see('drift')
     return hits
@@ -260,8 +264,8 @@ def add(root, cls, target, description, run=subprocess.run):
         return 1
 
     doc = graph(root, run)
-    category_at = {c['dir']: name for name, c in doc['categories'].items()}
-    category = next((category_at[a] for a in ancestors(target) if a in category_at), None)
+    category_at = {category_doc['dir']: name for name, category_doc in doc['categories'].items()}
+    category = next((category_at[ancestor] for ancestor in ancestors(target) if ancestor in category_at), None)
     if category is None:
         print(f"error: {target} sits outside every category; a module must be "
               f"under a category's folder (only entry points live outside, and "

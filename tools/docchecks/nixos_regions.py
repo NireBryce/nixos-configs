@@ -44,16 +44,16 @@ DEFAULT_COUNT_ROWS = [
 
 
 def _settings(root):
-    s = {**Config(root).section('regions')}
+    section = {**Config(root).section('regions')}
     return {
-        'class_order': s.get('class-order', CLASS_ORDER),
-        'homelab': s.get('homelab', 'homelab-config/homelab'),
-        'nested_max': int(s.get('nested-named-max', 3)),
-        'pages': s.get('pages-dir', 'wiki/config-structure/categories'),
-        'tailnet': s.get('tailnet-template', 'ts-{short}'),
-        'wipes_import': s.get('wipes-import', 'impermanence'),
-        'wipes_darwin': s.get('wipes-darwin-label', 'n/a'),
-        'counts': s.get('module-counts', DEFAULT_COUNT_ROWS),
+        'class_order': section.get('class-order', CLASS_ORDER),
+        'homelab': section.get('homelab', 'homelab-config/homelab'),
+        'nested_max': int(section.get('nested-named-max', 3)),
+        'pages': section.get('pages-dir', 'wiki/config-structure/categories'),
+        'tailnet': section.get('tailnet-template', 'ts-{short}'),
+        'wipes_import': section.get('wipes-import', 'impermanence'),
+        'wipes_darwin': section.get('wipes-darwin-label', 'n/a'),
+        'counts': section.get('module-counts', DEFAULT_COUNT_ROWS),
     }
 
 
@@ -69,11 +69,11 @@ def host_rows(root):
     hosts = tree.actual_hosts(root)
     if not hosts:
         raise GenError('hosts.nix declares no nire-* hosts (or moved)')
-    shorts = [n.removeprefix('nire-') for n in hosts]
-    for s in shorts:
-        p = root / 'flake/modules/host-config' / f'{s}-configuration.nix'
-        if not p.exists():
-            raise GenError(f'no {p.relative_to(root)} for nire-{s}')
+    shorts = [host.removeprefix('nire-') for host in hosts]
+    for short_name in shorts:
+        config_path = root / 'flake/modules/host-config' / f'{short_name}-configuration.nix'
+        if not config_path.exists():
+            raise GenError(f'no {config_path.relative_to(root)} for nire-{short_name}')
     imports = tree.host_imports(root, categories, shorts)
     for name, cls in hosts.items():
         short = name.removeprefix('nire-')
@@ -100,8 +100,8 @@ def category_rows(homelab):
         modules = root / 'flake/modules'
         pages = root / st['pages']
         found = []
-        for name, d in tree.find_categories(root).items():
-            rel = d.relative_to(modules).as_posix()
+        for name, category_dir in tree.find_categories(root).items():
+            rel = category_dir.relative_to(modules).as_posix()
             if (rel == st['homelab']
                     or rel.startswith(st['homelab'] + '/')) != homelab:
                 continue
@@ -111,20 +111,21 @@ def category_rows(homelab):
                 link = f'{name}/00-INDEX.md'
             else:
                 continue  # no page, no row
-            nested = sorted(c.name for c in tree.categories_under(root, d))
+            nested = sorted(nested_dir.name
+                            for nested_dir in tree.categories_under(root, category_dir))
             dir_cell = f'`{rel}/`'
             if 0 < len(nested) <= st['nested_max']:
-                dir_cell += ' (+ nested ' + ', '.join(f'`{n}`'
-                                                      for n in nested) + ')'
+                dir_cell += ' (+ nested ' + ', '.join(f'`{nested_name}`'
+                                                      for nested_name in nested) + ')'
             elif nested:
                 dir_cell += f' (+ {len(nested)} nested)'
-            classes = tree.category_classes(d)
-            ordered = ([c for c in st['class_order'] if c in classes]
+            classes = tree.category_classes(category_dir)
+            ordered = ([class_name for class_name in st['class_order'] if class_name in classes]
                        + sorted(classes - set(st['class_order'])))
             found.append(((rel.split('/')[0], name), name, {
                 'Category': f'[{name}]({link})', 'Directory': dir_cell,
                 'Class(es)': ', '.join(ordered)}))
-        for _, name, cells in sorted(found, key=lambda t: t[0]):
+        for _, name, cells in sorted(found, key=lambda entry: entry[0]):
             yield name, cells
     return rows
 
@@ -138,17 +139,17 @@ def count_rows(root):
     files = sorted((root / 'flake/modules').rglob('*.nix'))
     if not files:
         raise GenError('no .nix files under flake/modules/')
-    texts = [f.read_text() for f in files]
+    texts = [file_path.read_text() for file_path in files]
     for row in st['counts']:
         label, grep, regex = (row.get('label'), row.get('grep'),
                               row.get('regex'))
         if grep is None and regex is None:
-            n = len(files)
+            file_count = len(files)
         elif regex:
-            n = sum(1 for t in texts if re.search(regex, t))
+            file_count = sum(1 for text in texts if re.search(regex, text))
         else:
-            n = sum(1 for t in texts if grep in t)
-        yield label, {'What': label, 'Files': str(n)}
+            file_count = sum(1 for text in texts if grep in text)
+        yield label, {'What': label, 'Files': str(file_count)}
 
 
 def module_layout(root):
@@ -169,23 +170,23 @@ def module_layout(root):
         raise GenError('no categories under flake/modules/')
     flake = pathlib_path(__file__).resolve().parents[2] / 'flake'
     try:
-        r = subprocess.run(
+        result = subprocess.run(
             ['nix', 'run', f'{flake}#module-graph', '--',
              'tree', '-', '--depth', '1', '--categories-only'],
             input=json.dumps(doc), capture_output=True, text=True)
     except FileNotFoundError:
         raise GenError('nix is not installed; the diagram is drawn by the '
                        'flake-module-graph input')
-    if r.returncode:
-        lines = r.stderr.strip().splitlines()
+    if result.returncode:
+        lines = result.stderr.strip().splitlines()
         raise GenError(
-            f'module-graph failed: {lines[-1] if lines else r.returncode}')
-    return '```mermaid\n' + r.stdout.rstrip('\n') + '\n```'
+            f'module-graph failed: {lines[-1] if lines else result.returncode}')
+    return '```mermaid\n' + result.stdout.rstrip('\n') + '\n```'
 
 
-def pathlib_path(p):
+def pathlib_path(path_text):
     from pathlib import Path
-    return Path(p)
+    return Path(path_text)
 
 
 def register():

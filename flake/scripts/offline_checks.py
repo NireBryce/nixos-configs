@@ -75,7 +75,7 @@ def git(*args, check=True):
 
 def staged_paths():
     out = git("diff", "--cached", "--name-only", "--diff-filter=ACMR", "-z")
-    return [p for p in out.split("\0") if p]
+    return [path for path in out.split("\0") if path]
 
 
 def staged_text(path):
@@ -90,27 +90,27 @@ def check_staged_file(path):
     if name.suffix == ".py":
         try:
             compile(data, path, "exec")
-        except SyntaxError as e:
-            return [f"{path}:{e.lineno}: python syntax: {e.msg}"]
+        except SyntaxError as error:
+            return [f"{path}:{error.lineno}: python syntax: {error.msg}"]
     elif name.suffix in (".sh", ".bash") or path.startswith(".githooks/"):
-        r = subprocess.run(["bash", "-n"], input=data, capture_output=True)
-        if r.returncode:
-            return [f"{path}: bash -n: {r.stderr.decode().strip()}"]
+        result = subprocess.run(["bash", "-n"], input=data, capture_output=True)
+        if result.returncode:
+            return [f"{path}: bash -n: {result.stderr.decode().strip()}"]
     elif name.suffix == ".json":
         try:
             json.loads(data)
-        except ValueError as e:
-            return [f"{path}: json: {e}"]
+        except ValueError as error:
+            return [f"{path}: json: {error}"]
     elif name.suffix == ".toml":
         try:
             tomllib.loads(data.decode())
-        except (tomllib.TOMLDecodeError, UnicodeDecodeError) as e:
-            return [f"{path}: toml: {e}"]
+        except (tomllib.TOMLDecodeError, UnicodeDecodeError) as error:
+            return [f"{path}: toml: {error}"]
     elif name.suffix == ".nix" and shutil.which("nix-instantiate"):
-        r = subprocess.run(["nix-instantiate", "--parse", "-"], input=data,
+        result = subprocess.run(["nix-instantiate", "--parse", "-"], input=data,
                            capture_output=True)
-        if r.returncode:
-            return [f"{path}: nix parse: {r.stderr.decode().strip()[:400]}"]
+        if result.returncode:
+            return [f"{path}: nix parse: {result.stderr.decode().strip()[:400]}"]
     return []
 
 
@@ -123,15 +123,15 @@ def run_wiki_lint():
     safe wherever the tool exists."""
     if not shutil.which("factcheck"):
         return None
-    r = subprocess.run(["factcheck", "check"], capture_output=True, text=True)
-    return [] if r.returncode == 0 else (r.stdout + r.stderr).strip().splitlines()
+    result = subprocess.run(["factcheck", "check"], capture_output=True, text=True)
+    return [] if result.returncode == 0 else (result.stdout + result.stderr).strip().splitlines()
 
 
 def cmd_staged():
     problems = []
     paths = staged_paths()
-    for p in paths:
-        problems += check_staged_file(p)
+    for path in paths:
+        problems += check_staged_file(path)
     lint = run_wiki_lint()
     lint_note = ("and the wiki lint passed" if lint == [] else
                  "the wiki lint skipped (no factcheck on PATH)")
@@ -160,16 +160,16 @@ def classify(lines):
     """[(argv|None, label, reason|None)] -- argv None means skipped."""
     out = []
     for line in lines:
-        m = re.fullmatch(r"(cd flake && )?python3 (\S+\.py)(?: (.*))?", line)
-        if not m:
+        match = re.fullmatch(r"(cd flake && )?python3 (\S+\.py)(?: (.*))?", line)
+        if not match:
             first = line.split()[0] if line.split() else ""
             out.append((None, line,
                         NOT_PYTHON_REASONS.get(first, NOT_PYTHON)))
             continue
         # `cd flake && python3 scripts/x.py` and `python3 flake/scripts/x.py`
         # are one script; label it by its repo-relative path.
-        script = ("flake/" if m.group(1) else "") + m.group(2)
-        rest = (m.group(3) or "").split()
+        script = ("flake/" if match.group(1) else "") + match.group(2)
+        rest = (match.group(3) or "").split()
         if script in NEEDS_NIX:
             out.append((None, script, NEEDS_NIX[script]))
             continue
@@ -189,23 +189,23 @@ def clean_env():
     """
     out = subprocess.run(["git", "rev-parse", "--local-env-vars"],
                          capture_output=True, text=True).stdout.split()
-    return {k: v for k, v in os.environ.items() if k not in out}
+    return {name: value for name, value in os.environ.items() if name not in out}
 
 
 def run_one(argv):
-    r = subprocess.run(argv, cwd=REPO, capture_output=True, text=True,
+    result = subprocess.run(argv, cwd=REPO, capture_output=True, text=True,
                        env=clean_env())
-    return r.returncode, (r.stdout + r.stderr)
+    return result.returncode, (result.stdout + result.stderr)
 
 
 def cmd_preflight():
     steps = classify(preflight_lines())
-    runnable = [(a, l) for a, l, _ in steps if a]
-    for _, label, reason in (s for s in steps if not s[0]):
+    runnable = [(argv, step_label) for argv, step_label, _ in steps if argv]
+    for _, label, reason in (step for step in steps if not step[0]):
         print(f"skip  {label}  -- {reason}")
     failed = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
-        futures = {pool.submit(run_one, a): l for a, l in runnable}
+        futures = {pool.submit(run_one, argv): step_label for argv, step_label in runnable}
         for fut in concurrent.futures.as_completed(futures):
             label = futures[fut]
             rc, out = fut.result()

@@ -152,11 +152,11 @@ def scan_packages():
     them. Anything under a `_` directory is skipped, matching import-tree.
     """
     found = {}
-    for p in sorted((FLAKE / 'modules/packages-config').rglob('*.nix')):
-        if any(part.startswith('_') for part in p.parts):
+    for nix_file in sorted((FLAKE / 'modules/packages-config').rglob('*.nix')):
+        if any(part.startswith('_') for part in nix_file.parts):
             continue
-        rel  = p.relative_to(FLAKE / 'modules')
-        text = strip_comments(p.read_text())
+        rel  = nix_file.relative_to(FLAKE / 'modules')
+        text = strip_comments(nix_file.read_text())
         # Whether this file has already had the darwin question asked of it.
         # Tracked PER ENTRY rather than skipping the file, because a package
         # can be spread across sibling modules: terminals/kitty/ is kitty.nix
@@ -195,8 +195,8 @@ def cask_homepages(tokens):
     if not CASK_API.exists():
         return {}
     payload = json.loads(json.loads(CASK_API.read_text())['payload'])
-    return {c['token']: normalize(c.get('homepage'))
-            for c in payload if c['token'] in tokens}
+    return {cask['token']: normalize(cask.get('homepage'))
+            for cask in payload if cask['token'] in tokens}
 
 
 def normalize(url):
@@ -233,11 +233,11 @@ def match_cask(pkg, homepage, tokens, homepages):
 
 
 def probe(names, system):
-    with tempfile.NamedTemporaryFile('w', suffix='.json') as f:
-        json.dump(sorted(names), f)
-        f.flush()
+    with tempfile.NamedTemporaryFile('w', suffix='.json') as names_file:
+        json.dump(sorted(names), names_file)
+        names_file.flush()
         expr = PROBE % {'flake': FLAKE, 'system': system,
-                        'names': json.dumps(f.name)}
+                        'names': json.dumps(names_file.name)}
         out = subprocess.run(['nix', 'eval', '--impure', '--raw', '--expr', expr],
                              capture_output=True, text=True)
     if out.returncode != 0:
@@ -286,28 +286,28 @@ def report_duplicates(system):
     homepages = cask_homepages(tokens)
 
     hits = []
-    for r in rows:
-        if r['verdict'] != 'available':
+    for row in rows:
+        if row['verdict'] != 'available':
             continue
-        places = sorted(modules[r['name']])
+        places = sorted(modules[row['name']])
         # Any one of a package's modules handling darwin settles it for all of
         # them -- see scan_packages.
         if any(guarded for _, _, guarded in places):
             continue
-        cask = match_cask(r['name'], r['homepage'], tokens, homepages)
+        cask = match_cask(row['name'], row['homepage'], tokens, homepages)
         if cask:
-            hits.append((r['name'], cask, [(p, s) for p, s, _ in places]))
+            hits.append((row['name'], cask, [(place_path, place_shape) for place_path, place_shape, _ in places]))
 
     print(f'{system}\n')
     if not hits:
         print('no packages are installed by both nixpkgs and a homebrew cask.')
         return 0
 
-    w = max(len(n) for n, _, _ in hits)
-    print(f'{"PACKAGE":<{w}}  {"CASK":<24}  SHAPE     MODULE')
+    width = max(len(package_name) for package_name, _, _ in hits)
+    print(f'{"PACKAGE":<{width}}  {"CASK":<24}  SHAPE     MODULE')
     for name, cask, places in sorted(hits):
-        for i, (path, shape) in enumerate(places):
-            head = f'{name:<{w}}  {cask:<24}' if i == 0 else ' ' * (w + 26)
+        for index, (path, shape) in enumerate(places):
+            head = f'{name:<{width}}  {cask:<24}' if index == 0 else ' ' * (width + 26)
             print(f'{head}  {shape:<8}  {path}')
     # .replace, not .format: the help text contains literal Nix braces
     # (`{ nullable = true; }`) and str.format reads those as fields.
@@ -322,8 +322,8 @@ def main():
     # Interpolated into the Nix probe expression, so only a system double
     # (e.g. x86_64-linux) is accepted.
     ap.add_argument('--system', default='aarch64-darwin',
-                    type=lambda v: v if re.fullmatch(r'[a-z0-9_]+-[a-z0-9_]+', v)
-                    else ap.error(f'--system {v!r}: expected e.g. x86_64-linux'))
+                    type=lambda value: value if re.fullmatch(r'[a-z0-9_]+-[a-z0-9_]+', value)
+                    else ap.error(f'--system {value!r}: expected e.g. x86_64-linux'))
     ap.add_argument('--all', action='store_true',
                     help='derive the list from home.packages across packages-config/')
     ap.add_argument('--duplicates', action='store_true',
@@ -342,18 +342,18 @@ def main():
     rows      = probe(names, args.system)
     tokens    = our_casks()
     homepages = cask_homepages(tokens)
-    w         = max([len(r['name']) for r in rows] + [7])
+    width         = max([len(row['name']) for row in rows] + [7])
 
     print(f'{args.system}\n')
     if not homepages:
         # Not fatal: the name signal still works anywhere. Said out loud
         # because a silently weaker CASK column reads exactly like a clean one.
         print(f'note: {CASK_API} not found -- cask matching is by name only\n')
-    print(f'{"PACKAGE":<{w}}  {"VERDICT":<11}  {"BROKEN":<6}  CASK')
-    for r in sorted(rows, key=lambda r: (ORDER.get(r['verdict'], 9), r['name'])):
-        print(f'{r["name"]:<{w}}  {r["verdict"]:<11}  '
-              f'{"yes" if r["broken"] else "":<6}  '
-              f'{match_cask(r["name"], r["homepage"], tokens, homepages)}')
+    print(f'{"PACKAGE":<{width}}  {"VERDICT":<11}  {"BROKEN":<6}  CASK')
+    for row in sorted(rows, key=lambda row: (ORDER.get(row['verdict'], 9), row['name'])):
+        print(f'{row["name"]:<{width}}  {row["verdict"]:<11}  '
+              f'{"yes" if row["broken"] else "":<6}  '
+              f'{match_cask(row["name"], row["homepage"], tokens, homepages)}')
 
 
 if __name__ == '__main__':
