@@ -14,15 +14,11 @@ paths:
   `flake/scripts/`. Mostly Python: the whole thing in Python (`modules.py`
   is the precedent). A bash-wrapping-Nix-wrapping-Python checker here
   shipped both bugs the shape invites.
-- **Pick the language the script is easiest in; suggest a language the repo
-  doesn't use only when it is a clear win.** The repo's scripts are bash
-  and Python 3 (`jq` inside bash is the one extra tool), and the tooling
-  that checks scripts (`just short-names`, `ruff`, the unit tests) covers
-  only those. Choose between them by the rule above. Suggest anything else
-  (`awk`, `nu`, a Nix expression) in one sentence and let the user decide,
-  because each one adds a toolchain that every host, darwin included, must
-  build, plus a language the checks don't cover. Don't suggest it for a
-  script that is a few lines or that extends an existing file.
+- **Default to bash, or ideally Python.** Suggest another language (`awk`,
+  `nu`, a Nix expression) only when it is a clear win, in one sentence, and
+  let the user decide: each one adds a toolchain every host must build and
+  isn't covered by `just short-names`, `ruff` or the tests. Skip the
+  suggestion for a few-line script or one that extends an existing file.
 - `.agents/scripts/` (behind `just agent`) is the exception: agent-written
   scripts for recurring lookups, any language. Adding one: skill
   `agent-scripts`.
