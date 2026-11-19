@@ -14,6 +14,19 @@ paths:
   `flake/scripts/`. Mostly Python: the whole thing in Python (`modules.py`
   is the precedent). A bash-wrapping-Nix-wrapping-Python checker here
   shipped both bugs the shape invites.
+- **Suggest another language when it fits the script better, unless that is
+  a bad idea.** Before writing a script in Python, check whether another
+  language is clearly easier for it: `jq` or `nu` for reshaping JSON, `awk`
+  for column filters, bash for chaining commands, Nix for evaluating Nix.
+  If so, say so in one sentence and let the user choose; don't switch
+  silently. Stay with Python when:
+  - the language isn't on every host that runs the script (python3 and bash
+    are; anything else needs a package, which needs the user's approval, and
+    on darwin it must also build there);
+  - the script extends an existing Python file, or a checker whose tests are
+    in Python (`just short-names` and `test_recurring.py` only cover Python);
+  - the gain is small, or it would add a second language to a directory that
+    has one.
 - `.agents/scripts/` (behind `just agent`) is the exception: agent-written
   scripts for recurring lookups, any language. Adding one: skill
   `agent-scripts`.
