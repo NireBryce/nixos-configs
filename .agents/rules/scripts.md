@@ -25,7 +25,9 @@ paths:
 - **A script's entry point is a `just` recipe**, not a path typed by hand: a
   one-line recipe in `.justfile` for `flake/scripts/`, or in
   `.agents/scripts/agent.just` for agent scripts. The recipe is what shows
-  up in bare `just` and in permission prompts.
+  up in bare `just` and in permission prompts. The recipe only points at the
+  script; logic stays in the script. If a recipe needs real logic, ask the
+  user when you propose the script.
 - A new checker is tested against a case it should catch, in the same
   commit (§1 in `wiki/agent-lessons-learned.md`).
 - A `preflight` recipe step must use literal paths, not `{{scripts}}`:
