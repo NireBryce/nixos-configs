@@ -296,6 +296,16 @@ a decision they never saw, and the diff doesn't show which parts were
 judgment calls. Write "none" when there were none; leave out choices the
 request or this file already dictates.
 
+**Surface related research you already hit.** Below the choices list, add a
+"Related documents, concepts and research" section when a document, concept
+or piece of research turned up that bears on the work: in your own knowledge
+or in something you read while doing the task. One line each, with a link or
+path. Mention a find in chat when it comes up, in a sentence, if the user
+would want it before the end. Don't search for these, don't read more to
+find them, and don't summarize them: the tokens were spent already, and the
+section only records what they bought. Write "none" or omit the section when
+nothing turned up.
+
 **Then** run the preflight as skill `ship` step 0 describes (`just
 preflight` is what CI runs), and load skill `wiki-sync` for any wiki page the
 change made stale.
