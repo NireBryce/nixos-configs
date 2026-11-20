@@ -14,9 +14,20 @@ paths:
   `flake/scripts/`. Mostly Python: the whole thing in Python (`modules.py`
   is the precedent). A bash-wrapping-Nix-wrapping-Python checker here
   shipped both bugs the shape invites.
+- **Default to bash, or ideally Python.** Suggest another language (`awk`,
+  `nu`, a Nix expression) only when it is a clear win, in one sentence, and
+  let the user decide: each one adds a toolchain every host must build and
+  isn't covered by `just short-names`, `ruff` or the tests. Skip the
+  suggestion for a few-line script or one that extends an existing file.
 - `.agents/scripts/` (behind `just agent`) is the exception: agent-written
   scripts for recurring lookups, any language. Adding one: skill
   `agent-scripts`.
+- **A script's entry point is a `just` recipe**, not a path typed by hand: a
+  one-line recipe in `.justfile` for `flake/scripts/`, or in
+  `.agents/scripts/agent.just` for agent scripts. The recipe is what shows
+  up in bare `just` and in permission prompts. The recipe only points at the
+  script; logic stays in the script. If a recipe needs real logic, ask the
+  user when you propose the script.
 - A new checker is tested against a case it should catch, in the same
   commit (§1 in `wiki/agent-lessons-learned.md`).
 - A `preflight` recipe step must use literal paths, not `{{scripts}}`:
