@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Tests for the one-time git-signing note in rebuild.sh.
 
-After a successful NixOS `boot` or `switch`, rebuild.sh prints a note to run
+After a successful NixOS `build`, `boot` or `switch`, rebuild.sh prints a note to run
 `just retire-old-ssh-sign` when the evaluated config carries the new
 `git-ssh-sign` wrapper and the old script's override or file still exists. It
 must stay silent otherwise, so it stops appearing once the cleanup is done,
@@ -99,13 +99,23 @@ class RebuildSshSignNote(unittest.TestCase):
         self.assertNotIn(NOTE, result.stderr)
 
     def test_failed_rebuild_keeps_its_status_and_prints_no_note(self):
-        for action in ("boot", "switch"):
+        for action in ("build", "boot", "switch"):
             with self.subTest(action=action):
                 result = self.rebuild(action, STUB_NH_STATUS="3")
                 self.assertEqual(result.returncode, 3)
                 self.assertNotIn(NOTE, result.stderr)
 
-    def test_build_prints_no_note(self):
+    def test_build_prints_the_note_worded_for_after_a_switch_or_boot(self):
+        result = self.rebuild("build")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn(NOTE, result.stderr)
+        self.assertIn("After you switch or boot", result.stderr)
+
+    def test_build_is_silent_once_the_cleanup_is_done(self):
+        subprocess.run(["git", "-C", str(self.flake), "config", "--local",
+                        "--unset", "gpg.ssh.program"], check=True,
+                       env=self.env)
+        self.old_script.unlink()
         result = self.rebuild("build")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertNotIn(NOTE, result.stderr)

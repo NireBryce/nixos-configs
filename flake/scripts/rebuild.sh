@@ -84,11 +84,7 @@ if [ "$class" = darwin ]; then
     exec nh darwin "$action" "$flake" --hostname "$host" -o "$flake/result"
 fi
 
-if [ "$action" = build ]; then
-    exec nh os build "$flake" --hostname "$host" -o "$flake/result"
-fi
-
-# One-time note, shown after a boot or switch: the hand-made git signing
+# One-time note, shown after a build, boot or switch: the hand-made git signing
 # script from before elly-git.nix set gpg.ssh.program is still wired in by a
 # repo-local override, which wins over the new wrapper. Printed only when the
 # evaluated config carries the new wrapper and the override or the old script
@@ -102,18 +98,18 @@ ssh_sign_note() {
     [ "$check_status" -eq 4 ] || return 0
     echo >&2
     echo "ONE-TIME NOTE: an old git signing script is still wired in and overrides the" >&2
-    if [ "$action" = boot ]; then
-        echo "  new one. After you reboot, run \`just retire-old-ssh-sign\` (dry run), then" >&2
-    else
-        echo "  new one. Run \`just retire-old-ssh-sign\` (dry run), then" >&2
-    fi
+    case "$action" in
+        build) echo "  new one. After you switch or boot, run \`just retire-old-ssh-sign\` (dry run), then" >&2 ;;
+        boot)  echo "  new one. After you reboot, run \`just retire-old-ssh-sign\` (dry run), then" >&2 ;;
+        *)     echo "  new one. Run \`just retire-old-ssh-sign\` (dry run), then" >&2 ;;
+    esac
     echo "  \`just retire-old-ssh-sign --apply --remove-script\`. This note stops once it is" >&2
     echo "  done; it does not repeat. See wiki/ssh/commit-signing.md." >&2
 }
 
-if [ "$action" = boot ]; then
+if [ "$action" = build ] || [ "$action" = boot ]; then
     status=0
-    nh os boot "$flake" --hostname "$host" -o "$flake/result" || status=$?
+    nh os "$action" "$flake" --hostname "$host" -o "$flake/result" || status=$?
     if [ "$status" -eq 0 ]; then ssh_sign_note; fi
     exit "$status"
 fi

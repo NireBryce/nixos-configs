@@ -335,6 +335,7 @@ preflight-offline:
 build:
     # Runs on the host itself: no remote builder and no binfmt, so a NixOS host
     # cannot be built from the Mac. nire-lysithea IS the Mac, and builds here.
+    # On NixOS it also prints the one-time `retire-old-ssh-sign` reminder.
     @echo "==> building {{host}}   (override: just host=<other> build)"
     @{{scripts}}/rebuild.sh build {{flake}} {{host}}
 
