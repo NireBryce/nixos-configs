@@ -31,7 +31,7 @@ root holds only entry points.
   [disk formatting](fleet/disk-formatting.md),
   [name resolution](fleet/name-resolution.md), [managing the tailnet](fleet/tailnet.md),
   [durandal gaming](fleet/durandal-gaming.md).
-- [`ssh/`](ssh/) — SSH access to the fleet:
+- [`ssh/`](ssh/) — SSH keys and signing:
   [minting a YubiKey SSH key](ssh/minting-yubikey-ssh-keys.md).
 - [`upkeep-and-admin/`](upkeep-and-admin/) — recurring chores:
   [maintenance](upkeep-and-admin/maintenance.md),

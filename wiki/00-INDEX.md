@@ -76,7 +76,7 @@ root holds only entry points.
   [durandal gaming](fleet/durandal-gaming.md),
   [FHS environments](fleet/fhs-environments.md),
   [nix commands hang after a switch](fleet/nix-daemon-lock-hang.md).
-- [`ssh/`](ssh/) — SSH access to the fleet:
+- [`ssh/`](ssh/) — SSH keys and signing:
   [minting a YubiKey SSH key](ssh/minting-yubikey-ssh-keys.md),
   [commit signing through the SSH agent](ssh/commit-signing.md).
 - [`upkeep-and-admin/`](upkeep-and-admin/) — recurring chores:

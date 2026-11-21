@@ -84,6 +84,44 @@ class RetireOldSshSign(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertTrue(self.old_script.exists())
 
+    def test_tilde_spelling_is_removed_not_left_pointing_at_a_deleted_file(self):
+        self.set_override("~/.config/git/ssh-sign")
+        result = self.run_script("--apply", "--remove-script")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.override(), "")
+        self.assertFalse(self.old_script.exists())
+
+    def test_symlink_to_the_old_script_keeps_the_script(self):
+        link = self.home / "link-to-sign"
+        link.symlink_to(self.old_script)
+        self.set_override(str(link))
+        result = self.run_script("--apply", "--remove-script")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.override(), str(link))
+        self.assertTrue(self.old_script.exists())
+        self.assertIn("kept", result.stdout)
+
+    def test_multiple_values_are_reported_and_fail_the_run(self):
+        self.set_override("/other")
+        subprocess.run(["git", "-C", str(self.repo), "config", "--local",
+                        "--add", "gpg.ssh.program", str(self.old_script)],
+                       check=True, env=self.env)
+        result = self.run_script("--apply", "--remove-script")
+        self.assertEqual(result.returncode, 1)
+        self.assertTrue(self.old_script.exists())
+
+    def test_a_path_that_is_not_a_repo_fails_the_run(self):
+        result = subprocess.run([str(SCRIPT), str(self.home / "nope")],
+                                capture_output=True, text=True, env=self.env)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("not a git repository", result.stderr)
+
+    def test_help_stops_before_the_shell_options(self):
+        result = subprocess.run([str(SCRIPT), "--help"], capture_output=True,
+                                text=True, env=self.env)
+        self.assertEqual(result.returncode, 0)
+        self.assertNotIn("set -euo", result.stdout)
+
     def test_no_override_is_a_clean_no_op(self):
         result = self.run_script("--apply")
         self.assertEqual(result.returncode, 0, result.stderr)
