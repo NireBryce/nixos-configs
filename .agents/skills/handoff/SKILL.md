@@ -35,7 +35,7 @@ the note as an issue instead, with the same body shape, under skill
    say so in the body. If a dirty path is not yours, leave it and ask.
 3. **Write the body to a file** in the scratchpad, in the shape of
    `.github/PULL_REQUEST_TEMPLATE.md`: the `🤖 Co-written by an LLM agent`
-   line at top and bottom, then:
+   line at the top, then:
    - **What changed**: one line per change.
    - **Why**: the goal, and each decision the user made with its reason,
      including rejected options, so the next session does not reopen them.

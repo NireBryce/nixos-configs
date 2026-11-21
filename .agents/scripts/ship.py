@@ -72,9 +72,8 @@ push otherwise, and an agent has no terminal to answer). The title
 defaults to the only commit's subject; several commits need --title.
 Refuses on experimental, main, or a detached HEAD, and refuses a body
 missing the LLM-disclosure line (`🤖 Co-written by an LLM agent`, skill
-ship) before the first `## ` heading or as its last line --
-.github/PULL_REQUEST_TEMPLATE.md asks for it at both ends (a harness
-footer, `🤖 Generated with ...`, counts at the bottom). The body goes in
+ship) before the first `## ` heading --
+.github/PULL_REQUEST_TEMPLATE.md asks for it there only. The body goes in
 a file because backticks in an inline --body are executed by the shell.
 `--edit <n>`: `gh pr edit <n> --body-file F` (and --title), same check.
 """
@@ -395,11 +394,10 @@ def type_changed(path):
 # ---- pr --------------------------------------------------------------------
 
 DISCLOSURE = re.compile(r"^\s*🤖 Co-written by an LLM agent")
-FOOTER = re.compile(r"^\s*🤖 (Co-written by an LLM agent|Generated with )")
 
 
 def disclosure_problems(body):
-    """What the body lacks of the template's top-and-bottom disclosure."""
+    """What the body lacks of the template's top disclosure."""
     text = re.sub(r"<!--.*?-->", "", body, flags=re.S)
     lines = [line for line in text.splitlines() if line.strip()]
     head = []
@@ -411,9 +409,6 @@ def disclosure_problems(body):
     if not any(DISCLOSURE.match(line) for line in head):
         probs.append("no `🤖 Co-written by an LLM agent` line before the"
                      " first `## ` heading")
-    if not lines or not FOOTER.match(lines[-1]):
-        probs.append("last line is not the disclosure (`🤖 Co-written by an"
-                     " LLM agent`, or a harness `🤖 Generated with ...` footer)")
     return probs
 
 
@@ -425,7 +420,7 @@ def cmd_pr(args):
     probs = disclosure_problems(body)
     if probs:
         say(f"refusing: {args.body_file} lacks the LLM disclosure"
-            " .github/PULL_REQUEST_TEMPLATE.md asks for at top and bottom:")
+            " .github/PULL_REQUEST_TEMPLATE.md asks for at the top:")
         for problem in probs:
             say(f"  - {problem}")
         return 1

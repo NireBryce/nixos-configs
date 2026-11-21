@@ -5,13 +5,11 @@ left alone. Delete a section if it genuinely doesn't apply -- don't leave
 placeholder text.
 
 If an agent authored or materially assisted this PR, a disclosure line
-goes both here at the top, before "What changed", and at the bottom of
-the body -- harness-injected attribution footers land at the bottom
-regardless, so top and bottom both carry the disclosure rather than one
-replacing the other. Use the model-agnostic "🤖 Co-written by an LLM
-agent" -- an agent can't verify which model/harness executed it, the same
-reasoning as the `Co-Authored-By:` commit trailer; a footer the harness
-itself injects needs no help naming it.
+goes here at the top, before "What changed". Use the model-agnostic
+"🤖 Co-written by an LLM agent" -- an agent can't verify which
+model/harness executed it, the same reasoning as the `Co-Authored-By:`
+commit trailer. Don't put an agent's email address at the bottom of the
+body; a harness-injected footer that carries one is removed.
 -->
 
 ## What changed
@@ -32,7 +30,7 @@ running service, etc. -->
 ## Risk and impact
 
 <!-- Scale and examples: wiki/llm-aided-dev/risk-and-impact.md. One line of
-reason each. Goes last, before the bottom disclosure line. -->
+reason each. Goes last. -->
 
 - **Risk: N/10** --
 - **Impact: N/10** --

@@ -213,8 +213,8 @@ what CI cannot check, such as a `just switch` on a host or a `drvPath`
 comparison against unaffected hosts.
 
 When an agent wrote the PR, the disclosure line `🤖 Co-written by an LLM agent`
-goes before "What changed" and again at the bottom. A harness-injected footer
-counts as the bottom one. The line names no model, for the same reason as the
+goes before "What changed". Nothing at the bottom of the body may carry an
+agent's email address (a harness footer can add one: remove it). The line names no model, for the same reason as the
 trailer. For a change to a guard or check, the body says what is now enforced
 and how it was verified. It does not say which inputs got past the old
 version.
@@ -307,7 +307,7 @@ checkout and `<scratch>` the session's scratch directory.
    ```
 
 8. Write the PR body to a file under the template's headings, with the
-   disclosure line at the top and bottom, then open the PR. The command prints
+   disclosure line at the top, then open the PR. The command prints
    the PR URL.
 
    ```sh

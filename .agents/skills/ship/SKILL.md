@@ -85,13 +85,13 @@ Then run `just agent recurring export`. It writes one line: this host's command 
 just agent pr <body-file> [--title T]   # --edit <n> replaces an open PR's body
 ```
 
-The script pushes with `-u` when the branch has no `origin/<branch>` upstream (a branch cut from `origin/experimental` tracks the trunk, so a bare push fails), then runs `gh pr create --base experimental --body-file`. The title defaults to the only commit's subject; several commits need `--title`. It refuses on `experimental`/`main`, and refuses a body missing the disclosure line at top or bottom (below). The body goes in a file because backticks in an inline `--body` are executed, as in a commit message.
+The script pushes with `-u` when the branch has no `origin/<branch>` upstream (a branch cut from `origin/experimental` tracks the trunk, so a bare push fails), then runs `gh pr create --base experimental --body-file`. The title defaults to the only commit's subject; several commits need `--title`. It refuses on `experimental`/`main`, and refuses a body missing the disclosure line at the top (below). The body goes in a file because backticks in an inline `--body` are executed, as in a commit message.
 
 The PR body covers what changed, why, what was verified, and what was left alone, under `.github/PULL_REQUEST_TEMPLATE.md`'s headings. At the end of the body, below the "Choices I made that you didn't ask for" list if there is one, add a "Related documents, concepts and research" section for anything relevant you already ran into; don't search for it or summarize it (AGENTS.md, "Before calling it done"). For a security-relevant change, the PR body and commit messages state what is now enforced, never what got past the old version or what it could reach; that goes to `elly/infra-notes` (AGENTS.md, Working in this repo).
 
-End the body, before the bottom disclosure line, with `## Risk and impact`: a risk and an impact out of 10, one line of reason each, on the scale in `wiki/llm-aided-dev/risk-and-impact.md`. A promotion PR to `main` rates the promotion as a whole: the riskiest promoted change sets the risk, and the blurb names it.
+End the body with `## Risk and impact`: a risk and an impact out of 10, one line of reason each, on the scale in `wiki/llm-aided-dev/risk-and-impact.md`. A promotion PR to `main` rates the promotion as a whole: the riskiest promoted change sets the risk, and the blurb names it.
 
-Put the LLM-disclosure line at both the top (before "What changed") and the bottom, because a harness footer lands at the bottom regardless. Use the model-agnostic `🤖 Co-written by an LLM agent` (`propose-issue`'s reasoning: an agent cannot verify its model or harness). A harness-injected footer is accurate by construction, so there is no reason to name it at the top.
+Put the LLM-disclosure line at the top (before "What changed"): `🤖 Co-written by an LLM agent` (`propose-issue`'s reasoning: an agent cannot verify its model or harness). Nothing at the bottom of the body may carry an agent's email address; a harness footer that adds one is removed before the PR is opened.
 
 ## 2. Preview, then ask
 
