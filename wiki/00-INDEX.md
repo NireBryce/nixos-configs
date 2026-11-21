@@ -1,6 +1,6 @@
 # Wiki
 
-_Last modified: 2026-11-07_
+_Last modified: 2026-11-21_
 
 This is the wiki's topic index. The `flake/` folder is meant to be browsed by
 its file tree, with documentation next to the code; the heavy modularization
@@ -218,7 +218,9 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
   [using the forge](homelab/forgejo.md),
   [practicing a workplace coding environment with it](homelab/practice-environment.md),
   [using Grafana](homelab/grafana.md),
-  [monitoring the QNAP](homelab/qnap-monitoring.md), and
+  [monitoring the QNAP](homelab/qnap-monitoring.md),
+  [running and restoring backups](homelab/backup-runbook.md) (with
+  [rustic](homelab/rustic.md), a TUI for browsing the repository), and
   [creating go/ links](homelab/creating-golinks.md), plus
   [pending setup](homelab/pending-setup.md) — what's running but not
   finished, tracked as `pending-setup`-labelled issues. A different tier from the category pages, and the one place a

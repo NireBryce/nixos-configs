@@ -1,6 +1,6 @@
 # Wiki index, for agents
 
-_Last modified: 2026-11-07_
+_Last modified: 2026-11-21_
 
 Condensed from [00-INDEX.md](00-INDEX.md). Routing only.
 
@@ -77,6 +77,7 @@ root holds only entry points.
 | reach or debug a cube service | [homelab/reaching-services.md § Quick facts](homelab/reaching-services.md#quick-facts) |
 | cube lockout reset, Sunshine web UI, stream | [homelab/common-commands.md § Quick facts](homelab/common-commands.md#quick-facts) |
 | cube's Claude Remote Control units | [homelab/claude-rc.md § Quick facts](homelab/claude-rc.md#quick-facts) |
+| run or restore a restic backup, browse the repository | [homelab/backup-runbook.md](homelab/backup-runbook.md), [homelab/rustic.md](homelab/rustic.md) |
 | write or tighten a wiki page | [meta/styleguide-for-agents.md](meta/styleguide-for-agents.md), skills `wiki-sync`, `trim-docs`, `fact-hygiene` |
 | fact-check docs or the book against the code | skills `wiki-fact-check`, `book-fact-check`; `just agent book-lint` |
 | write a module | [config-structure/module-style-guide-for-agents.md](config-structure/module-style-guide-for-agents.md) |
