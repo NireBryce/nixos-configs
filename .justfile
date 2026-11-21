@@ -315,6 +315,7 @@ preflight:
     @python3 flake/scripts/tests/test_extracted_scripts.py
     @python3 flake/scripts/tests/test_comment_wrap.py
     @python3 flake/scripts/tests/test_init_ssh_handle.py
+    @python3 flake/scripts/tests/test_retire_old_ssh_sign.py
     @python3 flake/scripts/tests/test_tailscale_acl_token.py
     @just guards-test
     @just preflight-mirror-test
@@ -517,6 +518,18 @@ init-ssh-handle *args:
 # Skips without ssh-keygen; runs in preflight and CI
 init-ssh-handle-test:
     python3 {{scripts}}/tests/test_init_ssh_handle.py
+
+# One-time cleanup: remove the repo-local `gpg.ssh.program` that keeps the old
+# hand-made ~/.config/git/ssh-sign in use over the store-path script from
+# elly-git.nix. Dry run unless --apply; --remove-script also deletes the old
+# script. Repos default to this one; worktrees share a repo's config
+retire-old-ssh-sign *args:
+    @{{scripts}}/retire-old-ssh-sign.sh {{args}}
+
+# Fixtures in a throwaway HOME and repo: nothing changes without --apply, only
+# the old script's path is unset, other values stay. Runs in preflight and CI
+retire-old-ssh-sign-test:
+    python3 {{scripts}}/tests/test_retire_old_ssh_sign.py
 
 # How tailscale-acl.py reads its API token: as the user first, then `sudo sops`
 # with an interactive prompt, never without a terminal. subprocess is mocked;
