@@ -132,6 +132,8 @@ The script:
 
 Any failure stops it and prints what is left; a failed merge deletes nothing. Raise the failure instead of retrying silently. A remote-branch delete that errors with "remote ref does not exist" or "cannot lock ref" is already done (the repo deletes merged branches itself); the script prints `failed, but its goal already holds; going on`.
 
+**Entered the worktree with `EnterWorktree`** (skill `use-a-worktree`)? After `ship-land` the session is still in the detached worktree. Run `ExitWorktree` with `action: "keep"` (it refuses `remove` for a worktree entered by `path`), then `git -C <shared checkout> worktree remove <path>`.
+
 **Merged outside this flow** (web UI, another session): the branch stays. `just branches` classifies local branches by patch-id, which catches rebased merges; `git branch --merged` does not, because rebasing gives new SHAs (11 stale branches accumulated by 2026-09-11, hiding 3 unmerged). `just branches prune` deletes only landed branches and asks first. Agent sessions have no terminal for the prompt, so pass `--yes`; without it, prune prints the verdict, deletes nothing and exits 2. Check it at session start, like `git worktree list`.
 
 Report the merge commit and the branch's fate, including anything `ship-land` left for you. Never report a commit range as if pushed to `experimental`. After a land that ran outside `ship-land`, still run `just close-fixed <n>`: it re-checks every issue the PR claims to fix and closes the ones still OPEN, with a comment saying it was a hand close.
