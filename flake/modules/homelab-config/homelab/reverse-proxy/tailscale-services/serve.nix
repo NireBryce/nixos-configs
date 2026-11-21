@@ -73,12 +73,19 @@ in {
         # bounds it, so a persistent failure still gives up. Retry
         # rather than a readiness-polling `ExecStartPre`: smaller, and
         # it fixes the failure actually observed.
+        #
+        # The StartLimit keys are `[Unit]` keys: under `serviceConfig`
+        # systemd logs "Unknown key name" and ignores them (checked with
+        # `systemd-analyze verify`, issue #672), so they are in
+        # `unitConfig`.
         systemd.services.tailscale-serve = {
-            serviceConfig = {
-                Restart               = "on-failure";
-                RestartSec            = 5;
+            unitConfig = {
                 StartLimitIntervalSec = 60;
                 StartLimitBurst       = 6;
+            };
+            serviceConfig = {
+                Restart    = "on-failure";
+                RestartSec = 5;
             };
         };
     };
