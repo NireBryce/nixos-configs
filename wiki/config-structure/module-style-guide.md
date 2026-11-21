@@ -84,7 +84,8 @@ reads as a sibling of `settings`, so the block's extent is hidden. The same
 goes for a list's items under their `[`.
 
 Lines end without trailing whitespace (`.editorconfig` sets
-`trim_trailing_whitespace`), and a block has no blank line before its
+`trim_trailing_whitespace`; `flake/scripts/py_style.py` checks it in
+preflight), and a block has no blank line before its
 closing bracket or at the end of the file. Whitespace inside a `''` string
 that ships to a generated file is content: strip it only after checking the
 rendered file does not change meaningfully.

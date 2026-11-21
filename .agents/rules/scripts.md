@@ -47,11 +47,13 @@ paths:
   edit by syntax tree rather than text (`just agent rename-names`), then run
   `ruff check --select F821` and the file's tests, and grep for callers passing
   the old parameter name as a keyword (`rename-names callers` does; §54).
-- **Python style the repo lints for** (`ruff check` reports these; the
-  preflight does not run it yet, so check by hand):
+- **Python style the repo lints for** (`flake/scripts/py_style.py`
+  checks these with ruff in preflight and CI; run it with `just py-style`):
   - one statement per line: no `a; b`, no `if x: return` on one line (E702);
   - `def` for a named function, never `name = lambda ...` (E731); an inline
     `key=lambda item: ...` is fine;
   - no unused imports (F401), unused locals (F841) or unused loop variables
-    (B007: name it `_` or iterate `.values()`);
-  - an f-string has a placeholder, otherwise it is a plain string (F541).
+    (B007: name it `_` or iterate `.values()`; the check does not run B007);
+  - an f-string has a placeholder, otherwise it is a plain string (F541);
+  - no trailing whitespace in `.nix` and `.py` files (`.editorconfig`;
+    `py_style.py` checks it too).

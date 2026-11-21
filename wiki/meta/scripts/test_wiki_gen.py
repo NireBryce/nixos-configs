@@ -9,7 +9,7 @@ regions), changes a source fact on purpose, and asserts what `--check`
 reports and what a write run produces. Pure stdlib; runs via
 `just wiki-gen-test`, part of `just preflight` and so of CI.
 """
-import contextlib, io, pathlib, re, sys, tempfile, unittest
+import contextlib, io, pathlib, sys, tempfile, unittest
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import wiki_gen  # noqa: E402

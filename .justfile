@@ -112,6 +112,17 @@ short-names *args:
 short-names-test:
     python3 {{scripts}}/tests/test_short_names.py
 
+# Fails on the Python lint rules F401 F541 F841 E702 E731 (via ruff) and on
+# trailing whitespace in tracked .nix and .py files. ruff comes from the dev
+# shell. In preflight and CI. Rule: .agents/rules/scripts.md
+py-style *args='check':
+    python3 {{scripts}}/py_style.py {{args}}
+
+# Fixture test for py_style.py: a case per rule it must flag, and a clean
+# pass. Needs ruff (dev shell); runs in preflight and CI
+py-style-test:
+    python3 {{scripts}}/tests/test_py_style.py
+
 # Draw the module tree: just module-graph tree|hosts|dot|html [--category X] [--depth N]
 # [--categories-only] [--wrap N]. tree/hosts print Mermaid, dot prints Graphviz
 # (`just module-graph dot --view hosts | nix shell nixpkgs#graphviz -c dot -Tsvg`).
@@ -292,6 +303,8 @@ preflight:
     @just branches-test
     @just short-names-test
     @just short-names
+    @python3 flake/scripts/tests/test_py_style.py
+    @python3 flake/scripts/py_style.py check
     @just keybindings-test
     @just cod-desc-test
     @just trailers-test
