@@ -51,7 +51,6 @@
             "no-pty,no-agent-forwarding,no-X11-forwarding,ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK7cAjTkv0oDgj0K5Vo1B5WDnyn1miumOyWgANfBmXMl elly@nire-lysithea-agent"
             "no-pty,no-agent-forwarding,no-X11-forwarding,ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN1IcbzRw0uTDtXISfyz16OHN9DgHBdoUBVq+NF3KXeu elly@nire-tenacity-agent"
             "no-pty,no-agent-forwarding,no-X11-forwarding,ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICr5RWh9XrTJyg7IVrpAcJ+m6WeunwbRUJagpBwX60u6 elly@nire-cube-agent"
-            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJFTe27f8e8B4DpqQYHFK7I7Pg3ZK12W7LqIrdI+ChI1 elly@nire-galatea"
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILqzV9o32OsJdkCfDJhR5X4uSu1nzRzrL/2gBWLp9QyX elly@nire-cube"
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFFfyxNzG07CdeNEZof+l49+fqx+2E79gmYvnRqiGdNp elly@nire-tenacity"
             # deja is the iPad.
