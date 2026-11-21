@@ -82,6 +82,10 @@ where *args:
 lessons *args:
     @cd "{{invocation_directory()}}" && "{{scripts}}/lessons.py" "$@"
 
+# durandal suspend cycles whose drive power-cycle delta marks a hang: debug-suspend-hangs [--dir D] [--all]
+debug-suspend-hangs *args:
+    @"{{scripts}}/debug_suspend_hangs.py" "$@"
+
 # Docs ranked by commits to the paths they cite since their date: doc-drift [--top N]
 doc-drift *args:
     @"{{scripts}}/doc_drift.py" "$@"
