@@ -39,7 +39,9 @@
         #            RobSis/zsh-completion-generator
         #
         #          The file's z-a-* entries were zi annexes, meaningless without zi;
-        #          its `unset python` was marked "MAGIC: idk why this is here".
+        #          its `unset python` marked "MAGIC: idk why this is here" is
+        #          possibly related to the equally unexplained PYTHON = "PYTHON"
+        #          in shell-env.nix.
 
         # plugin dependencies
         home.packages = with pkgs; [
