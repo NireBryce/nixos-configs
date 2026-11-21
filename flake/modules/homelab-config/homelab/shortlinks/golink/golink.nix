@@ -93,7 +93,16 @@ let
     # than `%S` so the flags below read as ordinary paths.
     stateDir = "/var/lib/golink";
 in {
-    nixos = { pkgs, ... }: {
+    nixos = { pkgs, ... }: let
+        # nixpkgs' default Go (1.27) breaks golink's vendored
+        # go-json-experiment/json ("undefined: json.SkipFunc",
+        # "json.DiscardUnknownMembers"). Build with Go 1.26 until
+        # nixpkgs' golink builds on the default Go again; delete this
+        # override then. Built on nire-cube's nixpkgs, 2026-11-21.
+        golink = pkgs.golink.override {
+            buildGoModule = pkgs.buildGoModule.override { go = pkgs.go_1_26; };
+        };
+    in {
         # `pkgs` bound on the INNER NixOS module, not the outer
         # flake-parts function -- flake-parts injects no `pkgs` there;
         # evaluating it errors "attribute 'pkgs' missing". Same pattern
@@ -119,7 +128,7 @@ in {
                 # goes wrong quietly under DynamicUser (no $HOME). Both
                 # pinned.
                 ExecStart = lib.concatStringsSep " " [
-                    (lib.getExe pkgs.golink)
+                    (lib.getExe golink)
                     "-hostname go"                      # see header: must stay `go`
                     "-sqlitedb ${stateDir}/golink.db"   # the links themselves
                     "-config-dir ${stateDir}/tsnet"     # tsnet node key + state
