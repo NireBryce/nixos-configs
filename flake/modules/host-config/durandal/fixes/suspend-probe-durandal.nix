@@ -16,11 +16,9 @@
             dir=/var/log/suspend-probe
             mkdir -p "$dir" || exit 0
 
-            # Text a device supplies (a USB product string is set by whatever
-            # is plugged in, up to ~126 characters) goes into world-readable
+            # Device-supplied text (a USB product string) goes into world-readable
             # dumps that people and agents read. Keep the first line, 40
-            # characters of [A-Za-z0-9 ._-], everything else becomes `?`, so a
-            # device cannot put instructions into a dump.
+            # characters of [A-Za-z0-9 ._-]; everything else becomes `?`.
             clamp() {
                 head -n 1 "$1" 2>/dev/null | tr -c 'A-Za-z0-9 ._\n-' '?' | cut -c1-40
             }
@@ -60,13 +58,11 @@
                 # later: org_kde_powerdevil means the idle timeout fired,
                 # plasmashell/kscreenlocker mean a person asked.
                 #
-                # Only systemd-logind's own messages (matched by unit, which a
-                # local user cannot spoof, unlike a process name or a `logger`
-                # line), and only three fields are kept: time, PID and the
-                # client's process name, clamped to 15 characters of
-                # [A-Za-z0-9_.-]. Anything else in the journal line is dropped,
-                # because these dumps are read by people and by agents, and
-                # free text from the journal is a prompt-injection path.
+                # Only systemd-logind's own messages (matched by unit), and only
+                # three fields are kept: time, PID and the client's process name,
+                # clamped to 15 characters of [A-Za-z0-9_.-]. Nothing else from
+                # the journal line is copied, because these dumps are read by
+                # people and by agents.
                 echo "## requester"
                 requester=$(timeout 15 journalctl -b 0 --since -10min --no-pager -o short-iso \
                         _SYSTEMD_UNIT=systemd-logind.service 2>/dev/null \
@@ -220,8 +216,8 @@
             ${lib.optionalString (phase == "pre") ''
                 date +%s > "$dir/.last-pre-epoch"
             ''}
-            # Two files per cycle; keep the window bounded. 2000 files is a
-            # few MB and about a year at the current rate. It was 200 (about
+            # Two files per cycle; keep the window bounded. 2000 files is about
+            # 13 MB and about a year at the current rate. It was 200 (about
             # five weeks) until 2026-11-21, and the dumps for the 10-02, 10-06 and
             # 10-15 (UTC) hangs rotated out, so they cannot be re-checked. The
             # dotfile above is not
@@ -297,10 +293,9 @@
         # an amdgpu that is abnormally slow on the cycles around a hang is
         # visible. Costs a few lines of dmesg per cycle and nothing else.
         #
-        # The dump directory is also declared here: root-owned 0755, so no one
-        # else can plant a symlink or a file the root-run probe then reads or
-        # deletes. The probe's own `mkdir -p` would make it that way anyway;
-        # `d` makes it explicit and repairs it if something changes it.
+        # The dump directory is also declared here: root-owned 0755. The probe's
+        # own `mkdir -p` would make it that way anyway; `d` makes it explicit and
+        # repairs it if something changes it.
         systemd.tmpfiles.rules = [
             "w /sys/power/pm_print_times - - - - 1"
             "d /var/log/suspend-probe 0755 root root -"

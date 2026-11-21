@@ -145,7 +145,7 @@ too long, RAM and the session are lost.
   shuffled real S3 cycles, logged+synced before each suspend; resume = the
   kernel's `suspend_stats/success` rising (`systemctl suspend` returns
   immediately); `suspend` with no `resumed`/`failed`/`timeout` = hung;
-  `timeout` = never slept (missed alarm, refused suspend). Delays start at 30 s
+  `resumed ... late=1` = woke after delay + `--wait-extra` (a missed alarm, then a later wake: it did sleep); `timeout` = the counter never rose (suspend refused, machine stayed awake). Delays start at 30 s
   (no ≤33 s cycle has hung; alarms under 15 s can fire before S3). Expect ~3
   hangs at ~1 in 12, ~4% chance of none, so a clean run is weak evidence; a
   cluster in one delay = power-sequencing race. Default wake is an RTC alarm (different wake path from the keyboard;
@@ -156,7 +156,7 @@ too long, RAM and the session are lost.
   on a recovery cycle; not compared yet); file cap 200→2000 (the dumps for the
   10-02, 10-06 and 10-15 UTC hangs had rotated out); `set +e` (NixOS wraps unit scripts in `set -e`);
   `## requester` only from `_SYSTEMD_UNIT=systemd-logind.service`, time/PID/comm
-  clamped to `[A-Za-z0-9_.-]{0,15}` (journal text is a prompt-injection path);
+  clamped to `[A-Za-z0-9_.-]{0,15}` (nothing else from the journal line is copied);
   the scanner reads drive counters only from `## drive power cycles`. Not worth adding: pstore/ramoops, serial console,
   `pm_wakeup_irq` (no data here).
 

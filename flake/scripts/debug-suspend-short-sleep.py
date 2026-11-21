@@ -33,9 +33,11 @@ a hang.
 command says nothing about the wake. The script reads the kernel's
 /sys/power/suspend_stats/success counter before suspending and waits until it
 rises: that is the resume. A `resumed` line carries the wall-clock seconds
-between the two. If the counter has not moved after delay + --wait-extra
-seconds the machine never slept (a missed alarm, a refused suspend) and a
-`timeout` line is written.
+between the two, and `late=1` when the wake came after delay + --wait-extra
+(for example an RTC alarm that fired before S3 and a key press much later: the
+machine did sleep). If the counter has not risen by then and is still unchanged
+when this process next runs, the suspend never happened (refused, or the
+machine stayed awake) and a `timeout` line is written.
 
 The log is ~/.local/state/debug-suspend/short-sleep.log (or under
 XDG_STATE_HOME). A `suspend` line is written and synced BEFORE each suspend. A
@@ -110,14 +112,25 @@ def now_stamp():
     return time.strftime("%Y-%m-%dT%H:%M:%S%z")
 
 
+def counter_rose(success_before):
+    count = read_success_count()
+    return count is not None and success_before is not None and count > success_before
+
+
 def wait_for_resume(success_before, deadline):
-    """Poll until the kernel's success counter rises or the deadline passes."""
+    """Poll until the kernel's success counter rises or the deadline passes.
+
+    Returns "resumed" (rose in time), "late" (rose, but only seen after the
+    deadline: this process is frozen while the machine sleeps, so a wake that
+    comes after delay + --wait-extra is noticed on the first check after it)
+    or "never" (it did not rise).
+    """
     while time.time() < deadline:
-        count = read_success_count()
-        if count is not None and success_before is not None and count > success_before:
-            return True
+        if counter_rose(success_before):
+            return "resumed"
         time.sleep(0.5)
-    return False
+    # One more read: a long sleep can end between the last read and the clock.
+    return "late" if counter_rose(success_before) else "never"
 
 
 def run_cycle(path, run_id, cycle, delay, options):
@@ -142,11 +155,16 @@ def run_cycle(path, run_id, cycle, delay, options):
         append_synced(path, f"{now_stamp()} failed {key} reason={type(error).__name__}")
         print(f"cycle {cycle}: could not start the suspend ({error}); stopping", file=sys.stderr)
         return False
-    if wait_for_resume(success_before, started + delay + options.wait_extra):
-        append_synced(path, f"{now_stamp()} resumed {key} slept={time.time() - started:.1f}")
+    outcome = wait_for_resume(success_before, started + delay + options.wait_extra)
+    elapsed = time.time() - started
+    if outcome == "resumed":
+        append_synced(path, f"{now_stamp()} resumed {key} slept={elapsed:.1f}")
+    elif outcome == "late":
+        append_synced(path, f"{now_stamp()} resumed {key} slept={elapsed:.1f} late=1")
+        print(f"cycle {cycle}: woke {elapsed - delay:.0f} s later than planned (see `late=1`)", file=sys.stderr)
     else:
-        append_synced(path, f"{now_stamp()} timeout {key} waited={time.time() - started:.1f}")
-        print(f"cycle {cycle}: the machine never slept (see `timeout` in the log)", file=sys.stderr)
+        append_synced(path, f"{now_stamp()} timeout {key} waited={elapsed:.1f}")
+        print(f"cycle {cycle}: the suspend count never rose (see `timeout` in the log)", file=sys.stderr)
     return True
 
 

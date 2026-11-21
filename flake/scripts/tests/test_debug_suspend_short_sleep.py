@@ -112,6 +112,26 @@ class ShortSleep(unittest.TestCase):
         self.assertIn(" failed ", text)
         self.assertIn("(failed)", run(self.state_home, "report").stdout)
 
+    def test_a_wake_after_the_deadline_is_late_not_never(self):
+        # The process is frozen while the machine sleeps, so the first check
+        # after a long sleep can find the clock past the deadline with the
+        # counter already risen. That must be "late", not "never".
+        import importlib.util
+        from unittest import mock
+
+        spec = importlib.util.spec_from_file_location("short_sleep", SCRIPT)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        with mock.patch.object(module, "read_success_count", return_value=8), \
+                mock.patch.object(module.time, "time", return_value=1000.0):
+            self.assertEqual(module.wait_for_resume(7, 10.0), "late")
+        with mock.patch.object(module, "read_success_count", return_value=7), \
+                mock.patch.object(module.time, "time", return_value=1000.0):
+            self.assertEqual(module.wait_for_resume(7, 10.0), "never")
+        with mock.patch.object(module, "read_success_count", return_value=8), \
+                mock.patch.object(module.time, "time", return_value=1.0):
+            self.assertEqual(module.wait_for_resume(7, 10.0), "resumed")
+
     def test_cycle_without_a_resolution_is_unresolved(self):
         self.log.parent.mkdir(parents=True)
         self.log.write_text(
