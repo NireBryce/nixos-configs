@@ -1,6 +1,6 @@
 # Durandal suspend instrumentation: what is running
 
-_Last modified: 2026-10-20_
+_Last modified: 2026-11-21_
 
 This page lists every step run against `nire-durandal` for the auto-suspend
 investigation and what survives a reboot. **Check it, don't trust it**: each
@@ -43,6 +43,7 @@ grep -c "GPU state" "$(grep -oE '/nix/store/[a-z0-9]+-unit-script-sleep-actions-
 | 5 | `just switch` 2026-09-16 — GPU state per cycle (DPM levels, link speed, busy%, hwmon) | yes, config | `grep -c "GPU state" <probe script>` |
 | 6 | same switch — `pm_print_times=1` via tmpfiles, per-device suspend/resume timings. Took effect immediately, no reboot | yes, config | `cat /sys/power/pm_print_times` |
 | 7 | in the tree 2026-10-02 — GPU memory totals and DRM client count in the GPU state section. Live only after a `just switch`; no reboot needed | yes, config | `grep -c drm_client_processes <probe script>` |
+| 8 | in the tree 2026-11-21 — `## sleep length` in `post`, `## firmware performance (FPDT)` in both dumps, the file cap raised from 200 to 2000, the dump directory declared root-owned 0755 by tmpfiles, `set +e`, a clamped `## requester` line (systemd-logind's unit only; time, PID and a 15-character process name), and clamped USB product and `/sys/class/wakeup` name fields. Live only after a `just switch`; no reboot needed | yes, config | `grep -c 'wall_seconds_since_pre' <probe script>` |
 
 Steps 5-6 confirmed producing data 2026-09-18: GPU state present in dumps from
 `20260916T082142Z` onward, and 1140 device callbacks recorded. Note the kernel
