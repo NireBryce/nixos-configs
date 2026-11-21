@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 # Retire the hand-made git signing wrapper at ~/.config/git/ssh-sign.
 #
-#   retire-old-ssh-sign.sh [--apply] [--remove-script] [<repo>...]
+#   retire-old-ssh-sign.sh [--apply] [--remove-script] [--check] [<repo>...]
 #
 # Before `elly-git.nix` set `gpg.ssh.program` to a store-path script, a
 # hand-made ~/.config/git/ssh-sign did the same job, wired in by a
@@ -20,6 +20,10 @@
 #                    one of the given repos still points at it. Repos you did
 #                    not name are not checked.
 #
+#   --check          print nothing; exit 4 if a given repo still has the override
+#                    or the old script still exists, 0 otherwise. rebuild.sh
+#                    uses it to decide whether to print its one-time note.
+#
 # <repo> defaults to the repo this script lives in. Worktrees share their
 # repo's .git/config, so naming any one worktree covers all of them.
 set -euo pipefail
@@ -27,12 +31,14 @@ set -euo pipefail
 old_script="$HOME/.config/git/ssh-sign"
 apply=false
 remove_script=false
+check=false
 repos=()
 
 for argument in "$@"; do
     case "$argument" in
         --apply) apply=true ;;
         --remove-script) remove_script=true ;;
+        --check) check=true ;;
         -h|--help) sed -n '2,/^[^#]/{/^#/p}' "$0"; exit 0 ;;
         -*) echo "retire-old-ssh-sign: unknown option: $argument" >&2; exit 2 ;;
         *) repos+=("$argument") ;;
@@ -46,6 +52,17 @@ fi
 
 if [[ ${#repos[@]} -eq 0 ]]; then
     repos=("$(cd "$(dirname "$0")" && git rev-parse --show-toplevel)")
+fi
+
+if $check; then
+    pending=false
+    [[ -e "$old_script" ]] && pending=true
+    for repo in "${repos[@]}"; do
+        value="$(git -C "$repo" config --local --type=path --get gpg.ssh.program 2>/dev/null || true)"
+        [[ "$value" == "$old_script" ]] && pending=true
+    done
+    $pending && exit 4
+    exit 0
 fi
 
 still_referenced=false

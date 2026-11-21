@@ -77,8 +77,11 @@ just retire-old-ssh-sign --apply --remove-script  # also deletes the old script
 - The repo defaults to the one the script lives in. Worktrees share their
   repo's `.git/config`, so naming one covers all of them.
 - Run it once per clone that has the override, after a switch that installs the
-  new script. Before that switch, signing from a non-interactive shell would
-  fall back to plain `ssh-keygen` and fail without `SSH_AUTH_SOCK`.
+  new script. `just switch` and `just boot` on a NixOS host print a one-time
+  note until it is done: they check for the override or the old script and say
+  nothing once both are gone. Before that switch, signing from a
+  non-interactive shell would fall back to plain `ssh-keygen` and fail without
+  `SSH_AUTH_SOCK`.
 
 The recipe and its tests are `flake/scripts/retire-old-ssh-sign.sh` and
 `flake/scripts/tests/test_retire_old_ssh_sign.py`.

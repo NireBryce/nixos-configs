@@ -122,6 +122,29 @@ class RetireOldSshSign(unittest.TestCase):
         self.assertEqual(result.returncode, 0)
         self.assertNotIn("set -euo", result.stdout)
 
+    def test_check_is_silent_and_exits_4_while_the_override_is_set(self):
+        self.set_override(str(self.old_script))
+        result = self.run_script("--check")
+        self.assertEqual(result.returncode, 4)
+        self.assertEqual(result.stdout + result.stderr, "")
+
+    def test_check_exits_4_while_only_the_old_script_remains(self):
+        result = self.run_script("--check")
+        self.assertEqual(result.returncode, 4)
+
+    def test_check_exits_0_once_both_are_gone(self):
+        self.set_override(str(self.old_script))
+        self.run_script("--apply", "--remove-script")
+        result = self.run_script("--check")
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stdout + result.stderr, "")
+
+    def test_check_ignores_an_unrelated_override(self):
+        self.old_script.unlink()
+        self.set_override("/somewhere/else/sign")
+        result = self.run_script("--check")
+        self.assertEqual(result.returncode, 0)
+
     def test_no_override_is_a_clean_no_op(self):
         result = self.run_script("--apply")
         self.assertEqual(result.returncode, 0, result.stderr)
