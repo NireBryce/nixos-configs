@@ -1,5 +1,7 @@
 # Extraction candidates — general Nix
 
+_Last modified: 2026-11-21_
+
 One file per thing in this repo that would serve any Nix flake / NixOS /
 Home Manager / nix-darwin config, not just this fleet — module patterns,
 flake-parts machinery, lint and diff scripts, Nix-specific traps and the

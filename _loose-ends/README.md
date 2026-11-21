@@ -1,5 +1,7 @@
 # `_loose-ends/`
 
+_Last modified: 2026-11-21_
+
 `_loose-ends/` holds material that waits on a later action outside the normal
 build-and-ship flow: a filing only the user may make, a pattern to extract, a
 removed module to restore, a review, a cleanup on live hosts. Nothing here is
@@ -22,6 +24,15 @@ Put it where the first matching line says:
 
 Security or threat analysis goes in the private `elly/infra-notes` repo, never
 here: this folder is public.
+
+## Date line
+
+Every note carries `_Last modified: YYYY-MM-DD_` on the line after its title,
+and the line is updated when the note's content changes. The shape-specific
+dates in the table (`Written`, `Recorded`, `_Status:_`, the shelved date in a
+title) say when something happened and stay as they are. The fact checker does
+not enforce this line here: its `dates` check shares a scope with the Contents
+and sibling rules, which do not apply to this folder.
 
 ## Shapes
 
@@ -71,5 +82,6 @@ the pattern: one or two similar notes do not need a folder.
 
 The fact checker reads `_loose-ends/**/*.md` (the `docs` scope in
 `factcheck.toml`), so `just wiki-lint` flags a broken link or anchor in a note.
-Its backticked-path check (`[paths]`) is off, because the bug reports name other
-projects' files.
+Its backticked-path check (`[paths]`) is off: it reads the same scope as the
+rest of the docs and reports every historical file name in the wiki, and the bug
+reports name other projects' files.

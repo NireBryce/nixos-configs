@@ -1,5 +1,7 @@
 # ZCode desktop 3.15.3: workspace hook trust approval from the review prompt is never persisted
 
+_Last modified: 2026-11-21_
+
 Written 2026-10-19 against ZCode desktop 3.15.3 (Electron 41.0.3, env=prod) on
 Linux x86_64 (NixOS 26.11).
 

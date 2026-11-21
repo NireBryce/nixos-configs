@@ -1,5 +1,7 @@
 # Extraction candidates — general agent orchestration
 
+_Last modified: 2026-11-21_
+
 One file per thing in this repo whose mechanism would work in *any* repo an
 agent works in — skills, wiki conventions, lessons, hooks, lint scripts,
 AGENTS.md structure — recorded for a future general-purpose repo. No such

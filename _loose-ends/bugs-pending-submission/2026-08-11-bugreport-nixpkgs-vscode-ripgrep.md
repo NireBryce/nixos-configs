@@ -1,5 +1,7 @@
 # nixpkgs: vscode ≥ 1.129 patches the wrong ripgrep on Linux
 
+_Last modified: 2026-11-21_
+
 Written 2026-08-11 against nixpkgs `f13ff45afd1bb73e640eaa08a7066dbed07e3238`,
 on x86_64-linux, vscode 1.130.0. Still present on `master` as of the same date,
 so a channel bump does not fix it.

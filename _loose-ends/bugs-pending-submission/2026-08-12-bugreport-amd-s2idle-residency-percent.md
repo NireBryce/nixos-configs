@@ -1,5 +1,7 @@
 # amd-s2idle: hardware sleep residency reported 100× too high in generated reports
 
+_Last modified: 2026-11-21_
+
 Written 2026-08-12 against `amd-debug-tools` 0.2.20 (as packaged in nixpkgs
 `e4bae1bd10c9c57b2cf517953ab70060a828ee6f`), Python 3.14, on NixOS 26.11.
 

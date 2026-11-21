@@ -1,5 +1,7 @@
 # StickyKeysLockWindow (shelved 2026-11-07)
 
+_Last modified: 2026-11-07_
+
 A kwin sticky-keys plugin patch that tells a deliberate double-tap of a
 modifier (lock it) from a later second tap (unlatch it), built out-of-tree as
 `StickyKeysLockWindowPlugin` and installed on `nire-tenacity` only. Issue
