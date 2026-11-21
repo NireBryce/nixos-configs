@@ -1,6 +1,6 @@
 # `monitoring`, for agents
 
-_Last modified: 2026-11-09_
+_Last modified: 2026-11-21_
 
 _Sibling reviewed: 2026-11-09 -- QNAP metrics and alert rows updated from the NAS MIB_
 
@@ -17,14 +17,15 @@ on loopback**:
 
 | File | Scrapes | Note |
 |---|---|---|
-| `node-exporter/node-exporter.nix` | host CPU/mem/disk/net | |
+| `node-exporter/node-exporter.nix` | host CPU/mem/disk/net | owns the textfile collector flag and `/var/lib/node-exporter-textfile` (tmpfiles, 0755 root); writers repeat the path string: runner-alerts.nix, actions-runner.nix, restic.nix |
 | `cadvisor/cadvisor.nix` | podman containers | not runtime-verified against podman; falls back to walking cgroups, so containers show by cgroup path not name unless `virtualisation.podman.dockerSocket` is wired |
 | `libvirt-exporter/libvirt-exporter.nix` | libvirt/QEMU guests via `qemu:///system` | **overrides `group` to `libvirtd`** — its default group can't read `/run/libvirt/libvirt-sock` and it then serves an empty metrics page instead of failing |
 | `smartctl-exporter/smartctl-exporter.nix` | per-disk SMART/NVMe wear (health, percentage used, media errors, temperature) | added 2026-09-21; `devices` left `[]` (autodiscover). **No dashboard panel yet** — `smartctl_device_*` metric names weren't confirmed against live `/metrics` before landing this; check that on cube first |
 | `prometheus/prometheus.nix` | the exporters above, over loopback | |
-| `runner-alerts/runner-alerts.nix` | textfile metrics (`/var/lib/node-exporter-textfile`: `forge_runner_egress_dropped_packets_total{reason}`, `forge_runner_dns_refused_5m`, cycle gauges from actions-runner.nix) + systemd collector (unit-include: forge-runner-cycle, vm-egress-dns, libvirt-vm-forge-runner) | Prometheus alert rules (areas `forge-runner`, `cube`; `cube` is low free space on /); were Grafana-provisioned rules until 2026-11-08, ported to PromQL with `absent()` where the old rule alerted on no data. Rules pass promtool in the build; not yet runtime-verified |
+| `runner-alerts/runner-alerts.nix` | textfile metrics (written to `/var/lib/node-exporter-textfile`: `forge_runner_egress_dropped_packets_total{reason}`, `forge_runner_dns_refused_5m`, cycle gauges from actions-runner.nix) + systemd collector (unit-include: forge-runner-cycle, vm-egress-dns, libvirt-vm-forge-runner) | Prometheus alert rules (areas `forge-runner`, `cube`; `cube` is low free space on /); were Grafana-provisioned rules until 2026-11-08, ported to PromQL with `absent()` where the old rule alerted on no data. Rules pass promtool in the build; not yet runtime-verified |
 | `snmp-exporter/snmp-exporter.nix` | `ts-hive` QNAP over SNMPv3 (SHA, DES), `qnap` job in prometheus.nix | standard MIBs plus QNAP's QTS-MIB objects (enterprise 55062, `.2`: disk, RAID, pool, fan, power, temperature), OIDs copied from the NAS's MIB. Credentials in sops key `snmp-exporter-env` (multi-line env file); activation fails until the key is in secrets.yaml; a change to the key restarts the exporter (`restartUnits`). Build runs `snmp_exporter --dry-run`. Runtime, as of 2026-11-09: the NAS answers over the tailnet (`udp:161` granted) but SNMPv3 authentication was still failing, so no QTS-MIB metrics have been seen |
 | `qnap-alerts/qnap-alerts.nix` | — | rules `QnapUnreachable`, `QnapMetricsMissing`, `QnapStoragePoolUnhealthy` (status < 0), `QnapStoragePoolAlmostFull`, `QnapDiskHot` (> 55), `QnapPowerFailed`; no rule on `diskStatus`/`raidStatus` (free-text strings, healthy value unknown) |
+| `restic-alerts/restic-alerts.nix` | textfile metrics `restic_sqlite_staging_ok{db}`, `restic_sqlite_staging_last_success_timestamp_seconds{db}` (written by restic.nix's `backupPrepareCommand`) | rules `ResticSqliteStagingFailed` (`_ok == 0`, no `for`), `ResticSqliteStagingStale` (> 2 days); area `backup`. Not runtime-verified |
 | `alertmanager/alertmanager.nix` | — | loopback; `default` receiver has no channel, so nothing is sent yet; Grafana views it via the `alertmanager-cube` datasource |
 | `grafana/grafana.nix` | — | the only off-host-facing piece. Ships provisioned dashboards: `nire-cube-overview.json` and `roundtrip-check.json` (the export-verification artifact) |
 

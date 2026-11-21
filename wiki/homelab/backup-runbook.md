@@ -1,6 +1,6 @@
 # Backup runbook — restic on `nire-cube`
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-11-21_
 
 Run these on `nire-cube` to operate [backup](../config-structure/categories/backup.md), the
 restic backups of Forgejo/Grafana/golink's state and `/persist` to the
@@ -40,6 +40,7 @@ wrapper (plain `restic` fails — root-owned `0400` env files).
 | status | `systemctl status restic-backups-cube.service`; `journalctl -u restic-backups-cube -e` |
 | run now | `sudo systemctl start restic-backups-cube.service` (timer: `timerConfig` in `restic.nix`) |
 | staging log | `sudo cat /var/cache/restic-backups-cube/prepare.log` |
+| staging metrics | `curl -s 127.0.0.1:9100/metrics \| grep restic_sqlite`; PromQL `restic_sqlite_staging_ok == 0` |
 | list / inspect | `sudo restic-cube snapshots`; `ls --recursive <id\|latest> <path>`; `stats`; `check` |
 | restore | `restore latest --target /root/restore-test --include /var/lib/restic-backups-cube-sqlite-staging …` |
 | prove it | `sqlite3 …/sqlite-staging/forgejo.db ".tables"` lists real tables |
@@ -86,6 +87,16 @@ step actually produced real files without waiting for the next restore:
 ```sh
 sudo cat /var/cache/restic-backups-cube/prepare.log
 ```
+
+A failed `sqlite3 .backup` does not fail the unit, so the log line
+`<name>.db: .backup FAILED` is the detail and Prometheus is the alarm. The
+prepare step writes `restic_sqlite_staging_ok{db}` (1 or 0) and
+`restic_sqlite_staging_last_success_timestamp_seconds{db}` to
+`/var/lib/node-exporter-textfile/restic_sqlite_staging.prom`. Alerts
+`ResticSqliteStagingFailed` (`restic_sqlite_staging_ok == 0`) and
+`ResticSqliteStagingStale` (`time() - restic_sqlite_staging_last_success_timestamp_seconds > 172800`)
+are in `restic-alerts.nix`; they show in Grafana's Alerting UI and notify
+nowhere until alertmanager.nix gets a channel.
 
 ## Listing and inspecting snapshots
 

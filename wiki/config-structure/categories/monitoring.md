@@ -1,6 +1,6 @@
 # `monitoring` — `homelab-config/homelab/monitoring/`
 
-_Last modified: 2026-11-09_
+_Last modified: 2026-11-21_
 
 Prometheus + Alertmanager + Grafana, scraping this host's own resource metrics. Cube-only so
 far (added 2026-08-23; under the `homelab` umbrella since 2026-08-27).
@@ -36,7 +36,9 @@ All `nixos`-class:
 
 - **`node-exporter/node-exporter.nix`** — host CPU/memory/disk/network
   metrics. Loopback-only (`127.0.0.1`); nothing outside the host queries it
-  directly.
+  directly. Also enables the textfile collector on
+  `/var/lib/node-exporter-textfile`, where other modules publish metrics
+  (runner-alerts, the runner cycle, restic's prepare step).
 - **`cadvisor/cadvisor.nix`** — per-container metrics for the podman
   containers [containers](containers.md) enables. Also loopback-only. Not
   runtime-verified against podman specifically — cadvisor falls back to
@@ -79,8 +81,7 @@ All `nixos`-class:
   module to import.
 - **`runner-alerts/runner-alerts.nix`** — metrics and alert rules for the
   Forgejo runner VM ([git-forge](git-forge.md)). It turns on node-exporter's
-  textfile collector (`/var/lib/node-exporter-textfile`) and its systemd
-  collector, limited to the runner's units. A one-minute timer writes the
+  systemd collector, limited to the runner's units. A one-minute timer writes the
   guest egress drop counters and the resolver's refused-lookup count; the
   runner's cycle loop writes its own gauges. Prometheus alert rules cover
   blocked connections outside the allowlist or into private ranges, refused
@@ -103,6 +104,11 @@ All `nixos`-class:
   over 90% full, a disk over 55 C, and a power failure. There is no rule on
   disk or RAID status yet: the MIB gives those as free text with no values, so
   a rule waits on a real string from the NAS.
+- **`restic-alerts/restic-alerts.nix`** — Prometheus rules for cube's backup
+  prepare step, from the textfile metrics `restic.nix` writes
+  (`restic_sqlite_staging_*`; see [backup](backup.md)): a sqlite `.backup`
+  that failed (`ResticSqliteStagingFailed`) and no success for over 2 days
+  (`ResticSqliteStagingStale`), area `backup`.
 - **`alertmanager/alertmanager.nix`** — receives the alerts from
   `prometheus.nix`. Its `default` receiver has no notification channel yet,
   so alerts show in Grafana (Alertmanager datasource) and go nowhere else.

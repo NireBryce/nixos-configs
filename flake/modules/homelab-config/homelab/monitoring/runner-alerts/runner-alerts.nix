@@ -4,6 +4,8 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 { lib, ... }:
 let
+    # The collector flag and the directory's tmpfiles rule are in
+    # node-exporter.nix; keep this string equal to its `textfileDir`.
     textfileDir = "/var/lib/node-exporter-textfile";
 in {
     nixos = { pkgs, config, ... }: let
@@ -38,7 +40,6 @@ in {
         services.prometheus.exporters.node = {
             enabledCollectors = [ "systemd" ];
             extraFlags = [
-                "--collector.textfile.directory=${textfileDir}"
                 # Only the units the rules below watch; the collector
                 # otherwise exports every unit on the host.
                 "--collector.systemd.unit-include=(forge-runner-cycle|vm-egress-dns|libvirt-vm-forge-runner)[.]service"
@@ -46,10 +47,6 @@ in {
         };
 
         systemd = {
-            # Written by root (the timer below, and actions-runner.nix's
-            # cycle); read by node-exporter, which runs as its own user.
-            tmpfiles.rules = [ "d ${textfileDir} 0755 root root -" ];
-
             services.forge-runner-egress-metrics = {
                 description = "Write forge-runner egress metrics for node-exporter";
                 serviceConfig = { Type = "oneshot"; ExecStart = egressMetrics; };
