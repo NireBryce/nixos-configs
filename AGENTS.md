@@ -293,7 +293,9 @@ changed anything, in the repo or on a host, end the report with a short
 "Choices I made that you didn't ask for" list: a default picked, scope added
 or dropped, a behavior that differs from the obvious one. One line each, with
 how to reverse it. The user can't object to a decision they never saw, and
-the diff doesn't show which parts were judgment calls.
+the diff doesn't show which parts were judgment calls. In a PR body or commit
+message, which other people read, head the list "Choices I made that the user
+didn't ask for" and write "the user", never "you".
 
 Leave out anything the request or the repo's own instructions already settle:
 this file, a rule file or a skill (worktrees, commit trailers, the `ship`
