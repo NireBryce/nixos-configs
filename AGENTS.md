@@ -288,23 +288,29 @@ can return non-zero; before believing a count, know what it counts (§22,
 commit (§1). When an existing check fires on new work, fix its model before
 reaching for its escape flag (§23).
 
-**List the choices you made that the user did not ask for.** End the report
-on a task with a short "Choices I made that you didn't ask for" list: a
-default picked, scope added or dropped, a behavior that differs from the
-obvious one. One line each, with how to reverse it. The user can't object to
-a decision they never saw, and the diff doesn't show which parts were
-judgment calls. Write "none" when there were none; leave out choices the
-request or this file already dictates.
+**List the choices you made that the user did not ask for.** When a task
+changed anything, in the repo or on a host, end the report with a short
+"Choices I made that you didn't ask for" list: a default picked, scope added
+or dropped, a behavior that differs from the obvious one. One line each, with
+how to reverse it. The user can't object to a decision they never saw, and
+the diff doesn't show which parts were judgment calls.
 
-**Surface related research you already hit.** Below the choices list, add a
-"Related documents, concepts and research" section when a document, concept
+Leave out anything the request or the repo's own instructions already settle:
+this file, a rule file or a skill (worktrees, commit trailers, the `ship`
+flow). List a departure from a documented default (for example, a worktree
+path other than the one a skill names). Omit the section when there were no
+choices, and for read-only investigation and Q&A replies. Don't write
+"none".
+
+**Surface related research you already hit.** At the end of the report, below the choices list if there is one, add
+a "Related documents, concepts and research" section when a document, concept
 or piece of research turned up that bears on the work: in your own knowledge
 or in something you read while doing the task. One line each, with a link or
 path. Mention a find in chat when it comes up, in a sentence, if the user
 would want it before the end. Don't search for these, don't read more to
 find them, and don't summarize them: the tokens were spent already, and the
-section only records what they bought. Write "none" or omit the section when
-nothing turned up.
+section only records what they bought. Omit the section when nothing turned
+up; don't write "none".
 
 **Then** run the preflight as skill `ship` step 0 describes (`just
 preflight` is what CI runs), and load skill `wiki-sync` for any wiki page the
