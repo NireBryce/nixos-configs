@@ -369,7 +369,6 @@ def main(argv=None):
                 else:
                     path.write_text(new_text)
                 text = new_text
-        lines = text.split("\n")
         for lineno, _, cls, detail, para in over_limit(text, args.limit):
             remaining.append(f"{path}:{lineno + 1}: [{cls}] {detail}: "
                              f"{dict(para)[lineno]}")

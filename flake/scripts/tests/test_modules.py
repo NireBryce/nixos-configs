@@ -78,7 +78,9 @@ class Graph(Tree):
         self.assertEqual(fake.calls[0][3], f'path:{self.root.resolve().parent}#moduleGraph')
 
     def test_a_failed_evaluation_says_why(self):
-        bad = lambda cmd, **kw: types.SimpleNamespace(returncode=1, stdout='', stderr='error: boom\n')
+        def bad(cmd, **kwargs):
+            return types.SimpleNamespace(returncode=1, stdout='', stderr='error: boom\n')
+
         with self.assertRaises(SystemExit) as cm:
             modules.graph(self.root, bad)
         self.assertIn('boom', str(cm.exception))

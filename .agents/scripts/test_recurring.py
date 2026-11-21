@@ -52,7 +52,7 @@ def vocabulary():
             words.add(word)
             if children:
                 walk(children)
-    for tool, subs in recurring.SUBCOMMANDS.items():
+    for _tool, subs in recurring.SUBCOMMANDS.items():
         walk(subs)
     walk(RECIPES)
     return words
@@ -293,9 +293,11 @@ class SqliteReader(unittest.TestCase):
             db.execute('create table part (id text, session_id text, data text)')
             db.executemany('insert into session values (?, ?)', [
                 ('s1', '/home/u/nixos-configs'), ('s2', '/home/u/elsewhere')])
-            part = lambda tool, cmd: json.dumps(
-                {'type': 'tool', 'tool': tool, 'callID': 'c',
-                 'state': {'input': {'command': cmd}}})
+            def part(tool, cmd):
+                return json.dumps(
+                    {'type': 'tool', 'tool': tool, 'callID': 'c',
+                     'state': {'input': {'command': cmd}}})
+
             db.executemany('insert into part values (?, ?, ?)', [
                 ('p1', 's1', part('bash', 'git status')),     # opencode
                 ('p2', 's1', part('Bash', 'ls')),             # zcode
@@ -320,9 +322,11 @@ class SqliteReader(unittest.TestCase):
             db.executemany('insert into session values (?, ?)', [
                 ('s1', '/home/u/nixos'), ('s2', '/home/u/nixos-docs'),
                 ('s3', '/home/u/elsewhere')])
-            part = lambda cmd: json.dumps(
-                {'type': 'tool', 'tool': 'bash',
-                 'state': {'input': {'command': cmd}}})
+            def part(cmd):
+                return json.dumps(
+                    {'type': 'tool', 'tool': 'bash',
+                     'state': {'input': {'command': cmd}}})
+
             db.executemany('insert into part values (?, ?, ?)', [
                 ('p1', 's1', part('main')), ('p2', 's2', part('sibling')),
                 ('p3', 's3', part('other'))])
@@ -350,8 +354,10 @@ class ExportFlow(unittest.TestCase):
         env = {**os.environ, 'GIT_CONFIG_GLOBAL': os.devnull,
                'GIT_AUTHOR_NAME': 't', 'GIT_AUTHOR_EMAIL': 't@t',
                'GIT_COMMITTER_NAME': 't', 'GIT_COMMITTER_EMAIL': 't@t'}
-        run = lambda *args, cwd=None: subprocess.run(args, cwd=cwd, env=env, check=True,
-                                                  capture_output=True)
+        def run(*args, cwd=None):
+            return subprocess.run(args, cwd=cwd, env=env, check=True,
+                                  capture_output=True)
+
         run('git', 'init', '-q', '--bare', '-b', 'main', str(base_dir / 'forge.git'))
         run('git', 'init', '-q', '-b', 'main', str(base_dir / 'seed'))
         (base_dir / 'seed' / 'README.md').write_text('log\n')

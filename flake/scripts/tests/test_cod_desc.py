@@ -25,7 +25,6 @@ Covers:
 """
 import importlib.util
 import pathlib
-import re
 import shutil
 import subprocess
 import tempfile

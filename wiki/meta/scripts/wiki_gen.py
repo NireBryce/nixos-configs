@@ -95,7 +95,9 @@ def parse_table(body):
     lines = [line.strip() for line in body.splitlines() if line.strip().startswith('|')]
     if len(lines) < 2:
         return []
-    split = lambda line: [cell.strip() for cell in CELL_SPLIT.split(line.strip('|'))]
+    def split(line):
+        return [cell.strip() for cell in CELL_SPLIT.split(line.strip('|'))]
+
     headers = split(lines[0])
     return [dict(zip(headers, split(line))) for line in lines[2:]]
 

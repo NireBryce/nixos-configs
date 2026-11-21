@@ -109,7 +109,9 @@ class HmCollisions(unittest.TestCase):
             self.entries(owned=False, missing=False, plain=False, recdir=True, plaindir=False),
             self.home)
 
-        in_home = lambda name: os.path.join(self.home, name)
+        def in_home(name):
+            return os.path.join(self.home, name)
+
         self.assertEqual(owned, [in_home("owned")])
         self.assertEqual(absent, [in_home("missing")])
         self.assertEqual(rec, [in_home("recdir")])

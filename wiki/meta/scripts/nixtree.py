@@ -108,7 +108,9 @@ def static_document(root):
     modules with their classes, includes and enables -- for drawing without
     nix and for `just modules` to compare against the evaluated one."""
     modules = root / 'flake' / 'modules'
-    rel = lambda nix_file: nix_file.relative_to(modules).as_posix()
+    def rel(nix_file):
+        return nix_file.relative_to(modules).as_posix()
+
     doc = {'version': 1, 'classes': list(CLASS_KEYS), 'folders': [], 'defaults': [], 'admin': [],
            'categories': {category_name: {'dir': rel(category_dir), 'members': [], 'nested': [], 'flag': None}
                           for category_name, category_dir in all_categories(root).items()},

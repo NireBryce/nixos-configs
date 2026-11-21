@@ -34,7 +34,9 @@ def roster(root):
     columns write it. Read from hosts.nix, so adding or removing a host
     needs no edit here."""
     hosts = actual_hosts(root)
-    short = lambda name: name.removeprefix(PREFIX)
+    def short(name):
+        return name.removeprefix(PREFIX)
+
     return ([short(host_name) for host_name in hosts],
             {short(host_name) for host_name, cls in hosts.items() if cls == 'nixos'})
 

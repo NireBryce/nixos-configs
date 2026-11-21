@@ -310,14 +310,17 @@ def add(root, cls, target, description, run=subprocess.run):
 def main(argv=None, run=subprocess.run):
     argv = list(sys.argv[1:] if argv is None else argv)
     if not argv:
-        print(__doc__); return 2
+        print(__doc__)
+        return 2
     cmd = argv[0]
     if cmd == 'add':
         if len(argv) < 4:
-            print(__doc__); return 2
+            print(__doc__)
+            return 2
         return add(argv[1], argv[2], argv[3], argv[4:], run)
     if len(argv) != 2:
-        print(__doc__); return 2
+        print(__doc__)
+        return 2
     root = argv[1]
     if cmd == 'untracked':
         return 1 if untracked(root) else 0
@@ -330,7 +333,8 @@ def main(argv=None, run=subprocess.run):
         bad = bool(untracked(root)) | bool(options(root)) | bool(drift(doc, static_document(root)))
         print("no findings" if not bad else "", end="")
         return 1 if bad else 0
-    print(__doc__); return 2
+    print(__doc__)
+    return 2
 
 
 if __name__ == '__main__':
