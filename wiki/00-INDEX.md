@@ -87,7 +87,8 @@ root holds only entry points.
 - [`llm-aided-dev/`](llm-aided-dev/) — working with coding agents:
   [cloud sessions](llm-aided-dev/cloud-sessions.md) (plan and runbook),
   [risk and impact ratings](llm-aided-dev/risk-and-impact.md) (the 1-10 scale for PR bodies and issues),
-  [skill locations](llm-aided-dev/skill-locations.md) (`.agents/skills`, the `.claude/skills` symlink, and loading a skill).
+  [skill locations](llm-aided-dev/skill-locations.md) (`.agents/skills`, the `.claude/skills` symlink, and loading a skill),
+  [third-party text](llm-aided-dev/untrusted-text.md) (issue titles, journal lines and device strings that reach an agent, and what filters them).
 - [`meta/`](meta/) — the wiki's own rules and the repo's memory:
   [style guide](meta/styleguide.md), [traps and skills](meta/traps-and-skills.md),
   [history](meta/history.md), [open threads](meta/open-threads.md), and `scripts/`.
