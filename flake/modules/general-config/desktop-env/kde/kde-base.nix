@@ -27,7 +27,6 @@
         # make GTK apps obey theme settings
         programs.dconf.enable = true;
 
-        # fix electron fonts? https://github.com/electron/electron/issues/31797
         environment.systemPackages = with pkgs; [
             # kdePackages.xdg-desktop-portal-kde  # lives in xdg-portals
             kdePackages.spectacle # screenshot tool                          https://invent.kde.org/graphics/spectacle

@@ -75,10 +75,10 @@ in {
         # it fixes the failure actually observed.
         systemd.services.tailscale-serve = {
             serviceConfig = {
-                Restart              = "on-failure";
-                RestartSec           = 5;
+                Restart               = "on-failure";
+                RestartSec            = 5;
                 StartLimitIntervalSec = 60;
-                StartLimitBurst      = 6;
+                StartLimitBurst       = 6;
             };
         };
     };

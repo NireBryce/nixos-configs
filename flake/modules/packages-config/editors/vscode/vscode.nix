@@ -3,7 +3,7 @@
 # it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 { inputs, ... }:
-# TODO: remove need for `inputs`, try `'self?`
+# TODO: remove need for `inputs`, try `self`?
 {
     nixos = { pkgs, ... }: {
         # package summary: vscode-fhs -- Visual Studio Code in an FHS environment
@@ -13,7 +13,6 @@
         environment.systemPackages = with pkgs; [
             vscode-fhs
         ];
-
 
         programs.nix-ld.enable = true; # Needed for VSCode remote connection, etc
         environment.sessionVariables.NIXOS_OZONE_WL = "1";

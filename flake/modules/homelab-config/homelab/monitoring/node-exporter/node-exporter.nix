@@ -4,7 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
 # summary: node_exporter: CPU/memory/disk/network metrics for the host itself.
-# One of three things prometheus.nix scrapes -- see that file and grafana.nix
+# One of the things prometheus.nix scrapes -- see that file and grafana.nix
 # for the rest of the stack this belongs to.
 {
     nixos = {

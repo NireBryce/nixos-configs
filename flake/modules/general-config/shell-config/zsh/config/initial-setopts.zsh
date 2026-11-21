@@ -2,7 +2,7 @@
   # From manjaro defaults:
     setopt correct                                                  # Auto correct mistakes
     setopt nocaseglob                                               # Case insensitive globbing
-    setopt rcexpandparam                                            # Array expension with parameters
+    setopt rcexpandparam                                            # Array expansion with parameters
     setopt nocheckjobs                                              # Don't warn about running processes when exiting
     setopt numericglobsort                                          # Sort filenames numerically when it makes sense
     setopt nobeep                                                   # No beep

@@ -33,7 +33,6 @@
             xdotool
             xwininfo
             yad
-
         ];
     };
 }

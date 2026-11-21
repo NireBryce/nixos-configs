@@ -8,9 +8,9 @@
             enable = true;
             allowSFTP = false; # Don't set this if you need sftp
             settings = {
-            PasswordAuthentication = false;
-            KbdInteractiveAuthentication = false;
-            PermitRootLogin = "no"; # default "prohibit-password"; root has no keys to allow
+                PasswordAuthentication = false;
+                KbdInteractiveAuthentication = false;
+                PermitRootLogin = "no"; # default "prohibit-password"; root has no keys to allow
             };
 
             # Only the declared keys below, never ~/.ssh/authorized_keys:
@@ -19,16 +19,15 @@
             # host had that file when this was set (2026-09-26).
             authorizedKeysInHomedir = false;
             extraConfig = ''
-            AllowTcpForwarding          yes
-            X11Forwarding               no
-            AllowAgentForwarding        no
-            AllowStreamLocalForwarding  no
-            AuthenticationMethods       publickey
+                AllowTcpForwarding          yes
+                X11Forwarding               no
+                AllowAgentForwarding        no
+                AllowStreamLocalForwarding  no
+                AuthenticationMethods       publickey
             '';
         };
         users.users.elly = {
             openssh.authorizedKeys.keys = [
-
             # The key on nire-lysithea, added 2026-08-21.
             # SHA256:fUxn4S79MlIYFrd4yKKy0d8RmE0J59bdeGXg36c6dgw
             # Until this landed, the laptop this repo is edited from could not

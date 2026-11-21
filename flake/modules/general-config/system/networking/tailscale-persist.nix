@@ -27,12 +27,12 @@
 # added without it (originally nire-testbed, since removed; nire-cube is the
 # current example) does not -- persistent root, nothing wipes
 # /var/lib/tailscale -- and this entry would have been pure overhead for it: a
-# same-filesystem bind mount
-# rescuing state from a wipe that never happens, plus a real side effect,
-# impermanence's own "Neither /var/lib/nixos nor any of its parents are
-# persisted" warning, which fires the moment ANY environment.persistence entry
-# exists without /var/lib/nixos alongside it (nixos.nix:608-610 in the
-# impermanence flake). Wrong warning for a host with no wipe to worry about.
+# same-filesystem bind mount rescuing state from a wipe that never happens,
+# plus a real side effect, impermanence's own "Neither /var/lib/nixos nor any
+# of its parents are persisted" warning, which fires the moment ANY
+# environment.persistence entry exists without /var/lib/nixos alongside it
+# (nixos.nix:608-610 in the impermanence flake). Wrong warning for a host with
+# no wipe to worry about.
 #
 # `environment.persistence` itself is declared for every NixOS host regardless
 # -- see general-config/system/persistence/persistence-options.nix -- so

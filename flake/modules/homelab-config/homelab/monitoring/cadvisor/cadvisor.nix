@@ -4,9 +4,9 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
 # summary: cadvisor: per-container CPU/memory/network metrics, for the podman
-# containers containers.nix's `podman` category enables. One of three things
-# prometheus.nix scrapes -- see that file and grafana.nix for the rest of the
-# stack this belongs to.
+# containers that podman.nix (the `containers` category) enables. One of the
+# things prometheus.nix scrapes -- see that file and grafana.nix for the rest
+# of the stack this belongs to.
 {
     nixos = {
         services.cadvisor = {

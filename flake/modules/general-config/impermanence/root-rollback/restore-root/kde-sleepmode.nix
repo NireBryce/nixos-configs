@@ -46,8 +46,8 @@
         #
         # Absolute store path because home-manager activation runs as a
         # systemd unit whose PATH is only coreutils/findutils/gnugrep/
-        # gnused/systemd -- see CLAUDE.md. Absolute --file for the same
-        # reason: XDG_CONFIG_HOME is not reliably set there.
+        # gnused/systemd -- see the `home-manager-dotfiles` skill. Absolute
+        # --file for the same reason: XDG_CONFIG_HOME is not reliably set there.
         #
         # SleepMode = 1 is SuspendToRam. PowerDevil's enum, from
         # plasma/powerdevil daemon/powerdevilenums.h:

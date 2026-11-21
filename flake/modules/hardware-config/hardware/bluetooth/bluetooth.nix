@@ -9,9 +9,9 @@
             enable = true;
             settings = {
                 General = {
-                FastConnectable = true;
-                DiscoverableTimeout = 60; # seconds
-                PairableTimeout = 60; # seconds
+                    FastConnectable = true;
+                    DiscoverableTimeout = 60; # seconds
+                    PairableTimeout = 60; # seconds
                 };
             };
         };

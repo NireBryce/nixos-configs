@@ -10,12 +10,13 @@
 #
 # Added alongside the first NixOS host in this repo that does NOT import
 # `impermanence` (originally nire-testbed, since removed; nire-cube is the
-# current example). tailscale-persist.nix (and jovian-persist.nix)
-# write to environment.persistence."/persist" unconditionally, and each
-# already carries a comment anticipating this: "A future host taking `system`
-# WITHOUT [impermanence] would hit an option-does-not-exist error here and
-# would need this guarded, not just deleted." This is that guard -- but it
-# guards the OPTION, not the value, because the value can't be:
+# current example). jovian-persist.nix writes to
+# environment.persistence."/persist" unconditionally, and its comment says a
+# jovian host without `impermanence` would need that guarded, not just
+# deleted. tailscale-persist.nix used to do the same and carried the same
+# note; it is now gated by lib.persist.persistIfImpermanent. This is the guard
+# for the option itself -- but it guards the OPTION, not the value, because
+# the value can't be:
 #
 #   lib.mkIf false { environment.persistence."/persist".directories = [...]; }
 #
@@ -27,9 +28,10 @@
 # `imports` list instead (`lib.optional (options ? ...) ...`) was the other
 # candidate, and it fails harder: referencing `options` (or `config`) of the
 # same evalModules call from within that call's own `imports` list is exactly
-# the circular-imports shape CLAUDE.md documents for pkgs under useGlobalPkgs,
-# except here it is `options` doing it, not `pkgs` -- also confirmed with
-# evalModules, and it throws "infinite recursion encountered" identically.
+# the circular-imports shape elly-home-manager.nix documents for pkgs under
+# useGlobalPkgs, except here it is `options` doing it, not `pkgs` -- also
+# confirmed with evalModules, and it throws "infinite recursion encountered"
+# identically.
 #
 # So the option has to just always exist. This is that.
 #

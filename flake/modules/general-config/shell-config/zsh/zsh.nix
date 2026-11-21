@@ -48,7 +48,6 @@
             diff-so-fancy
             # starship                        # enabled via programs.starship, see appearance-cli/starship.nix
             tree
-            # ruby                            # zi depends on `gem`
             nix-zsh-completions
             zsh-f-sy-h
             zsh-fzf-tab
@@ -143,7 +142,7 @@
                 # From manjaro defaults:
                 "correct" # Auto correct mistakes
                 "nocaseglob" # Case insensitive globbing
-                "rcexpandparam" # Array expension with parameters
+                "rcexpandparam" # Array expansion with parameters
                 "nocheckjobs" # Don't warn about running processes when exiting
                 "numericglobsort" # Sort filenames numerically when it makes sense
                 "nobeep" # No beep
@@ -226,11 +225,10 @@
                                                                   # terminfo[kend] to bind Home and End. Not kitty-specific,
                                                                   # despite the old note here.
 
-                WORDCHARS='*?[]~=&;!#$%^(){}<>';                  # Dont consider certain characters part of the word for nav
+                WORDCHARS='*?[]~=&;!#$%^(){}<>';                  # Don't consider certain characters part of the word for nav
             '')
 
                 (lib.mkOrder 550 ''
-                # zicompinit                                        # zi cleanup
                 autoload -Uz compinit
                 compinit -C
             '')
