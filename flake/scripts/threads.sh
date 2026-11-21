@@ -35,7 +35,12 @@ term=$*
 
 echo "=== GitHub issues (NireBryce/nixos-configs) ==="
 if command -v gh > /dev/null; then
-    gh issue list --repo NireBryce/nixos-configs --search "$term" --state all \
+    # Issue titles are written by whoever can file or comment, and this output
+    # reaches an agent's context through a pre-approved recipe, so it goes
+    # through the sanitise-and-fence filter (.agents/scripts/untrusted.py).
+    # Titles only: `gh issue list` prints no bodies, and none are added here.
+    gh issue list --repo NireBryce/nixos-configs --search "$term" --state all 2>&1 \
+        | python3 "$repo_root/.agents/scripts/untrusted.py" --source github-issues \
         || echo "(gh issue list failed -- not authenticated? check by hand)"
 else
     echo "(gh not installed -- skipping)"

@@ -305,6 +305,8 @@ preflight:
     @python3 .agents/scripts/test_debug_suspend_hangs.py
     @python3 flake/scripts/tests/test_debug_suspend_short_sleep.py
     @python3 .agents/scripts/test_untrusted.py
+    @python3 .agents/scripts/test_journal.py
+    @python3 flake/scripts/tests/test_threads.py
     @python3 .agents/scripts/test_guard_check.py
     @python3 .agents/scripts/test_docs.py
     @python3 .agents/scripts/test_move_refs.py
