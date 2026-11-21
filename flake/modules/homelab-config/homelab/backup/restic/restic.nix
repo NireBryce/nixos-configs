@@ -49,6 +49,13 @@ let
     # account in backup.md.
     sqliteStagingDir  = "/var/lib/restic-backups-cube-sqlite-staging";
 
+    # node-exporter's textfile collector directory, where the prepare step
+    # publishes its metrics. The directory, its tmpfiles rule and the
+    # exporter flag live in monitoring/node-exporter/node-exporter.nix;
+    # runner-alerts.nix and actions-runner.nix write there too. Keep this
+    # string equal to that file's `textfileDir`.
+    textfileDir       = "/var/lib/node-exporter-textfile";
+
     # The three sqlite dbs actually at risk (issue #87's table), and
     # where each one lives -- checked against the pinned nixpkgs
     # modules rather than assumed: forgejo.nix's `stateDir` defaults to
@@ -174,6 +181,28 @@ in {
             # with no useful `$PATH`, and ad hoc reproductions of it
             # kept hitting `command not found`.
             #
+            # Each staged copy is removed before its `.backup`, and a
+            # failed `.backup` logs FAILED. The `{ ...; }` group's exit
+            # status is its last command's, so a failure does not stop
+            # the run (failing the unit would skip the whole backup,
+            # secrets included), and last night's copy would otherwise be
+            # backed up as if fresh (issue #673). A db whose `.backup`
+            # failed is absent from the snapshot and says so here.
+            #
+            # The outcome is also published for Prometheus, so a failure
+            # is alertable (restic-alerts.nix) and not only in the log:
+            # `restic_sqlite_staging_ok{db}` is 1 when sqlite3 exited 0
+            # and 0 when it did not, and
+            # `restic_sqlite_staging_last_success_timestamp_seconds{db}`
+            # is the time of the last success. On a failure the previous
+            # timestamp line is copied from the old file, so the series
+            # keeps its last real value; a db that has never succeeded has
+            # no timestamp series, and only the `_ok` alert covers it. The
+            # file is built in dot-named parts (the collector reads only
+            # `*.prom`), set to 0644 because `umask 077` would leave it
+            # unreadable to node-exporter's own user, and renamed into
+            # place so the exporter never reads a half-written file.
+            #
             # umask 077 and a 0700 staging dir: the copies are whole
             # forgejo/grafana/golink dbs (account hashes included), and
             # under the default 022 they landed 0644 in a 0755 dir,
@@ -181,17 +210,44 @@ in {
             # in 0700/0750 dirs. `install -d -m` also tightens the dir
             # when it already exists. restic runs as root, so nothing
             # it reads changes.
-            backupPrepareCommand = ''
+            backupPrepareCommand = let
+                coreutils = "${pkgs.coreutils}/bin";
+                metricsFile = "${textfileDir}/restic_sqlite_staging.prom";
+                okPart = "${textfileDir}/.restic_sqlite_staging.ok.part";
+                timestampPart = "${textfileDir}/.restic_sqlite_staging.timestamp.part";
+                metricsTmp = "${textfileDir}/.restic_sqlite_staging.prom.tmp";
+            in ''
                 umask 077
                 {
-                    ${pkgs.coreutils}/bin/echo "=== prepare run: $(${pkgs.coreutils}/bin/date -Iseconds) ==="
-                    ${pkgs.coreutils}/bin/install -d -m 0700 ${sqliteStagingDir}
+                    ${coreutils}/echo "=== prepare run: $(${coreutils}/date -Iseconds) ==="
+                    ${coreutils}/install -d -m 0700 ${sqliteStagingDir}
+                    : > ${okPart}
+                    : > ${timestampPart}
                     ${lib.concatStringsSep "\n" (lib.mapAttrsToList
                         (name: db: ''
-                            ${pkgs.sqlite}/bin/sqlite3 ${db} ".backup '${sqliteStagingDir}/${name}.db'"
-                            ${pkgs.coreutils}/bin/echo "${name}.db: $(${pkgs.coreutils}/bin/stat -c%s ${sqliteStagingDir}/${name}.db 2>&1 || ${pkgs.coreutils}/bin/echo MISSING) bytes"
+                            ${coreutils}/rm -f ${sqliteStagingDir}/${name}.db
+                            if ${pkgs.sqlite}/bin/sqlite3 ${db} ".backup '${sqliteStagingDir}/${name}.db'"; then
+                                ${coreutils}/echo "restic_sqlite_staging_ok{db=\"${name}\"} 1" >> ${okPart}
+                                ${coreutils}/echo "restic_sqlite_staging_last_success_timestamp_seconds{db=\"${name}\"} $(${coreutils}/date +%s)" >> ${timestampPart}
+                            else
+                                ${coreutils}/echo "${name}.db: .backup FAILED"
+                                ${coreutils}/echo "restic_sqlite_staging_ok{db=\"${name}\"} 0" >> ${okPart}
+                                ${pkgs.gnugrep}/bin/grep -h '^restic_sqlite_staging_last_success_timestamp_seconds{db="${name}"} ' ${metricsFile} >> ${timestampPart} 2>/dev/null || true
+                            fi
+                            ${coreutils}/echo "${name}.db: $(${coreutils}/stat -c%s ${sqliteStagingDir}/${name}.db 2>&1 || ${coreutils}/echo MISSING) bytes"
                         '')
                         sqliteDbs)}
+                    {
+                        ${coreutils}/echo "# HELP restic_sqlite_staging_ok Whether the last sqlite .backup into the restic staging directory exited 0."
+                        ${coreutils}/echo "# TYPE restic_sqlite_staging_ok gauge"
+                        ${coreutils}/cat ${okPart}
+                        ${coreutils}/echo "# HELP restic_sqlite_staging_last_success_timestamp_seconds Unix time of the last successful sqlite .backup into the staging directory."
+                        ${coreutils}/echo "# TYPE restic_sqlite_staging_last_success_timestamp_seconds gauge"
+                        ${coreutils}/cat ${timestampPart}
+                    } > ${metricsTmp}
+                    ${coreutils}/chmod 0644 ${metricsTmp}
+                    ${coreutils}/mv -f ${metricsTmp} ${metricsFile}
+                    ${coreutils}/rm -f ${okPart} ${timestampPart}
                 } >> /var/cache/restic-backups-cube/prepare.log 2>&1
             '';
 

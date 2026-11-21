@@ -1,6 +1,6 @@
 # `backup` — `homelab-config/homelab/backup/`
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-11-21_
 
 [restic](https://restic.net/) backs up `nire-cube`'s service state to the
 `ts-hive` NAS already on the network. Cube-only; added 2026-08-28 against issue
@@ -96,6 +96,16 @@ that gets backed up, not the live one. The prepare step runs under
 databases, account hashes included, and until 2026-09-27 they sat 0644 in
 a 0755 directory, readable by every account on cube while the live ones
 sit in 0700/0750 service directories.
+
+A failed `.backup` does not fail the unit (that would skip the whole run,
+secrets included). The step logs `<name>.db: .backup FAILED` to `prepare.log`
+and publishes `restic_sqlite_staging_ok{db}` (1 or 0) and
+`restic_sqlite_staging_last_success_timestamp_seconds{db}` to node-exporter's
+textfile directory (`/var/lib/node-exporter-textfile/restic_sqlite_staging.prom`).
+`monitoring/restic-alerts/restic-alerts.nix` alerts on `_ok == 0` and on no
+success for over 2 days. A db that has never succeeded has no timestamp series.
+Check by hand: `curl -s 127.0.0.1:9100/metrics | grep restic_sqlite`. Evaluated
+and run against a stub `sqlite3` 2026-11-21; not yet seen on cube.
 
 **It had never worked.** Found doing the restore drill this page's own
 "done means" always said was the real bar: `restic ls --recursive

@@ -4,7 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
 # summary: Alertmanager: receives alerts from Prometheus's rules
-# (runner-alerts.nix, qnap-alerts.nix) and routes them to a receiver.
+# (runner-alerts.nix, qnap-alerts.nix, restic-alerts.nix) and routes them to a receiver.
 # Loopback only; grafana.nix reads it through an Alertmanager datasource
 # for viewing and silencing.
 #

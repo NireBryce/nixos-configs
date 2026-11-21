@@ -1,6 +1,6 @@
 # `backup`, for agents
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-11-21_
 
 _Sibling reviewed: 2026-10-20 -- source's 2026-10-20 edit was filler-word removal only; no facts changed. Earlier: See-also links repointed from open-threads.md to issues #87/#130; this page links neither_
 
@@ -26,6 +26,7 @@ declare `flake.modules.nixos.restic` and silently **merge**.
 | Auth | dedicated ed25519 key `~/.ssh/restic-cube-backup`, not the personal key |
 | Host key | pinned in Nix via `programs.ssh.knownHosts`, not TOFU |
 | sqlite staging | `/var/lib/restic-backups-cube-sqlite-staging`, dir 0700 / copies 0600 (umask 077 in `backupPrepareCommand`; was 0755/0644 until 2026-09-27) |
+| sqlite staging metrics | `restic_sqlite_staging_ok{db}`, `restic_sqlite_staging_last_success_timestamp_seconds{db}` in `/var/lib/node-exporter-textfile/restic_sqlite_staging.prom` (0644, written atomically by `backupPrepareCommand`); alerts `ResticSqliteStagingFailed`, `ResticSqliteStagingStale` in `monitoring/restic-alerts/restic-alerts.nix`; a failed `.backup` still does not fail the unit |
 | Paths | `/var/lib/{forgejo,grafana,golink}`, `/persist/secrets`, `/persist/passwords`, sqlite staging dir |
 | Timer | `OnCalendar`, `RandomizedDelaySec`, `Persistent=true` (values in `restic/restic.nix`) |
 | Retention | `pruneOpts` `--keep-daily/-weekly/-monthly` (unsized starting point; values in `restic/restic.nix`) |
