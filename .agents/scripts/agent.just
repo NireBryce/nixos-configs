@@ -86,6 +86,10 @@ lessons *args:
 debug-suspend-hangs *args:
     @"{{scripts}}/debug_suspend_hangs.py" "$@"
 
+# Fence third-party text (strip hidden chars, cap, label as data): cmd | untrusted --source NAME
+untrusted *args:
+    @"{{scripts}}/untrusted.py" "$@"
+
 # Docs ranked by commits to the paths they cite since their date: doc-drift [--top N]
 doc-drift *args:
     @"{{scripts}}/doc_drift.py" "$@"
