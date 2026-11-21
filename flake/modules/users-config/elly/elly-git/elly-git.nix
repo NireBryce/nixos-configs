@@ -3,7 +3,37 @@
 # it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
-    homeManager = {
+    homeManager = { pkgs, ... }: let
+        # git runs this in place of ssh-keygen for every SSH signature
+        # (`gpg.ssh.program`) and for verification calls (`-Y verify` etc.).
+        #
+        # - Non-interactive sessions (coding agents, CI) have no
+        #   SSH_AUTH_SOCK, so point it at the SSH agent's socket when that
+        #   socket exists. On cube there is none and the key is a file.
+        # - ssh-keygen runs as a child, not `exec`, so a hint can follow it.
+        #   Its exit status is passed through unchanged; git reads the
+        #   signature from a file only after a zero exit.
+        # - The hint prints only for a failed `-Y sign`, only to stderr, and
+        #   is a fixed string: no arguments, environment or ssh-keygen output
+        #   go into it, because agents read it and treat it as instructions.
+        #   It says nothing about retrying: each attempt can open a new
+        #   approval prompt for the user.
+        # - ssh-keygen is called by store path, not looked up on PATH.
+        # - No `${` in the script text: inside this `''` string it would be a
+        #   Nix interpolation.
+        sshSign = pkgs.writeShellScript "git-ssh-sign" ''
+            if [ -z "$SSH_AUTH_SOCK" ] && [ -S "$HOME/.bitwarden-ssh-agent.sock" ]; then
+                SSH_AUTH_SOCK="$HOME/.bitwarden-ssh-agent.sock"
+                export SSH_AUTH_SOCK
+            fi
+            ${pkgs.openssh}/bin/ssh-keygen "$@"
+            status=$?
+            if [ "$status" -ne 0 ] && [ "$1" = "-Y" ] && [ "$2" = "sign" ]; then
+                printf '%s\n' "git-ssh-sign: ssh-keygen returned no signature. The signing request may have been denied or timed out, or the key passphrase was not entered. Each attempt can open a new approval prompt. See wiki/ssh/commit-signing.md." >&2
+            fi
+            exit "$status"
+        '';
+    in {
         home.file."./.gitconfig".source = ./.gitconfig;
         
         programs.git = {        # User-specific git config
@@ -22,6 +52,7 @@
                 feature.manyFiles = true;
                 init.defaultBranch = "main";
                 gpg.format = "ssh";
+                gpg.ssh.program = "${sshSign}";
 
                 # prefetch is the only maintenance task that touches the network,
                 # and `origin` here is an ssh remote (git@github.com). The timer
