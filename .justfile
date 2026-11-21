@@ -303,6 +303,7 @@ preflight:
     @python3 .agents/scripts/test_worktree.py
     @python3 .agents/scripts/test_where.py
     @python3 .agents/scripts/test_debug_suspend_hangs.py
+    @python3 flake/scripts/tests/test_debug_suspend_short_sleep.py
     @python3 .agents/scripts/test_guard_check.py
     @python3 .agents/scripts/test_docs.py
     @python3 .agents/scripts/test_move_refs.py
@@ -386,6 +387,11 @@ root-drift:
 # Durandal suspend hunt: N cycles of the kernel's pm_test=core descent -- needs sudo, see the hang page
 pm-test-core cycles="50":
     @sudo {{scripts}}/pm-test-core.sh {{cycles}}
+
+# Durandal suspend hunt: real S3 cycles at short fixed sleeps, logged to survive a hang: run [--wake rtc|key] | report
+[positional-arguments]
+debug-suspend-short-sleep *args:
+    @{{scripts}}/debug-suspend-short-sleep.py "$@"
 
 # What's in /home that neither /persist nor home-manager covers -- needs sudo
 home-drift:
