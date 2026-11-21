@@ -5,11 +5,11 @@ Written 2026-08-12 against `amd-debug-tools` 0.2.20 (as packaged in nixpkgs
 
 Paste-ready for <https://github.com/amd/amd_s2idle/issues> (or wherever
 `amd-debug-tools` tracks issues). Everything below the "Describe the bug"
-heading is the report; the last section is local notes and should be dropped
+heading is the report; the last section is local notes and should be removed
 before filing.
 
 **Not filed. Not to be filed on the strength of this file existing** — per
-`CLAUDE.md`, filing outside `NireBryce/nixos-configs` needs the user to ask
+`AGENTS.md`, filing outside `NireBryce/nixos-configs` needs the user to ask
 in their own message, for this specific report.
 
 ---

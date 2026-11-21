@@ -6,10 +6,10 @@ Phoenix), NixOS 26.11, kernel 6.18.43.
 
 Paste-ready for <https://github.com/Jovian-Experiments/Jovian-NixOS/issues>.
 Everything below the "Describe the bug" heading is the report; the last section
-is local notes and should be dropped before filing.
+is local notes and should be removed before filing.
 
 **Not filed. Not to be filed on the strength of this file existing** — per
-`CLAUDE.md`, filing outside `NireBryce/nixos-configs` needs the user to ask
+`AGENTS.md`, filing outside `NireBryce/nixos-configs` needs the user to ask
 in their own message, for this specific report.
 
 ---

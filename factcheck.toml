@@ -6,7 +6,7 @@
 # the fleet knowledge that does not belong in a general tool.
 
 [scopes]
-docs = ["wiki/**/*.md", "AGENTS.md", ".agents/rules/**/*.md"]
+docs = ["wiki/**/*.md", "AGENTS.md", ".agents/rules/**/*.md", "_loose-ends/**/*.md"]
 pages = ["wiki/**/*.md"]
 
 [dates]

@@ -3,7 +3,9 @@
 `_loose-ends/` holds material that waits on a later action outside the normal
 build-and-ship flow: a filing only the user may make, a pattern to extract, a
 removed module to restore, a review, a cleanup on live hosts. Nothing here is
-imported, built or linted as config. Each item ends when its action happens.
+imported or built as config. Each item ends when its action happens.
+`wiki/meta/open-threads.md` uses "loose ends" for open GitHub issues and todos;
+this folder holds files that wait on an action.
 
 ## Does it belong here
 
@@ -15,7 +17,8 @@ Put it where the first matching line says:
   `NireBryce/nixos-configs` (skill `propose-issue`).
 - It runs: code, under `flake/` or `.agents/`.
 - It is held for a later action and gets deleted or moved when that action
-  happens: here, in the folder whose shape fits.
+  happens: here. Use the folder whose shape fits. If none fits, see "Anything
+  else".
 
 Security or threat analysis goes in the private `elly/infra-notes` repo, never
 here: this folder is public.
@@ -28,7 +31,7 @@ here: this folder is public.
 | `extraction-candidates/agent-orchestration/`, `extraction-candidates/nix/` | A mechanism here that would work in another repo | `<short-name>.md`, named for the mechanism | The fields in skill `extract-agent-tooling`, "File shape", including **Recorded:** | Skills `extract-agent-tooling`, `extract-nix-tooling` and their `-all` sweeps; nothing is copied out unless the user asks | The candidate is extracted or fails the generality test |
 | `reports/` | A working document that asks the user for a review | `<topic>.md` | A `_Status:_` line with the date written, who wrote it and what is left | The user reviews | The review is done: trim it to the record worth keeping, or delete it |
 | `shelved/` | A module file removed from the config with intent to restore | A folder `shelved/<module-name>/` holding the files as they were at removal | `README.md` with the shelved date in the title, what it did, why it was removed, the rung it last reached, and numbered restore steps; a comment in each module that referenced it pointing here | The user decides | It is restored with `git mv`, or the user drops it |
-| `nire-fleet/` (new) | Operational follow-ups for the fleet that span PRs or hosts and end in deleting the note | `<short-name>.md` | `_Last modified: YYYY-MM-DD_`; an opening line saying when to delete it; "What it is"; "State as of YYYY-MM-DD"; a numbered "To do" whose last step is deleting the file; "Related" paths | Agents keep it current; the user runs steps an agent cannot | The last step runs and the file is deleted |
+| `nire-fleet/` | Follow-ups that concern only the user's own fleet (its hosts, tailnet, accounts or checkouts), usually spanning PRs or hosts | `<short-name>.md` | `_Last modified: YYYY-MM-DD_`; an opening line saying when to delete it; "What it is"; "State as of YYYY-MM-DD"; a numbered "To do" whose last step is deleting the file; "Related" paths | Agents keep it current; the user runs steps an agent cannot | The last step runs and the file is deleted |
 
 Files outside `flake/modules/` are not read by dirs-as-categories, so a `.nix`
 file in `shelved/` stays inert until moved back.
@@ -48,8 +51,8 @@ names the fleet, not a host.
 
 ## Anything else
 
-When an item fits none of the shapes above, put it in
-`_loose-ends/other/YYYY-MM-DD-<short-name>.md`. It must carry:
+A note that fits none of the shapes above goes bare in `_loose-ends/`, as
+`_loose-ends/YYYY-MM-DD-<short-name>.md`. It must carry:
 
 1. A title saying what it is.
 2. The absolute date written.
@@ -57,5 +60,16 @@ When an item fits none of the shapes above, put it in
 4. The owner (the user, an agent, or a named skill) or the next step.
 5. When to delete it.
 
-The third time a similar item lands in `other/`, give it its own folder, move
-the items into it, and add a row for it to the table above in the same change.
+`nire-fleet/` is for items about the user's own fleet, not a general bin: a
+note about a general mechanism or another project stays bare.
+
+When several bare notes form a coherent pattern, give them a directory, move
+them in, and add a row for it to the table above in the same change. Wait for
+the pattern: one or two similar notes do not need a folder.
+
+## Checks
+
+The fact checker reads `_loose-ends/**/*.md` (the `docs` scope in
+`factcheck.toml`), so `just wiki-lint` flags a broken link or anchor in a note.
+Its backticked-path check (`[paths]`) is off, because the bug reports name other
+projects' files.
