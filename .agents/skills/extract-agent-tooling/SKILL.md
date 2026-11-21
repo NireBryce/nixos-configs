@@ -39,6 +39,8 @@ A thing can split. `trim-history`'s "history lives at the bottom of the file, co
 ```markdown
 # <short name>
 
+_Last modified: YYYY-MM-DD_
+
 - **Source:** `<path>` (+ any coupled files — a skill and the lint check
   enforcing it travel together)
 - **General kernel:** one sentence, repo nouns stripped.
@@ -56,7 +58,7 @@ A thing can split. `trim-history`'s "history lives at the bottom of the file, co
 1. Finish the actual task first. The candidate is incidental to it.
 2. Apply the generality test. If it fails, stop; there is nothing to record.
 3. Run `grep -rln '<source path>' _loose-ends/extraction-candidates/` and update an existing file rather than adding a duplicate.
-4. Write the file. Keep the "General kernel" line free of secrets, tailnet/host names, and the user's email. The folder is committed, and the secrets guard hooks flag the obvious cases.
+4. Write the file, and update its `_Last modified:` line whenever you change it later. Keep the "General kernel" line free of secrets, tailnet/host names, and the user's email. The folder is committed, and the secrets guard hooks flag the obvious cases.
 5. Mention it as a trailing clause in your report and in the commit message ("also recorded X as an extraction candidate").
 
 ## See also

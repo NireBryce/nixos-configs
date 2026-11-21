@@ -1,5 +1,7 @@
 # docs-audit-parallel
 
+_Last modified: 2026-10-22_
+
 - **Source:** `.agents/skills/docs-audit-all/SKILL.md` (+ the `just agent doc-drift` and `doc-partition` helpers it names)
 - **General kernel:** audit every documented claim against the code by partitioning all docs among parallel subagents that each own disjoint files, ranking by cited-code churn since each doc's last-modified date, with a fixed report format and a second behavioral pass over anything only checked mechanically.
 - **Strip/replace:** `just` recipe names, the wiki lint command, worktree skill name, sibling-page rule, commit id.

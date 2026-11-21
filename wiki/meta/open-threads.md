@@ -44,9 +44,9 @@ The `pending-setup` label is the fleet-side counterpart, explained on
 ## Upstream write-ups are not filed upstream
 
 `_loose-ends/bugs-pending-submission/` holds bug reports written up against
-third-party projects (nixpkgs, `amd-debug-tools`, Jovian-NixOS), each with
+third-party projects (nixpkgs, `amd-debug-tools`, Jovian-NixOS, ZCode), each with
 an `upstream`-labelled issue here that tracks it ([#444](https://github.com/NireBryce/nixos-configs/issues/444),
-[#442](https://github.com/NireBryce/nixos-configs/issues/442), [#443](https://github.com/NireBryce/nixos-configs/issues/443)). **Neither the file
+[#442](https://github.com/NireBryce/nixos-configs/issues/442), [#443](https://github.com/NireBryce/nixos-configs/issues/443), [#665](https://github.com/NireBryce/nixos-configs/issues/665)). **Neither the file
 nor the issue is a reason to file it upstream**: per `AGENTS.md`, filing
 outside `NireBryce/nixos-configs` happens only when the user says so
 in their own message, for that specific report — not as a

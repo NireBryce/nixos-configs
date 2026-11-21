@@ -176,7 +176,8 @@ around them, so there is nothing to undo:
 - [#442](https://github.com/NireBryce/nixos-configs/issues/442),
   `amd-s2idle` reports hardware-sleep residency 100× too high. Avoided by
   reading the kernel counter instead of the tool's percentage.
-- ZCode 3.15.3 not persisting hook-trust approval
+- [#665](https://github.com/NireBryce/nixos-configs/issues/665), ZCode 3.15.3
+  not persisting hook-trust approval
   (`_loose-ends/bugs-pending-submission/2026-10-19-bugreport-zcode-hook-trust-approval-not-persisted.md`).
   The workaround, a direct `hooks trust grant`, was run once by hand and
   left state on disk under `~/.zcode`, not in this config. Nothing to undo

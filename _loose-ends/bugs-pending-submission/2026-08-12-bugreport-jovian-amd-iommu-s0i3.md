@@ -1,15 +1,17 @@
 # Jovian-NixOS: `amd_iommu=off` blocks s0i3 on non-Deck handhelds with an NPU
 
+_Last modified: 2026-11-21_
+
 Written 2026-08-12 against Jovian-NixOS
 `57773e5c9efe27d298d732a2a061a380a5194090`, on a GPD G1617-02-L (Ryzen 7 8840U,
 Phoenix), NixOS 26.11, kernel 6.18.43.
 
 Paste-ready for <https://github.com/Jovian-Experiments/Jovian-NixOS/issues>.
 Everything below the "Describe the bug" heading is the report; the last section
-is local notes and should be dropped before filing.
+is local notes and should be removed before filing.
 
 **Not filed. Not to be filed on the strength of this file existing** — per
-`CLAUDE.md`, filing outside `NireBryce/nixos-configs` needs the user to ask
+`AGENTS.md`, filing outside `NireBryce/nixos-configs` needs the user to ask
 in their own message, for this specific report.
 
 ---

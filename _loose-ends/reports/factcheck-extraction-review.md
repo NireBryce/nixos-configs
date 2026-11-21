@@ -1,5 +1,7 @@
 # Report: factcheck extraction and adoption (for review)
 
+_Last modified: 2026-10-31_
+
 _Status: working doc, written 2026-10-30 by an agent session. The
 extraction and the switch-over described here are live on `experimental`
 (PR #601); the review it asks for, and the follow-up work, are only

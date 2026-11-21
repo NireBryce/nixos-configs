@@ -1,15 +1,17 @@
 # amd-s2idle: hardware sleep residency reported 100× too high in generated reports
 
+_Last modified: 2026-11-21_
+
 Written 2026-08-12 against `amd-debug-tools` 0.2.20 (as packaged in nixpkgs
 `e4bae1bd10c9c57b2cf517953ab70060a828ee6f`), Python 3.14, on NixOS 26.11.
 
 Paste-ready for <https://github.com/amd/amd_s2idle/issues> (or wherever
 `amd-debug-tools` tracks issues). Everything below the "Describe the bug"
-heading is the report; the last section is local notes and should be dropped
+heading is the report; the last section is local notes and should be removed
 before filing.
 
 **Not filed. Not to be filed on the strength of this file existing** — per
-`CLAUDE.md`, filing outside `NireBryce/nixos-configs` needs the user to ask
+`AGENTS.md`, filing outside `NireBryce/nixos-configs` needs the user to ask
 in their own message, for this specific report.
 
 ---

@@ -458,3 +458,7 @@ A change that makes a wiki page stale corrects it in the same change (skill
 `wiki/agent-lessons-learned.md` lists every past mistake as one line. A new
 lesson goes in its Home page as well as that index, and § numbers are never
 renumbered.
+
+Files that wait on a later action (bug reports to file, extraction candidates,
+shelved modules, fleet follow-ups) live in `_loose-ends/`; its `README.md`
+says which folder fits and what a note must carry.

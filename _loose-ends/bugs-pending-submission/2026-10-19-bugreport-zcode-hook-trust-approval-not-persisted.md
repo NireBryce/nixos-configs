@@ -1,11 +1,13 @@
 # ZCode desktop 3.15.3: workspace hook trust approval from the review prompt is never persisted
 
+_Last modified: 2026-11-21_
+
 Written 2026-10-19 against ZCode desktop 3.15.3 (Electron 41.0.3, env=prod) on
 Linux x86_64 (NixOS 26.11).
 
 Paste-ready for <https://github.com/zai-org/feedback>. Everything below the
 "Describe the bug" heading is the report; the last section ("Local notes —
-drop before filing") is not part of the report.
+remove before filing") is not part of the report.
 
 **Not filed. Not to be filed on the strength of this file existing** — per
 `AGENTS.md`, filing outside `NireBryce/nixos-configs` needs the user to ask
@@ -133,7 +135,7 @@ ELECTRON_RUN_AS_NODE=1 <install>/ZCode/zcode \
 
 ---
 
-## Local notes — drop before filing
+## Local notes — remove before filing
 
 - Manually granted 2026-10-19 ~04:37 local via the workaround; store now has 12
   records. App restart still pending to confirm the hooks actually execute
