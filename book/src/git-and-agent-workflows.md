@@ -213,8 +213,8 @@ what CI cannot check, such as a `just switch` on a host or a `drvPath`
 comparison against unaffected hosts.
 
 When an agent wrote the PR, the disclosure line `🤖 Co-written by an LLM agent`
-goes before "What changed". Nothing at the bottom of the body may carry an
-agent's email address (a harness footer can add one: remove it). The line names no model, for the same reason as the
+goes before "What changed". A harness footer at the bottom is fine, but an
+agent's email address (some signatures end with one) stays out of the body. The line names no model, for the same reason as the
 trailer. For a change to a guard or check, the body says what is now enforced
 and how it was verified. It does not say which inputs got past the old
 version.

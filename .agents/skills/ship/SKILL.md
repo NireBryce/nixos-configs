@@ -91,7 +91,7 @@ The PR body covers what changed, why, what was verified, and what was left alone
 
 End the body with `## Risk and impact`: a risk and an impact out of 10, one line of reason each, on the scale in `wiki/llm-aided-dev/risk-and-impact.md`. A promotion PR to `main` rates the promotion as a whole: the riskiest promoted change sets the risk, and the blurb names it.
 
-Put the LLM-disclosure line at the top (before "What changed"): `🤖 Co-written by an LLM agent` (`propose-issue`'s reasoning: an agent cannot verify its model or harness). Nothing at the bottom of the body may carry an agent's email address; a harness footer that adds one is removed before the PR is opened.
+Put the LLM-disclosure line at the top (before "What changed"): `🤖 Co-written by an LLM agent` (`propose-issue`'s reasoning: an agent cannot verify its model or harness). A harness footer at the bottom is fine, but an agent's email address (some signatures end with one) stays out of the body.
 
 ## 2. Preview, then ask
 

@@ -8,8 +8,8 @@ If an agent authored or materially assisted this PR, a disclosure line
 goes here at the top, before "What changed". Use the model-agnostic
 "🤖 Co-written by an LLM agent" -- an agent can't verify which
 model/harness executed it, the same reasoning as the `Co-Authored-By:`
-commit trailer. Don't put an agent's email address at the bottom of the
-body; a harness-injected footer that carries one is removed.
+commit trailer. A harness-injected footer at the bottom is fine, but an
+agent's email address (some signatures end with one) stays out of the body.
 -->
 
 ## What changed
