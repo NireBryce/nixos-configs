@@ -128,6 +128,4 @@ License
 -------
 
 Copyright 2026 Nire Bryce. Licensed under the Apache License, Version 2.0;
-see `LICENSE`. One file carries its own copyright header and keeps its own
-terms: `flake/modules/users-config/elly/!dotfiles/.dir_colors` (Free
-Software Foundation).
+see `LICENSE`.
