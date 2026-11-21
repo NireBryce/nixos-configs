@@ -88,12 +88,14 @@ fatal: failed to write commit object
   graphical sessions only. Its agent is switched on in the app's settings.
 - `bash.nix` and `zsh.nix` export `SSH_AUTH_SOCK` in interactive shells
   only. Claude Code's Bash tool is non-interactive and had none
-  (`nire-tenacity`, 2026-11-07). Set it per command; don't turn signing
-  off:
+  (`nire-tenacity`, 2026-11-07). Git signs through a store-path script
+  (`gpg.ssh.program` in `elly-git.nix`) that defaults `SSH_AUTH_SOCK` to the
+  socket, so `git commit` needs no prefix; `ssh-add` does. A
+  failed sign prints a `git-ssh-sign:` hint. A repo-local
+  `gpg.ssh.program` bypasses it.
 
   ```sh
   SSH_AUTH_SOCK=$HOME/.bitwarden-ssh-agent.sock ssh-add -l   # lists keys: agent is up
-  SSH_AUTH_SOCK=$HOME/.bitwarden-ssh-agent.sock git commit ...
   ```
 
 - A failed signing commit inside `just agent recurring export` left
