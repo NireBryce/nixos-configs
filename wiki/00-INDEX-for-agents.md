@@ -72,6 +72,7 @@ root holds only entry points.
 | work out which name/IP answers for what | [name-resolution.md § Quick facts](fleet/name-resolution.md#quick-facts) |
 | nix hangs after a switch | [nix-daemon-lock-hang.md § Quick facts](fleet/nix-daemon-lock-hang.md#quick-facts) |
 | create a YubiKey SSH key and authorize it | [ssh/minting-yubikey-ssh-keys.md § Quick facts](ssh/minting-yubikey-ssh-keys.md#quick-facts) |
+| commit signing fails | [ssh/commit-signing.md § Quick facts](ssh/commit-signing.md#quick-facts) |
 | reach or debug a cube service | [homelab/reaching-services.md § Quick facts](homelab/reaching-services.md#quick-facts) |
 | cube lockout reset, Sunshine web UI, stream | [homelab/common-commands.md § Quick facts](homelab/common-commands.md#quick-facts) |
 | cube's Claude Remote Control units | [homelab/claude-rc.md § Quick facts](homelab/claude-rc.md#quick-facts) |

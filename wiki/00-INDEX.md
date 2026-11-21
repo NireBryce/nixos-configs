@@ -77,7 +77,8 @@ root holds only entry points.
   [FHS environments](fleet/fhs-environments.md),
   [nix commands hang after a switch](fleet/nix-daemon-lock-hang.md).
 - [`ssh/`](ssh/) — SSH access to the fleet:
-  [minting a YubiKey SSH key](ssh/minting-yubikey-ssh-keys.md).
+  [minting a YubiKey SSH key](ssh/minting-yubikey-ssh-keys.md),
+  [commit signing through the SSH agent](ssh/commit-signing.md).
 - [`upkeep-and-admin/`](upkeep-and-admin/) — recurring chores:
   [maintenance](upkeep-and-admin/maintenance.md),
   [expiry schedule](upkeep-and-admin/maintenance-schedule.md),
@@ -118,6 +119,7 @@ or a skill (`.agents/skills/<name>/SKILL.md`) — nothing here is new content.
 | work out which name or IP answers for what (forward, reverse, `.local`, `svc:`) | [fleet/name-resolution.md](fleet/name-resolution.md) |
 | nix commands hang, or home-manager fails with a timeout, after a switch | [fleet/nix-daemon-lock-hang.md](fleet/nix-daemon-lock-hang.md) |
 | create a YubiKey SSH key (FIDO2 or PIV) and authorize it on the fleet | [ssh/minting-yubikey-ssh-keys.md](ssh/minting-yubikey-ssh-keys.md) |
+| a commit fails to sign, or what the `git-ssh-sign:` line means | [ssh/commit-signing.md](ssh/commit-signing.md) |
 
 ## Pages
 
