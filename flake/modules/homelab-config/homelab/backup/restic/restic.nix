@@ -174,6 +174,13 @@ in {
             # with no useful `$PATH`, and ad hoc reproductions of it
             # kept hitting `command not found`.
             #
+            # Each staged copy is removed before its `.backup`, and a
+            # failed `.backup` logs FAILED. The `{ ...; }` group's exit
+            # status is its last command's, so a failure does not stop
+            # the run, and last night's copy would otherwise be backed
+            # up as if fresh (issue #673). A db whose `.backup` failed
+            # is absent from the snapshot and says so here.
+            #
             # umask 077 and a 0700 staging dir: the copies are whole
             # forgejo/grafana/golink dbs (account hashes included), and
             # under the default 022 they landed 0644 in a 0755 dir,
@@ -188,7 +195,8 @@ in {
                     ${pkgs.coreutils}/bin/install -d -m 0700 ${sqliteStagingDir}
                     ${lib.concatStringsSep "\n" (lib.mapAttrsToList
                         (name: db: ''
-                            ${pkgs.sqlite}/bin/sqlite3 ${db} ".backup '${sqliteStagingDir}/${name}.db'"
+                            ${pkgs.coreutils}/bin/rm -f ${sqliteStagingDir}/${name}.db
+                            ${pkgs.sqlite}/bin/sqlite3 ${db} ".backup '${sqliteStagingDir}/${name}.db'" || ${pkgs.coreutils}/bin/echo "${name}.db: .backup FAILED"
                             ${pkgs.coreutils}/bin/echo "${name}.db: $(${pkgs.coreutils}/bin/stat -c%s ${sqliteStagingDir}/${name}.db 2>&1 || ${pkgs.coreutils}/bin/echo MISSING) bytes"
                         '')
                         sqliteDbs)}
