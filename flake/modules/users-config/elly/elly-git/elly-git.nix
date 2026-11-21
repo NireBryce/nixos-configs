@@ -29,7 +29,7 @@
             ${pkgs.openssh}/bin/ssh-keygen "$@"
             status=$?
             if [ "$status" -ne 0 ] && [ "$1" = "-Y" ] && [ "$2" = "sign" ]; then
-                printf '%s\n' "git-ssh-sign: ssh-keygen returned no signature. The signing request may have been denied or timed out, or the key passphrase was not entered. Each attempt can open a new approval prompt. Signing policy: AGENTS.md, commit signing." >&2
+                printf '%s\n' "git-ssh-sign: ssh-keygen returned no signature. The signing request may have been denied or timed out, or the key passphrase was not entered. Each attempt can open a new approval prompt. See wiki/ssh/commit-signing.md." >&2
             fi
             exit "$status"
         '';

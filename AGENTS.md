@@ -236,12 +236,15 @@ not precedent.
 
 **Commits are SSH-signed through the Bitwarden desktop app's SSH agent**
 (`~/.bitwarden-ssh-agent.sock`). The agent's Bash shell is non-interactive
-and may have no `SSH_AUTH_SOCK`, so a commit fails with `Couldn't get agent
-socket?`. Prefix the command with
-`SSH_AUTH_SOCK=$HOME/.bitwarden-ssh-agent.sock`; never disable signing. If
-`ssh-add -l` against that socket fails, the app isn't running: ask the user.
-Detail: `wiki/config-structure/categories/elly.md`, "Commit signing and the
-Bitwarden SSH agent".
+and may have no `SSH_AUTH_SOCK`. Git signs through the `git-ssh-sign` wrapper
+(`gpg.ssh.program` in `elly-git.nix`), which sets it when the socket exists.
+If a commit fails with `Couldn't get agent socket?` (the wrapper is not yet
+switched in, or a repo-local `gpg.ssh.program` bypasses it), prefix the
+command with `SSH_AUTH_SOCK=$HOME/.bitwarden-ssh-agent.sock`; never disable
+signing. If the wrapper prints a `git-ssh-sign:` line, the approval prompt
+was missed, denied or timed out: tell the user and wait, because each retry
+opens another prompt. If `ssh-add -l` against that socket fails, the app isn't
+running: ask the user. Detail: `wiki/ssh/commit-signing.md`.
 
 **Shape a Bash call to be read in a permission prompt**, which shows the
 command string verbatim and wrapped:

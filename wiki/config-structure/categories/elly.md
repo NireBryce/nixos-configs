@@ -91,7 +91,8 @@ fatal: failed to write commit object
   (`nire-tenacity`, 2026-11-07). Git signs through a store-path script
   (`gpg.ssh.program` in `elly-git.nix`) that defaults `SSH_AUTH_SOCK` to the
   socket, so `git commit` needs no prefix; `ssh-add` does. A
-  failed sign prints a `git-ssh-sign:` hint. A repo-local
+  failed sign prints a `git-ssh-sign:` hint
+  ([details](../../ssh/commit-signing.md)). A repo-local
   `gpg.ssh.program` bypasses it.
 
   ```sh
