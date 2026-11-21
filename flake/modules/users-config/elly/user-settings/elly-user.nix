@@ -3,8 +3,6 @@
 # it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
-    # TODO: these modules should be stored outside of the users folder, so it's
-    # clearer when it's imported
     nixos = { pkgs, ... }: {
         users.mutableUsers = false;
         users.users = {

@@ -8,15 +8,15 @@
         imports = [ inputs.nixos-hardware.nixosModules.common-gpu-amd ];
 
         environment.systemPackages = with pkgs; [
-            mesa # todo: document
-            glfw # todo: document
-            dxvk # todo: document
+            mesa
+            glfw
+            dxvk
             vulkan-tools # vulkan-tools                              https://github.com/KhronosGroup/Vulkan-Tools
             mesa-demos # glxinfo   -> mesa-demos                                 https://www.khronos.org/opengl/
 
             clinfo # clinfo                                    https://github.com/Oblomov/clinfo
 
-            amf-headers # todo: document
+            amf-headers
             amdgpu_top # amdgpu_top gpu monitor                    https://github.com/Umio-Yasuno/amdgpu_top
         ];
 
