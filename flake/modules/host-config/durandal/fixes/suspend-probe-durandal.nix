@@ -7,10 +7,23 @@
     nixos = { pkgs, ... }:
     let
         probe = phase: ''
+            # NixOS wraps unit scripts in `set -e`. Turn it off: this must not
+            # abort part-way and skip the sync, the timestamp or the rotation
+            # because one sysfs read failed.
+            set +e
             export PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.findutils pkgs.systemd pkgs.smartmontools ]}:$PATH
 
             dir=/var/log/suspend-probe
             mkdir -p "$dir" || exit 0
+
+            # Text a device supplies (a USB product string is set by whatever
+            # is plugged in, up to ~126 characters) goes into world-readable
+            # dumps that people and agents read. Keep the first line, 40
+            # characters of [A-Za-z0-9 ._-], everything else becomes `?`, so a
+            # device cannot put instructions into a dump.
+            clamp() {
+                head -n 1 "$1" 2>/dev/null | tr -c 'A-Za-z0-9 ._\n-' '?' | cut -c1-40
+            }
             out="$dir/$(date -u +%Y%m%dT%H%M%SZ)-${phase}.txt"
 
             {
@@ -19,13 +32,51 @@
                 echo "# uptime  $(cut -d' ' -f1 /proc/uptime)s"
                 echo "# kernel  $(uname -r)"
                 echo
+                ${lib.optionalString (phase == "post") ''
+                    # Added 2026-11-21. How long the machine was away, wall clock,
+                    # pre to post. For a hang this includes the user's recovery, so
+                    # it is an upper bound on when the failed wake happened. Short
+                    # sleeps hang more often than long ones in the dumps
+                    # (6 of 28 at <= 300 s, 3 of 71 above), so this makes that
+                    # check one grep.
+                    echo "## sleep length"
+                    # Digits only before the arithmetic: bash evaluates a
+                    # variable's text as an expression, and this runs as root.
+                    # `2>/dev/null` comes first so the shell's own "No such file"
+                    # (the first post after a switch) is not written into the dump.
+                    if read -r pre_epoch 2>/dev/null < "$dir/.last-pre-epoch" \
+                        && [[ $pre_epoch =~ ^[0-9]+$ ]]; then
+                        echo "wall_seconds_since_pre = $(( $(date +%s) - 10#$pre_epoch ))"
+                    else
+                        echo "wall_seconds_since_pre = unknown"
+                    fi
+                    # One use only: a post with no matching pre (the pre did not
+                    # run) must say "unknown", not reuse an old timestamp.
+                    rm -f "$dir/.last-pre-epoch"
+                    echo
+                ''}
 
                 # Labels this cycle auto vs manual without needing the journal
                 # later: org_kde_powerdevil means the idle timeout fired,
                 # plasmashell/kscreenlocker mean a person asked.
+                #
+                # Only systemd-logind's own messages (matched by unit, which a
+                # local user cannot spoof, unlike a process name or a `logger`
+                # line), and only three fields are kept: time, PID and the
+                # client's process name, clamped to 15 characters of
+                # [A-Za-z0-9_.-]. Anything else in the journal line is dropped,
+                # because these dumps are read by people and by agents, and
+                # free text from the journal is a prompt-injection path.
                 echo "## requester"
-                timeout 15 journalctl -b 0 --since -10min --no-pager -o short-iso 2>/dev/null \
-                    | grep "suspend requested from client" | tail -1
+                requester=$(timeout 15 journalctl -b 0 --since -10min --no-pager -o short-iso \
+                        _SYSTEMD_UNIT=systemd-logind.service 2>/dev/null \
+                    | sed -nE "s/^([0-9T:+-]{1,30}) [^ ]+ [^ ]+ suspend requested from client PID ([0-9]+) \\('([^']{0,15})'\\).*/\\1 \\2 \\3/p" \
+                    | tail -1)
+                if [ -n "$requester" ]; then
+                    read -r req_when req_pid req_comm <<< "$requester"
+                    req_comm=$(printf '%s' "$req_comm" | tr -c 'A-Za-z0-9_.-' '?' | cut -c1-15)
+                    echo "$req_when systemd-logind: suspend requested from client PID $req_pid ('$req_comm')"
+                fi
                 echo
 
                 echo "## sleep mode"
@@ -66,7 +117,7 @@
                     w=$(cat "$d/power/wakeup" 2>/dev/null) || continue
                     [ -z "$w" ] && continue
                     printf '%-10s %-8s %s\n' \
-                        "$(basename "$d")" "$w" "$(cat "$d/product" 2>/dev/null)"
+                        "$(basename "$d")" "$w" "$(clamp "$d/product")"
                 done
                 echo
 
@@ -74,7 +125,7 @@
                 for w in /sys/class/wakeup/*; do
                     printf '%-14s %-18s event=%-8s active=%s\n' \
                         "$(basename "$w")" \
-                        "$(cat "$w/name" 2>/dev/null)" \
+                        "$(clamp "$w/name")" \
                         "$(cat "$w/event_count" 2>/dev/null)" \
                         "$(cat "$w/active_count" 2>/dev/null)"
                 done
@@ -125,15 +176,30 @@
                 done
                 echo
 
+                # Added 2026-11-21. The firmware's own timing of the last S3
+                # entry and resume (ACPI FPDT, resume_count equals
+                # suspend_stats success on this host). The only firmware-side
+                # field available: a hang-recovery cycle may show a different
+                # resume_prev_ns than a clean one. Counters and nanoseconds
+                # only, no process data.
+                echo "## firmware performance (FPDT)"
+                for f in /sys/firmware/acpi/fpdt/suspend/* /sys/firmware/acpi/fpdt/resume/*; do
+                    [ -f "$f" ] || continue
+                    printf '%-24s %s\n' "$(basename "$f")" "$(cat "$f" 2>/dev/null)"
+                done
+                echo
+
                 # The only detector that works for the no-wake hang. The OS
                 # cannot see that failure from inside -- nothing is executing
                 # while it is stuck -- but recovering from it means cutting
                 # power at the PSU, and that drops the drives too.
                 #
-                # +1 PER CYCLE IS BASELINE, NOT A HANG. This board removes
-                # drive power on every S3 suspend (NVMe fully re-inits, SATA
-                # links drop, root hubs lose power -- all on every cycle), so a
-                # clean suspend already costs one. Measured with a controlled
+                # +1 PER CYCLE IS BASELINE, NOT A HANG. S3 on an ATX supply
+                # turns the main rails off, so drives lose power on every
+                # suspend (NVMe fully re-inits, SATA links drop, root hubs lose
+                # power -- all on every cycle) and a clean suspend already
+                # costs one. The +1 was measured here; the PS_ON mechanism is
+                # standard ATX behavior and was not. Measured with a controlled
                 # menu-suspend/keyboard-wake on 2026-09-15: nvme0 2862 -> 2863,
                 # sda 6170 -> 6171. A reboot, by contrast, is +0. Read
                 # delta > 1 as a hang, with delta - 1 = the number of PSU cuts.
@@ -151,8 +217,16 @@
             # else reaches disk, so flush before handing off to the kernel.
             sync
 
-            # Two files per cycle; keep the window bounded.
-            ls -1t "$dir" 2>/dev/null | tail -n +201 | while read -r old; do
+            ${lib.optionalString (phase == "pre") ''
+                date +%s > "$dir/.last-pre-epoch"
+            ''}
+            # Two files per cycle; keep the window bounded. 2000 files is a
+            # few MB and about a year at the current rate. It was 200 (about
+            # five weeks) until 2026-11-21, and the dumps for the 10-02, 10-06 and
+            # 10-15 (UTC) hangs rotated out, so they cannot be re-checked. The
+            # dotfile above is not
+            # listed by `ls -1`, so it is never rotated.
+            ls -1t "$dir" 2>/dev/null | tail -n +2001 | while read -r old; do
                 rm -f "$dir/$old"
             done
 
@@ -222,7 +296,15 @@
         # Makes the kernel log every device's suspend and resume duration, so
         # an amdgpu that is abnormally slow on the cycles around a hang is
         # visible. Costs a few lines of dmesg per cycle and nothing else.
-        systemd.tmpfiles.rules = [ "w /sys/power/pm_print_times - - - - 1" ];
+        #
+        # The dump directory is also declared here: root-owned 0755, so no one
+        # else can plant a symlink or a file the root-run probe then reads or
+        # deletes. The probe's own `mkdir -p` would make it that way anyway;
+        # `d` makes it explicit and repairs it if something changes it.
+        systemd.tmpfiles.rules = [
+            "w /sys/power/pm_print_times - - - - 1"
+            "d /var/log/suspend-probe 0755 root root -"
+        ];
 
         powerManagement.powerDownCommands = probe "pre";
         powerManagement.resumeCommands    = probe "post";
