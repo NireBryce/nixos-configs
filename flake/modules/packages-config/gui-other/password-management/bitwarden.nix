@@ -17,10 +17,16 @@
         ];
 
         # Keep the agent's host process alive from login onward: the agent
-        # only exists while the app runs. --start-minimized matches what
-        # the app's own start-on-login toggle writes, so do not also enable
-        # that toggle (duplicate autostart entries; the single-instance lock
-        # absorbs the second launch, but pick one source of truth).
+        # only exists while the app runs. Keep the app's own start-on-login
+        # toggle (Settings -> App Settings) OFF. When on, the app writes a
+        # second entry, ~/.config/autostart/bitwarden.desktop
+        # (Exec=bitwarden --autostart), on every start. Both entries launch
+        # at login and the single-instance lock does not absorb the second
+        # one: the journal showed two full startups (two pids) in the same
+        # second. With two instances on one profile, closing one closes the
+        # other, and the survivor could then not be closed from the GUI.
+        # Observed 2026-11-19; the link between the two instances and the
+        # stuck close is inferred from the journal, not reproduced.
         # XDG autostart is processed only by graphical session managers, so
         # a TTY or ssh login never launches this -- deliberately: the agent
         # belongs to the human tier, and headless contexts use the
