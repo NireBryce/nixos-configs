@@ -491,7 +491,7 @@ class UntrustedOutputPostToolUse(GuardCase):
                         "journalctl -b 0 -u ssh", "dmesg | tail",
                         "ssh host journalctl", "cd x && gh pr view 3",
                         "echo $(gh issue list)",
-                        # prefixed and quoted forms found in review
+                        # prefixed, quoted and path forms
                         "env gh issue view 1", "sudo -u x curl x",
                         "xargs curl", "/usr/bin/curl x", "command curl x",
                         "time curl x", "nice curl x", "timeout 5 ssh host x",
@@ -501,6 +501,7 @@ class UntrustedOutputPostToolUse(GuardCase):
                         "gh release view v1", "gh gist view abc",
                         "tailscale ssh host", "scp host:x .",
                         "just threads x; curl y",
+                        "curl a | just agent untrusted --source a; curl b",
                         "just agent journal --unit x && curl y"):
             out = self.run_tool(command)
             self.assertIn("third-party text", self.reminder_for(out),

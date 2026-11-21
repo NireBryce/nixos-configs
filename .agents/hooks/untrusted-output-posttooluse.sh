@@ -35,6 +35,7 @@ fi
 
 input=$(cat)
 tool_name=$(jq -r '.tool_name // "Bash"' <<< "$input" 2> /dev/null || echo Bash)
+tool_name=${tool_name:-Bash}
 
 if [ "$tool_name" = "Bash" ]; then
     command_text=$(jq -r '.tool_input.command // ""' <<< "$input" 2> /dev/null || true)
@@ -57,8 +58,9 @@ if [ "$tool_name" = "Bash" ]; then
     pattern="${before}(${words}|${gh_read}|${gh_other})${after}"
     grep -qE "$pattern" <<< "$command_text" || exit 0
 
-    # Piped into our own filter: the output is already fenced.
-    grep -qE '\|[[:space:]]*(just[[:space:]]+agent[[:space:]]+untrusted|[^|;&]*untrusted\.py)' <<< "$command_text" && exit 0
+    # Piped into our own filter as the LAST segment: the output is already
+    # fenced. A later `; curl b` would not be.
+    grep -qE '\|[[:space:]]*(just[[:space:]]+agent[[:space:]]+untrusted|[^|;&]*untrusted\.py)[^;&|]*$' <<< "$command_text" && exit 0
 fi
 
 jq -n '{

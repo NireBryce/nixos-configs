@@ -10,8 +10,8 @@ reads attacker-influenceable text. This replaces it for agent use:
   - keeps four fields per entry: time, unit, priority, message; the message is
     clamped by untrusted.py (escapes, hidden characters, length) and the whole
     output is fenced;
-  - marks every entry whose sender was not root (`uid=N`), the usual shape of a
-    forged line, so it reads as less trustworthy at a glance.
+  - marks every entry whose sender was not root (`uid=N`), so a message from an
+    ordinary user reads differently from a system one.
 
     journal.py (--unit NAME ... | --kernel) [--boot N] [--since T] [--priority P]
                [--lines N]
