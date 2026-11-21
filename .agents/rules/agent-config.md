@@ -135,6 +135,17 @@ paths:
   warning, or a decision's reason -- also goes in
   `hookSpecificOutput.additionalContext`; `test_guards.py` checks it for
   each warn, ask, and the #458 deny emitters.
+- `untrusted-output-posttooluse.sh` (PostToolUse; matchers `Bash` and
+  `WebFetch|WebSearch|mcp__claude_ai_.*`, the second skipped for ZCode in
+  `.polymorph/basecamp/decisions/zcode.toml`) adds a
+  reminder to `additionalContext` after a command that returns third-party text
+  (`gh issue|pr|repo view|list`, `gh api`, `curl`, `journalctl`, `dmesg`,
+  `ssh`, ...; prefixes and paths do not hide them), and skips only by command
+  (a pipe into `untrusted`, or `just threads` / `just agent journal` alone),
+  never by a fence string in the output, which is attacker text. It never
+  decides. Not verified live: whether a PostToolUse `additionalContext` reaches
+  the model under ZCode. `wiki/llm-aided-dev/untrusted-text.md` has the whole
+  picture and the fenced readers.
 - `.claude/` is a real directory. Its `settings.json`, `skills` and `rules`
   are symlinks into `.agents/`. Don't replace `.claude` itself with a
   symlink: Claude Code then refuses to create subagent worktrees.

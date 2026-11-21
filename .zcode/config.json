@@ -85,6 +85,11 @@
               "type": "command",
               "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/secrets-guard-posttooluse.sh\"",
               "enabled": true
+            },
+            {
+              "type": "command",
+              "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/untrusted-output-posttooluse.sh\"",
+              "enabled": true
             }
           ]
         },

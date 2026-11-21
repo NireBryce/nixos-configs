@@ -96,6 +96,19 @@
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/secrets-guard-posttooluse.sh\""
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/untrusted-output-posttooluse.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "WebFetch|WebSearch|mcp__claude_ai_.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.agents/hooks/untrusted-output-posttooluse.sh\""
           }
         ]
       },

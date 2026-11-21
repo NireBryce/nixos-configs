@@ -1,0 +1,9 @@
+# Decisions polymorph asked for when generating .zcode/config.json.
+schema = 1
+
+# The WebFetch/WebSearch/mcp__claude_ai_* matcher of the untrusted-output hook
+# has no ZCode counterpart (polymorph: "zcode has no tool for class(es) mcp,
+# other"). Skip it there; the Bash matcher of the same hook is mapped.
+[decisions.".agents/hooks/untrusted-output-posttooluse.sh:no-tool-class"]
+choice = "skip"
+date = "2026-11-21"
