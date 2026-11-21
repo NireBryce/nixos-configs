@@ -3,7 +3,7 @@
 # it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
-    homeManager = { 
+    homeManager = {
         # package summary: broot -- interactive tree view for navigating directories
         # `tree` alternative
         programs.broot = {

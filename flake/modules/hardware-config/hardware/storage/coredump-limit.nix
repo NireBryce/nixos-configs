@@ -13,7 +13,7 @@
 # observed (1.1G); the first draft capped below it, which would have
 # discarded dumps during exactly the incident they were wanted for
 # (wiki/agent-lessons-learned.md §31).
-# 
+#
 # settings.Coredump, not extraConfig: `systemd.coredump.extraConfig` is
 # deprecated in 26.11 and errors by name, the same way systemd.sleep.extraConfig
 # did.

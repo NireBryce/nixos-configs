@@ -3,7 +3,7 @@
 # it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 
-{ 
+{
     homeManager = {
         # package summary: micro -- terminal text editor with GUI-style keybindings
         # micro, what if nano was msword for dos

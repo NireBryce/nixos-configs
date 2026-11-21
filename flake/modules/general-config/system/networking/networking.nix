@@ -2,7 +2,7 @@
 # filename minus the .nix suffix, and its category is the name of the folder
 # it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
-{ 
+{
     nixos = {
         # DNS
         # networking.nameservers = [

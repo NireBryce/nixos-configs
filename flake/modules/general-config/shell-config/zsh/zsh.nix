@@ -3,7 +3,7 @@
 # it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 { lib, ... }:
-{ 
+{
     nixos = { pkgs, ... }: {
         # summary: zsh is handled through home-manager
         programs.zsh.enable = true;
@@ -12,7 +12,7 @@
             zsh
         ];
     };
-    
+
     homeManager = { pkgs, ... }: {
         # Notes: `zsh side` errors: delete ~/.zcompdump and ~/.config/zsh/.zcompdump
         # Multiple highlighters cause "zsh_zle-highlight-buffer-p:4: permission denied";
@@ -65,7 +65,7 @@
             setopts_cfg = lib.fileContents ./config/initial-setopts.zsh;
             zstyle_cfg = lib.fileContents ./config/initial-zstyle.zsh;
             zellij_keys_cfg = lib.fileContents ./config/free-zellij-keys.zsh;
-        in 
+        in
         {
             zsh-abbr.abbreviations = {
                 "abbr remove" = "abbr erase";
@@ -203,7 +203,7 @@
                 #################PASSWORD ENTRY/CONFIRM DIALOGS GO ABOVE##############################
 
                 # anything requiring input/perf goes above, else below
-                                                        
+
                 # keybindings from various configs
                     ${bindings_cfg}
                 # end keybindings (we are bracketing these categories for collated zshrc debugging purposes)
@@ -213,7 +213,7 @@
                 # end setopts
 
                 # zstyle
-                    ${zstyle_cfg}                                     
+                    ${zstyle_cfg}
                 # end zstyle
 
                 typeset -U path cdpath fpath manpath              # -U keeps these arrays unique, i.e. dedupes $PATH and friends
@@ -286,11 +286,11 @@
                 source <(${pkgs.carapace}/bin/carapace _carapace zsh)
 
                 # Free up bindings for zellij
-                ${zellij_keys_cfg}  
+                ${zellij_keys_cfg}
 
 
                 # Necessary to run flakes, otherwise `#` gets expanded
-                    disable -p '#'  
+                    disable -p '#'
 
                 # Inshellisense
                     # eval "''$(is init zsh)"

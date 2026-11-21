@@ -3,7 +3,7 @@
 # it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
-    homeManager = { 
+    homeManager = {
         # package summary: eza -- `ls` replacement, maintained fork of exa
         # `exa` fork, which is an ls alternative
         programs.eza = {

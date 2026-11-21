@@ -3,7 +3,7 @@
 # it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
-    homeManager = { pkgs, ... }: { 
+    homeManager = { pkgs, ... }: {
         # package summary: riffdiff -- diff filter that highlights in-line changes
         # per-character in-line diff
         home.packages = with pkgs; [

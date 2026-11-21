@@ -7,7 +7,7 @@
     # clearer when it's imported
     nixos = { pkgs, ... }: {
         users.mutableUsers = false;
-        users.users = { 
+        users.users = {
             # groups = {
             #     elly = { };
             # };
@@ -23,7 +23,7 @@
                                                           # i.e. passwordless root. Same for
                                                           # `libvirtd` -- see podman.nix, libvirt.nix.
                 hashedPasswordFile = "/persist/passwords/elly";
-                packages  = with pkgs; [ 
+                packages  = with pkgs; [
                     # Emergency packages if home-manager dies
                     firefox
                     git

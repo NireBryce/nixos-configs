@@ -35,7 +35,7 @@
         '';
     in {
         home.file."./.gitconfig".source = ./.gitconfig;
-        
+
         programs.git = {        # User-specific git config
             enable = true;
             settings = {
@@ -48,7 +48,7 @@
                     name = "Nire Bryce";
                     email = "nire@computernope.net";
                 };
-                
+
                 feature.manyFiles = true;
                 init.defaultBranch = "main";
                 gpg.format = "ssh";

@@ -3,7 +3,7 @@
 # it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
-    homeManager = { 
+    homeManager = {
         # package summary: zoxide -- `cd` that jumps to frequently used directories
         # Zoxide - better `cd`
         programs.zoxide = {

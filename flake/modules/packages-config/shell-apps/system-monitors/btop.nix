@@ -3,7 +3,7 @@
 # it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
-    homeManager = { pkgs, ... }: { 
+    homeManager = { pkgs, ... }: {
         # package summary: btop -- terminal monitor for CPU, memory, disk, network
         # `htop` alternative
         home.packages = with pkgs; [

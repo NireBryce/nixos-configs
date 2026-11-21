@@ -154,7 +154,7 @@
                 loadAcpiCallModule = true;
             };
         };
-        
+
         systemd.services."power-profiles-daemon" = {
             enable = false; # conflicts with adjustor in hhd
         };

@@ -47,7 +47,7 @@
     inputs = {
         nixpkgs.url                                = "github:NixOS/nixpkgs/nixos-unstable";
         nixpkgs-lib.follows                        = "nixpkgs";
-        
+
         flake-parts.url                            = "github:hercules-ci/flake-parts";
         flake-parts.inputs.nixpkgs-lib.follows     = "nixpkgs-lib";
 
@@ -68,7 +68,7 @@
         flake-module-graph = {
             url = "github:NireBryce/flake-module-graph";
             inputs.nixpkgs.follows = "nixpkgs";
-        }; 
+        };
 
         # static check and generator for the agent hook configs
         # (.polymorph/basecamp/; `nix run .#polymorph`). Experimental and

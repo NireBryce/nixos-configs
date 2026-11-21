@@ -4,7 +4,7 @@
 # https://github.com/NireBryce/dirs-as-categories/wiki
 { lib, ... }:
 {
-    homeManager = { pkgs, ... }: { 
+    homeManager = { pkgs, ... }: {
         # package summary: zellij -- terminal multiplexer and workspace
         # zellij terminal multiplexer
         home.packages = with pkgs; [
