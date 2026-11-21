@@ -1,8 +1,5 @@
 
 
-# Enable flake8 "bugbear" rules
-select = ["E", "F", "B"]
-ignore = []
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
 # Exclude a variety of commonly ignored directories.
@@ -29,6 +26,11 @@ exclude = [
     "node_modules",
     "venv",
 ]
-per-file-ignores = {}
 
 line-length = 128
+
+[lint]
+# Enable flake8 "bugbear" rules
+select = ["E", "F", "B"]
+ignore = []
+per-file-ignores = {}
