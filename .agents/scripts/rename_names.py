@@ -135,7 +135,7 @@ def rename_in_source(source, spec, mapping):
     tree = ast.parse(source)
     scope = find_scope(tree, spec)
     used = names_used(scope)
-    for old, new in mapping.items():
+    for new in mapping.values():
         if not new.isidentifier():
             raise ValueError(f"{new!r} is not a valid name")
         if new in used:

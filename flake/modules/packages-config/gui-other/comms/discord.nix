@@ -2,7 +2,7 @@
 # filename minus the .nix suffix, and its category is the name of the folder
 # it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
-{ 
+{
     homeManager = { pkgs, lib, ... }:
         # Same reason as obsidian.nix, and read the isDarwin test the same
         # way: "on darwin, homebrew.nix owns this app", NOT "Linux-only".

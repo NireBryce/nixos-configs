@@ -92,7 +92,7 @@ config-vs-usage split. "—" means no service exists to write one about yet.
 | shortlinks | [homelab/creating-golinks.md](../../homelab/creating-golinks.md) |
 | virtualization | — (`nire-llm-sandbox` removed 2026-08-28; see the category's own page) |
 
-No per-category file count here on purpose (removed 2026-08-29, with the
+No per-category file count here on purpose (removed 2026-08-29, with
 the factcheck `table`/`imports` checks that verified it) — read the category's own
 directory rather than trusting a number here.
 

@@ -56,7 +56,7 @@ originally mounted under a path prefix on `ts-cube`'s one hostname
 each app's own file for the by-then-retired mechanics, kept as history).
 
 **Tailscale Services (`svc:`) reopened this 2026-09-07** — see
-`flake/modules/general-config/homelab/reverse-proxy/tailscale-services/README.md` for
+`flake/modules/homelab-config/homelab/reverse-proxy/tailscale-services/README.md` for
 the ACL/tag/service-object side (a separate, API-managed resource, not
 declared in this repo's Nix). Each app now has its own tailnet DNS name
 with no path prefix. What Services did **not** solve, discovered live: it

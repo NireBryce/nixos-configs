@@ -2,7 +2,7 @@
 # filename minus the .nix suffix, and its category is the name of the folder
 # it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
-{ 
+{
     homeManager = {
         # package summary: direnv -- per-directory environment loader, with nix-direnv
         programs.direnv = {

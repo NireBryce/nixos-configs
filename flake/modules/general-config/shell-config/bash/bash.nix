@@ -11,7 +11,7 @@
         bash
         ];
     };
-    
+
     homeManager = { pkgs, lib, ... }:
     let
         # A real file rather than inlined, same reasoning as

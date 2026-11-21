@@ -3,7 +3,7 @@
 # it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
-    homeManager = { 
+    homeManager = {
         # package summary: tmux -- terminal multiplexer
         # tmux - terminal multiplexer
         programs.tmux = {

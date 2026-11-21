@@ -37,7 +37,7 @@
         # blesh module of any kind, so the `programs.bash.blesh.enable =
         # true` that used to be here had never applied. blesh is wired up
         # by hand in bash.nix instead: the package in home.packages,
-        # `source ble.sh --attach=none` early in initContent, and
+        # `source ble.sh --attach=none` early in initExtra, and
         # `ble-attach` at the end.
 
         # WHY THE PIECES BELOW ARE SHAPED THE WAY THEY ARE. This is the

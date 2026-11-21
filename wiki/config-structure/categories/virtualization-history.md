@@ -60,7 +60,7 @@ imports, still collected it (through `bareModulesOf`).
 
 The collector rule was removed 2026-09-28, which would have put the VM
 wiring into `virtualization`, so the file moved to
-`host-config/cube/vms/virtualization-cube.nix` (directory renamed
+`flake/modules/host-config/cube/cube-vm/virtualization-cube.nix` (directory renamed
 `cube-vm/` 2026-09-29), cube-only because only
 cube's configuration imports the `cube` category. Full account:
 `flake/doc/dirsAsCategory.md`'s History.

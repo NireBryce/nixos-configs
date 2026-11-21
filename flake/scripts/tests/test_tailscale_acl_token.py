@@ -9,7 +9,6 @@ Pure stdlib; runs in `just preflight`.
 """
 import importlib.util
 import os
-import sys
 import unittest
 from types import SimpleNamespace
 from unittest import mock

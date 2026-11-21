@@ -2,7 +2,7 @@
 # filename minus the .nix suffix, and its category is the name of the folder
 # it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
-{ 
+{
     homeManager = { pkgs, ... }: {
         # package summary: which -- prints the path a command name resolves to
         # which - find the location of a given command's binary

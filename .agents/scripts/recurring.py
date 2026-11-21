@@ -833,7 +833,9 @@ def analyze(min_sessions, top, max_len, sync=True):
 
 
 def report(analysis):
-    pct = lambda count: f'{100 * count // max(analysis["sessions"], 1)}%'
+    def pct(count):
+        return f'{100 * count // max(analysis["sessions"], 1)}%'
+
     def src(entry):
         if entry['local']:
             return f'{entry["source"]} {entry["sessions"]}'

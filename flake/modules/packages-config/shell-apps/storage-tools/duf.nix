@@ -3,7 +3,7 @@
 # it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
-    homeManager = { pkgs, ... }: { 
+    homeManager = { pkgs, ... }: {
         # package summary: duf -- `df` alternative with a table of mounted disks
         # `df` alternative
         home.packages = with pkgs; [

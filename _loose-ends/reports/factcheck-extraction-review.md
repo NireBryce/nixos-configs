@@ -10,7 +10,7 @@ rather than left untracked. Trim it once review is finished._
 
 ## What happened, in one paragraph
 
-`wiki/meta/scripts/check_docs.py` (2,079 lines, the doc-vs-repo checker
+`wiki/meta/scripts/check_docs.py` (deleted; 2,079 lines, the doc-vs-repo checker
 behind `just wiki-lint`) was extracted into a standalone tool,
 [factcheck](https://github.com/NireBryce/factcheck) (public, stdlib-only
 Python 3.11+, no dependencies), and nixos-configs was switched over to
@@ -32,7 +32,7 @@ header, each naming the revert.
   (`flake/modules/dev-shell.nix` puts its CLI on PATH and exports
   `FACTCHECK_SRC`).
 - **This repo's plugins**: `tools/docchecks/{tree,roster,imports_table,
-  secrets,routes,lessons,nixos_regions}.py`. `tree.py` wraps
+  secrets,routes,lessons,nixos_regions,skills_index}.py`. `tree.py` wraps
   `wiki/meta/scripts/nixtree.py` (kept — `wiki_gen.py` still imports it),
   so there is one static tree reader shared by checks, regions, and
   `just modules`.

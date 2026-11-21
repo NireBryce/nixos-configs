@@ -113,10 +113,10 @@
         # line existed.
         invariantsFor = name: host:
         let
-            hostConfig       = host.config;
-            persistDirs      = persistedDirectories hostConfig;
-            persistFiles     = persistedFiles hostConfig;
-            restoreRoot      = hostConfig.boot.initrd.systemd.services.restore-root or null;
+            hostConfig         = host.config;
+            persistDirs        = persistedDirectories hostConfig;
+            persistFiles       = persistedFiles hostConfig;
+            restoreRoot        = hostConfig.boot.initrd.systemd.services.restore-root or null;
             runsHandheldDaemon = hostConfig.services.handheld-daemon.enable or false;
 
             # restore-root existing is what marks a host as having opted

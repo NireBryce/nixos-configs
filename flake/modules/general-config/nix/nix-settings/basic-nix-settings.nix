@@ -13,16 +13,6 @@
         # This also drops the `allowUnfreePredicate = (_: true)` workaround for
         # home-manager issue #2942 that used to sit here. If unfree packages
         # start failing in home config, that is the first thing to look at.
-
-        # nix.extraOptions = "experimental-features = nix-command flakes";
-        # nix.settings = {
-        #     trusted-users = [ "root" ];
-        #     experimental-features = [
-        #         # duplicated in extraOptions?
-        #         "nix-command"
-        #         "flakes"
-        #     ];
-        # };
     };
 
     nixos = {
@@ -32,7 +22,6 @@
         nix = {
             nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
 
-            # extraOptions = "experimental-features = 'nix-command flakes'";
             settings = {
                 trusted-users = [ "root" ];
                 # Who may talk to the Nix daemon at all (default "*").
@@ -41,9 +30,8 @@
                 # building or fetching. root is always allowed.
                 allowed-users = [ "@wheel" ];
                 experimental-features = [
-                # duplicated in extraOptions?
-                "nix-command"
-                "flakes"
+                    "nix-command"
+                    "flakes"
                 ];
             };
 

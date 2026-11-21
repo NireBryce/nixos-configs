@@ -37,9 +37,13 @@ def glob_regex(pattern):
     while pos < len(pattern):
         char = pattern[pos]
         if pattern.startswith('**/', pos):
-            out.append('(?:.*/)?'); pos += 3; continue
+            out.append('(?:.*/)?')
+            pos += 3
+            continue
         if pattern.startswith('**', pos):
-            out.append('.*'); pos += 2; continue
+            out.append('.*')
+            pos += 2
+            continue
         if char == '*':
             out.append('[^/]*')
         elif char == '?':

@@ -3,7 +3,7 @@
 # it belongs to.
 # https://github.com/NireBryce/dirs-as-categories/wiki
 {
-    homeManager = { pkgs, ... }: { 
+    homeManager = { pkgs, ... }: {
         # package summary: ripgrep -- `rg`, recursive regex search, a grep alternative
         # `rg` is a much faster and more powerful grep alternative
         home.packages = with pkgs; [

@@ -17,7 +17,6 @@ One `git log --name-only` pass, so it is fast.
     doc_drift.py [--top N] [--root DIR]
 """
 import argparse
-import subprocess
 import sys
 from collections import defaultdict
 from pathlib import Path

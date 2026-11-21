@@ -82,10 +82,11 @@
         # landing -- landing since removed) into `homelab-config/homelab/`. Each of
         # those is still its own category nested under it
         # (`homelab-config/homelab/<name>/`, each a category because its subfolders hold
-        # modules) and still individually importable by name -- tenacity still pulls
-        # `containers` directly, unaffected by this move (durandal dropped both
-        # `virtualization` and `containers` 2026-08-27, the same day this move landed;
-        # cube's own copies come through `homelab` now), per the same coarse-and-fine
+        # modules) and still individually importable by name -- tenacity pulled
+        # `containers` directly then, unaffected by this move (it dropped it
+        # 2026-09-26; durandal dropped both `virtualization` and `containers`
+        # 2026-08-27, the same day this move landed; cube's own copies come
+        # through `homelab` now), per the same coarse-and-fine
         # nesting `hardware-config/hardware`/ `hardware-config/hardware/amd` already
         # established (see wiki/config-structure/module-files.md). All of it was
         # cube-only before this move and stays cube-only now -- nothing here belongs on

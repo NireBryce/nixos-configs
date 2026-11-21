@@ -44,8 +44,8 @@
         # `decky-loader`. The intended referent is the module option this
         # same file sets below.
         systemd.services.decky-loader.environment.LD_LIBRARY_PATH =
-          lib.makeLibraryPath
-          config.jovian.decky-loader.extraPackages;
+            lib.makeLibraryPath
+            config.jovian.decky-loader.extraPackages;
 
         # The display manager used to arrive as a side effect of
         # jovian.steam.autoStart, which enabled SDDM with autoLogin into
@@ -82,7 +82,6 @@
             decky-loader = {
                 enable = true;
                 extraPackages = with pkgs; [
-                    # power-profiles-daemon
                     inotify-tools
                     libpulseaudio
                     coreutils
@@ -155,7 +154,7 @@
                 loadAcpiCallModule = true;
             };
         };
-        
+
         systemd.services."power-profiles-daemon" = {
             enable = false; # conflicts with adjustor in hhd
         };

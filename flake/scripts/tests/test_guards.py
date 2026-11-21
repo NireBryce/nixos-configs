@@ -1202,8 +1202,10 @@ class NixUntrackedGuard(GuardCase):
     def setUp(self):
         self.repo = pathlib.Path(tempfile.mkdtemp(prefix="untracked-guard-"))
         self.addCleanup(shutil.rmtree, self.repo, ignore_errors=True)
-        git = lambda *args: subprocess.run(
-            ["git", "-C", str(self.repo), *args], check=True, capture_output=True)
+        def git(*args):
+            return subprocess.run(
+                ["git", "-C", str(self.repo), *args], check=True, capture_output=True)
+
         git("-c", "init.defaultBranch=main", "init", "-q")
         (self.repo / "tracked.nix").write_text("{ }\n")
         git("add", "tracked.nix")

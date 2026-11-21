@@ -15,7 +15,6 @@ is platform independent, and `just check` covers every host.
 """
 import shutil
 import subprocess
-import sys
 import tempfile
 import unittest
 from pathlib import Path

@@ -134,10 +134,10 @@ def prose(src, top=8):
             for match in FILLER.finditer(flat):
                 filler[(chapter.name, match.group(1).lower())] = filler.get((chapter.name, match.group(1).lower()), 0) + 1
     print(f"{len(chapters(src))} chapters")
-    print(f"\nlongest paragraphs (words):")
+    print("\nlongest paragraphs (words):")
     for word_count, file_name, snippet in sorted(paras, reverse=True)[:top]:
         print(f"  {word_count:4} {file_name}: {snippet}")
-    print(f"\nlongest sentences (words):")
+    print("\nlongest sentences (words):")
     for word_count, file_name, snippet in sorted(sents, reverse=True)[:top]:
         print(f"  {word_count:4} {file_name}: {snippet}")
     print("\nfiller phrases:", dict(sorted(filler.items(), key=lambda kv: -kv[1])[:top]) or "none")

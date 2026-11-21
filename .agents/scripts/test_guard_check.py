@@ -84,7 +84,7 @@ class Mapping(unittest.TestCase):
 
     def test_payload_shape(self):
         out = self.dir / "seen.json"
-        hook = self.hook("p.sh", f"true")
+        hook = self.hook("p.sh", "true")
         # Re-write to capture stdin instead of discarding it.
         Path(hook.strip('"')).write_text(
             f"#!/usr/bin/env bash\ncat > {out}\n")

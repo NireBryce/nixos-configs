@@ -1,6 +1,6 @@
 # Module style guide
 
-_Last modified: 2026-10-28_
+_Last modified: 2026-11-21_
 
 Every module under `flake/modules/` follows these conventions, not just
 packages. See
@@ -76,6 +76,18 @@ that closes the `in` expression:
 Indenting the `let` a level deeper makes `in {` open an indentation level
 whose closing bracket sits a level further out, and a reader skimming the
 file sees a level with no bracket closing it and suspects one is missing.
+
+Everything inside a bracket pair sits one level deeper than the line
+that opens it, in `settings = { ... }` blocks and `''` strings of Nix
+config alike. A key at the same column as the `settings = {` that holds it
+reads as a sibling of `settings`, so the block's extent is hidden. The same
+goes for a list's items under their `[`.
+
+Lines end without trailing whitespace (`.editorconfig` sets
+`trim_trailing_whitespace`), and a block has no blank line before its
+closing bracket or at the end of the file. Whitespace inside a `''` string
+that ships to a generated file is content: strip it only after checking the
+rendered file does not change meaningfully.
 
 ## Comment width
 

@@ -1,6 +1,6 @@
 # Module style guide, for agents
 
-_Last modified: 2026-10-28_
+_Last modified: 2026-11-21_
 
 Condensed from [module-style-guide.md](module-style-guide.md). Rules only.
 
@@ -70,6 +70,12 @@ Was `moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file)` +
   deeper: an extra level with no closing bracket of its own reads as a
   missing bracket.
 - `with pkgs; [ ... ]`, one package per line, no `pkgs.` prefix inside.
+- Contents of a bracket pair (attrset, list, `''` string body) sit one level
+  deeper than the line that opens it. A key at the column of its own
+  `settings = {` reads as a sibling.
+- No trailing whitespace (`.editorconfig`), no blank line before a closing
+  bracket or at end of file. Whitespace inside a `''` string that ships to a
+  generated file is content: check the rendered file before stripping.
 - **Aligned `=` columns** for runs of related assignments — match the
   surrounding block, don't apply it everywhere. **This is why `nix fmt` is
   not run**; `treefmt` is deliberately absent and would need

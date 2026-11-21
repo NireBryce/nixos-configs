@@ -152,8 +152,8 @@
 # - A rollback that stops running looks like a working machine. invariants.nix
 #   catches the structural ways it can stop: restore-root gone, not wanted
 #   by initrd.target, not before sysroot.mount, btrfs missing from the
-#   initrd. It gates all of these on restore-root
-#   existing, so a host that never imported this is exempt.
+#   initrd. It gates all of these on restore-root existing, so a host that
+#   never imported this is exempt.
 # - Hibernation has a desktop half. With the kernel refusing hibernation,
 #   KDE's PowerDevil asking for hybrid sleep (suspend + hibernation image)
 #   gets CanHybridSleep=no from logind and *drops the request* -- suspend
@@ -379,9 +379,8 @@
 # in 26.11), and systemd stage 1 fails an assertion on postResumeCommands, so
 # the switch was atomic. 2026-11-04: nixpkgs removed scripted initrd and the
 # boot.initrd.systemd.enable option, so the migration can no longer be reverted.
-# The working note, wiki/impermanence-stage1-
-# migration.md, was removed 2026-09-05 (git history). What the old mechanism
-# did that a revert would bring back:
+# The working note for the migration was removed 2026-09-05 (git history).
+# What the old mechanism did that a revert would bring back:
 #
 # - `udevadm settle` guarded the mount: scripted stage 1 hardcoded
 #   /dev/mapper/enc (created synchronously by cryptsetup), while

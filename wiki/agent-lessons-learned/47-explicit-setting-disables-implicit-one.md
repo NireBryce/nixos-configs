@@ -102,6 +102,6 @@ version never was.
   two-flavour bare-name situation this left behind.
 - §37, §43 — the other two entries about checks that pass without proving
   what you wanted proved.
-- `flake/modules/general-config/homelab/reverse-proxy/caddy/caddy.nix` — its
+- `flake/modules/homelab-config/homelab/reverse-proxy/caddy/caddy.nix` — its
   `tailscaleCert` binding carries the mechanism with `file:line` references
   into Caddy 2.11.4 (moved off the file header 2026-09-13).

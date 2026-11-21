@@ -94,7 +94,7 @@ def read_table(path=DATA):
 def check_sorted(path=DATA):
     """Candidate rows must be sorted by (command, candidate) among
     themselves -- keeps the diff readable and makes duplicates obvious."""
-    keys = [key for key in read_table(path)]
+    keys = list(read_table(path))
     if keys != sorted(keys):
         bad = [key for old, key in zip(keys, keys[1:]) if key <= old]
         raise ValueError(f'{path}: rows out of sorted order near {bad[0]}')

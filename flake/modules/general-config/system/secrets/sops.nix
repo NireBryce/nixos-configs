@@ -5,7 +5,7 @@
 { inputs, ... }:
 {
     nixos = { config, pkgs, ... }:
-    let   
+    let
       isEd25519 = k: k.type == "ed25519";
       getKeyPath = k: k.path;
       keys = builtins.filter isEd25519 config.services.openssh.hostKeys;
@@ -33,20 +33,17 @@
             sops
         ];
 
-    sops = {
-        age.sshKeyPaths = map getKeyPath keys;
-        defaultSopsFile = secretsPath;
-        # TODO: what did this do
-        # defaultSymlinkPath = "/run/user/1000/secrets";
-        # defaultSecretsMountPoint = "/run/user/1000/secrets.d";
-    };
+        sops = {
+            age.sshKeyPaths = map getKeyPath keys;
+            defaultSopsFile = secretsPath;
+        };
 
-    # No `sops.secrets.*` here on purpose -- this module only sets
-    # `defaultSopsFile` and the age keys. A secret declared HERE decrypts on
-    # every host importing `system`, i.e. all three Linux hosts; the
-    # cube-only ones are declared in the modules that actually use them
-    # (`forgejo.nix`, `restic.nix`), each of which says so. See history
-    # below for the five that used to sit here.
+        # No `sops.secrets.*` here on purpose -- this module only sets
+        # `defaultSopsFile` and the age keys. A secret declared HERE decrypts on
+        # every host importing `system`, i.e. every Linux host; the
+        # cube-only ones are declared in the modules that actually use them
+        # (`forgejo.nix`, `restic.nix`), each of which says so. See history
+        # below for the five that used to sit here.
     };
 }
 
