@@ -16,6 +16,7 @@ import py_style  # noqa: E402
 CASES = {
     "F401": "import os\n",
     "F541": "message = f'no placeholder'\nprint(message)\n",
+    "F821": "print(undefined_name)\n",
     "F841": "def run():\n    unused = 1\n",
     "E702": "first = 1; second = 2\nprint(first, second)\n",
     "E731": "double = lambda value: value * 2\nprint(double(1))\n",
@@ -62,6 +63,12 @@ class PyStyle(unittest.TestCase):
     def test_passes_clean_files(self):
         paths = [self.write("clean.py", CLEAN_PY), self.write("clean.nix", CLEAN_NIX)]
         self.assertEqual(py_style.cmd_check(paths), 0)
+
+    def test_uses_pinned_rule_set(self):
+        long_line = "value = '" + "x" * 200 + "'\nprint(value)\n"
+        self.assertEqual(py_style.ruff_findings([self.write("long.py", long_line)]), [])
+        flagged = py_style.ruff_findings([self.write("unused.py", "def run():\n    unused = 1\n")])
+        self.assertTrue(any(": F841 " in finding for finding in flagged), flagged)
 
     def test_noqa_exempts_a_line(self):
         path = self.write("noqa.py", "import os  # noqa: F401\n")

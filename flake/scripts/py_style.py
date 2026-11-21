@@ -4,12 +4,13 @@ whitespace in .nix and .py files.
 
     py_style.py check [FILE...]    # no FILE: every git-tracked .py and .nix
 
-Python rules, run through `ruff check --isolated` (the flag keeps the stray
-ruff.toml under packages-config/.../linter-configs from changing the rule
-set):
+Python rules come from the repo's ruff.toml (passed with --config, so the
+stray ruff.toml under packages-config/.../linter-configs cannot change the rule
+set, and bare `ruff check` agrees with this check):
 
     F401  unused import             F541  f-string without a placeholder
-    F841  unused local variable     E702  several statements on one line
+    F821  undefined name            F841  unused local variable
+    E702  several statements on one line
     E731  `name = lambda ...`
 
 Whitespace rule: no line in a .nix or .py file ends in a space or tab, which
@@ -33,7 +34,6 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-RULES = "F401,F541,F841,E702,E731"
 WHITESPACE_SUFFIXES = {".nix", ".py"}
 TRAILING_WHITESPACE = re.compile(r"[ \t]+$")
 # ruff --output-format concise: `path:line:col: CODE [*] message`
@@ -46,6 +46,10 @@ def repo_root():
     if result.returncode != 0:
         sys.exit("py_style: not inside a git repository")
     return Path(result.stdout.strip())
+
+
+def ruff_config():
+    return repo_root() / "ruff.toml"
 
 
 def tracked_files(root):
@@ -61,7 +65,7 @@ def ruff_findings(paths):
     if not python_files:
         return []
     result = subprocess.run(
-        ["ruff", "check", "--isolated", "--select", RULES, "--no-fix",
+        ["ruff", "check", "--config", str(ruff_config()), "--no-fix",
          "--output-format", "concise", *python_files],
         capture_output=True, text=True)
     findings = []
