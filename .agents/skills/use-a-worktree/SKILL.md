@@ -57,8 +57,32 @@ minus its feat/-style prefix>`.
 `<branch>` is the real shipping branch, not a throwaway label. Then `just`,
 `nix eval` and `gh pr create` work as usual. Verify you are in the worktree
 (`git status -sb`, `pwd`, or `just agent where`, which also shows commits ahead
-of `origin/experimental`) before anything state-changing. The bash tool can
-reset cwd between calls, so re-`cd` or use absolute paths.
+of `origin/experimental`) before anything state-changing.
+
+**Claude Code: enter the worktree instead of typing its path on every call.**
+The Bash tool keeps a `cd` between calls only inside the session's working
+directories, and the scratchpad is outside them, so a scratchpad worktree
+forces `git -C <path>` or an absolute path on each command. Create the
+worktree under `.claude/worktrees/` (gitignored), then switch the session into
+it with the `EnterWorktree` tool (deferred: load it with `ToolSearch`
+`select:EnterWorktree,ExitWorktree`):
+
+```sh
+just agent worktree new <branch> --root <repo>/.claude/worktrees
+```
+
+```text
+EnterWorktree path=<repo>/.claude/worktrees/wt-<branch-minus-prefix>
+```
+
+After that, bare `git status`, `just check` and `gh pr create` run in the
+worktree. Do not use `EnterWorktree name=...` for shipping work: it creates a
+`worktree-<name>` branch off `worktree.baseRef`, not the real branch off
+`origin/experimental`. A worktree entered with `path` is not removed by
+`ExitWorktree`: call it with `action: "keep"`, then remove the worktree and
+branch as under Clean up. Checked 2026-11-20: after entering, `pwd` and `git
+status -sb` showed the worktree and its `origin/experimental` tracking branch.
+Other harnesses: use `git -C <path>` and absolute paths.
 
 **Already edited in the shared checkout?** Move the edits instead of committing
 there. Do this only when every dirty path is yours: run `git status --short`
