@@ -32,8 +32,8 @@
 #     was added, rather than assuming this one applies.
 #
 #   - Disk layout comes from a captured hardware-configuration, not disko:
-#     installed by hand off the stock live ISO, so the placeholder
-#     disko-cube.nix was replaced by a real nixos-generate-config capture.
+#     installed by hand off the stock live ISO, so the placeholder disko
+#     module was replaced by a real nixos-generate-config capture.
 #     cube/hardware/hardware-cube.nix's header and history have the story.
 #
 # WITHOUT impermanence, unlike durandal and tenacity: plain persistent root,
@@ -49,10 +49,10 @@
 {
     includes.nixos = [
         # ── this machine ──────────────────────────────────────────────────────
-        # host-config/cube/: hardware-cube, boot-cube, nixpkgs-hostPlatform-cube,
-        # nixpkgs-stateVersion-cube -- suffixed for the same reason
-        # tenacity's are: a module's name is its filename, and
-        # a repeated name anywhere in the tree stops evaluation.
+        # This host's own modules are every file under host-config/cube/
+        # (configuration/, hardware/, cube-vm/). They carry a -cube suffix for
+        # the same reason tenacity's are suffixed: a module's name is its
+        # filename, and a repeated name anywhere in the tree stops evaluation.
         "cube"
 
         # ── shared ────────────────────────────────────────────────────────────

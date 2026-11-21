@@ -34,6 +34,8 @@
                 # lint ratchet (`just lint`)
                 statix
                 deadnix
+                # Python lint rules (`just py-style`, flake/scripts/py_style.py)
+                ruff
                 # LSPs -- .vscode/settings.json points at nixd
                 nixd
                 nil

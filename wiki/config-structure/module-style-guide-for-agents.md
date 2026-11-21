@@ -73,7 +73,8 @@ Was `moduleName = lib.removeSuffix ".nix" (baseNameOf __curPos.file)` +
 - Contents of a bracket pair (attrset, list, `''` string body) sit one level
   deeper than the line that opens it. A key at the column of its own
   `settings = {` reads as a sibling.
-- No trailing whitespace (`.editorconfig`), no blank line before a closing
+- No trailing whitespace (`.editorconfig`; `py_style.py` checks it in
+  preflight), no blank line before a closing
   bracket or at end of file. Whitespace inside a `''` string that ships to a
   generated file is content: check the rendered file before stripping.
 - **Aligned `=` columns** for runs of related assignments — match the

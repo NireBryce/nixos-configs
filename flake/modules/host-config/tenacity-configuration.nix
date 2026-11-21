@@ -13,15 +13,13 @@
 
     includes.nixos = [
         # ── this machine ──────────────────────────────────────────────────────
-        # host-config/tenacity/: hardware-tenacity, boot-tenacity,
-        # touchscreen-wakeup-tenacity, iommu-tenacity,
-        # nixpkgs-hostPlatform-tenacity, nixpkgs-stateVersion-tenacity -- suffixed
+        # This host's own modules are every file under host-config/tenacity/
+        # (configuration/, hardware/, fixes/). They carry a -tenacity suffix
         # because a module's name is its filename: two nixos hosts both
         # declaring a bare nixpkgs-hostPlatform.nix would share one name, and a
         # repeated name stops evaluation (dirs-as-categories names both
         # files). Found the first time these were added unsuffixed;
-        # durandal's copies got the same suffix treatment right after, for the
-        # same reason.
+        # durandal's copies got the same suffix right after.
         "tenacity"
 
         # ── shared ────────────────────────────────────────────────────────────

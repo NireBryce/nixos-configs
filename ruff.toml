@@ -1,0 +1,16 @@
+# Repo-wide ruff rule set. Bare `ruff check` (editors, hand runs) and
+# flake/scripts/py_style.py (preflight and CI, which passes this file with
+# --config) read it, so they report the same findings. Edit the rule list
+# here only; py_style.py has no copy of it.
+#
+# The file under packages-config/.../python-dev/!dotfiles/linter-configs/
+# is an editor dotfile for the user's own home directory, not this repo.
+[lint]
+select = [
+    "F401",  # unused import
+    "F541",  # f-string without a placeholder
+    "F821",  # undefined name
+    "F841",  # unused local variable
+    "E702",  # several statements on one line
+    "E731",  # `name = lambda ...`
+]

@@ -48,7 +48,6 @@ lists, class declarations), never restated here.
 Pure stdlib; fixture tests in test_wiki_gen.py (`just wiki-gen-test`, part
 of `just preflight` and so of CI).
 """
-import importlib.util
 import json
 import subprocess
 import pathlib

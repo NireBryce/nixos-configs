@@ -34,11 +34,8 @@
             enableCompletion = true;
             enableVteIntegration = true;
 
-            #? Shell integrations go here but main bash config is in the system one.
-            sessionVariables = {
-            };
-            shellAliases = {
-            };
+            # Session variables and aliases live in shell-env.nix; the main
+            # bash config is in the system module.
             #? Extra commands that should be run when initializing an interactive shell.
             #
             # Split into three ordered pieces rather than one block. ble.sh
@@ -176,13 +173,6 @@
                     [[ ! ''${BLE_VERSION-} ]] || ble-attach
                 '')
             ];
-            # ? Extra commands that should be placed in {file}~/.bashrc.
-            # ?   Note that these commands will be run even in non-interactive shells.
-            bashrcExtra = '''';
-            #? Extra commands that should be run when initializing a login shell.
-            profileExtra = '''';
-            #? Extra commands that should be run when logging out of an interactive shell.
-            logoutExtra = '''';
         };
     };
 }

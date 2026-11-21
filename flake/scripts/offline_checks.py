@@ -54,6 +54,12 @@ NEEDS_NIX = {
     "flake/scripts/modules.py":
         "reads the module tree through nix eval",
 }
+# Steps that need a tool from the dev shell, run only where it is on PATH:
+# script path -> the executable it needs.
+NEEDS_TOOL = {
+    "flake/scripts/py_style.py": "ruff",
+    "flake/scripts/tests/test_py_style.py": "ruff",
+}
 # Steps that are not python: skipped, with the reason shown.
 NOT_PYTHON = "not a python3 step (needs nix, or warn-only)"
 # Known non-python steps, with their own stated reason (keyed by the first
@@ -172,6 +178,10 @@ def classify(lines):
         rest = (match.group(3) or "").split()
         if script in NEEDS_NIX:
             out.append((None, script, NEEDS_NIX[script]))
+            continue
+        if script in NEEDS_TOOL and not shutil.which(NEEDS_TOOL[script]):
+            out.append((None, script, f"needs {NEEDS_TOOL[script]} on PATH "
+                                      f"(dev shell); CI runs it"))
             continue
         argv = [sys.executable, script, *rest, *EXTRA_ARGS.get(script, [])]
         out.append((argv, script, None))

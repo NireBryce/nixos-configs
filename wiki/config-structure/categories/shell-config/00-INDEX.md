@@ -1,6 +1,6 @@
 # `shell-config` — `general-config/shell-config/`
 
-_Last modified: 2026-10-22_
+_Last modified: 2026-11-21_
 
 ## Contents
 
@@ -36,7 +36,7 @@ _Last modified: 2026-10-22_
   the cod completion-description bridge (`cod-desc.tsv` + `cod-desc.bash`):
   [cod-desc](cod-desc.md).
 - **`shell-env/shell-env.nix`** — `homeManager`-only: `home.shellAliases`
-  (the everyday `ll`, `cp -i`, `lcd`, `img-cat`, `kssh`, etc.), plus
+  (the everyday `ll`, `cp -i`, `img-cat`, `kssh`, etc.), plus
   `home.sessionVariables` and `home.sessionPath`. Since 2026-08-24 it also
   carries the category's only platform-guarded content: a
   `lib.optionalAttrs pkgs.stdenv.isDarwin` block aliasing `discord` and
