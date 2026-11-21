@@ -43,6 +43,11 @@ sources = ["flake/modules/homelab-config/homelab/reverse-proxy/caddy/caddy.nix",
            "wiki/config-structure/categories/reverse-proxy-history.md"]
 base-domain = "ts-cube.moose-micro.ts.net"
 
+[host_files]
+dir = "flake/modules/host-config"
+files = "*-configuration.nix"
+skip-prefixes = ["nire-", "ts-"]
+
 [plugins]
 load = ["tools/docchecks/tree.py",
         "tools/docchecks/roster.py",
@@ -51,4 +56,5 @@ load = ["tools/docchecks/tree.py",
         "tools/docchecks/routes.py",
         "tools/docchecks/lessons.py",
         "tools/docchecks/nixos_regions.py",
-        "tools/docchecks/skills_index.py"]
+        "tools/docchecks/skills_index.py",
+        "tools/docchecks/host_files.py"]

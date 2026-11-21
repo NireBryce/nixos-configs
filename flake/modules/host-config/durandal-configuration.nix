@@ -14,12 +14,10 @@
 {
     includes.nixos = [
         # ── this machine ──────────────────────────────────────────────────────
-        # host-config/durandal/: hardware-durandal, boot-durandal,
-        # b550-suspend-fix, suspend-probe-durandal,
-        # nixpkgs-hostPlatform-durandal, nixpkgs-stateVersion-durandal,
-        # planetside2-ports-durandal, gaming-durandal
-        # -- suffixed 2026-08-12 so a second nixos host's copies (tenacity's)
-        # don't clash with these under the "module name is its filename" rule.
+        # This host's own modules are every file under host-config/durandal/
+        # (configuration/, hardware/, fixes/). Most carry a -durandal suffix
+        # (added 2026-08-12): a module's name is its filename, and a second
+        # nixos host's copies (tenacity's) would clash with unsuffixed ones.
         "durandal"
 
         # ── shared ────────────────────────────────────────────────────────────

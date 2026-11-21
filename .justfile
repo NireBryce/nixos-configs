@@ -332,6 +332,7 @@ preflight:
     @python3 flake/scripts/tests/test_parallel_unittest.py
     @python3 flake/scripts/tests/test_extracted_scripts.py
     @python3 flake/scripts/tests/test_comment_wrap.py
+    @python3 flake/scripts/tests/test_host_files_check.py
     @python3 flake/scripts/tests/test_init_ssh_handle.py
     @python3 flake/scripts/tests/test_retire_old_ssh_sign.py
     @python3 flake/scripts/tests/test_rebuild_ssh_sign_note.py
