@@ -84,8 +84,38 @@ if [ "$class" = darwin ]; then
     exec nh darwin "$action" "$flake" --hostname "$host" -o "$flake/result"
 fi
 
-if [ "$action" != switch ]; then
-    exec nh os "$action" "$flake" --hostname "$host" -o "$flake/result"
+if [ "$action" = build ]; then
+    exec nh os build "$flake" --hostname "$host" -o "$flake/result"
+fi
+
+# One-time note, shown after a boot or switch: the hand-made git signing
+# script from before elly-git.nix set gpg.ssh.program is still wired in by a
+# repo-local override, which wins over the new wrapper. Printed only when the
+# evaluated config carries the new wrapper and the override or the old script
+# still exists, so it stops appearing once `just retire-old-ssh-sign` has run.
+# Warn-only. Pages: wiki/ssh/commit-signing.md.
+ssh_sign_note() {
+    local wrapper check_status=0
+    wrapper=$(nix eval --raw "${flake}#nixosConfigurations.${host}.config.home-manager.users.elly.programs.git.settings.gpg.ssh.program" 2>/dev/null) || return 0
+    [[ "$wrapper" == *git-ssh-sign ]] || return 0
+    "$(dirname -- "$0")/retire-old-ssh-sign.sh" --check "$flake" || check_status=$?
+    [ "$check_status" -eq 4 ] || return 0
+    echo >&2
+    echo "ONE-TIME NOTE: an old git signing script is still wired in and overrides the" >&2
+    if [ "$action" = boot ]; then
+        echo "  new one. After you reboot, run \`just retire-old-ssh-sign\` (dry run), then" >&2
+    else
+        echo "  new one. Run \`just retire-old-ssh-sign\` (dry run), then" >&2
+    fi
+    echo "  \`just retire-old-ssh-sign --apply --remove-script\`. This note stops once it is" >&2
+    echo "  done; it does not repeat. See wiki/ssh/commit-signing.md." >&2
+}
+
+if [ "$action" = boot ]; then
+    status=0
+    nh os boot "$flake" --hostname "$host" -o "$flake/result" || status=$?
+    if [ "$status" -eq 0 ]; then ssh_sign_note; fi
+    exit "$status"
 fi
 
 # A switch that moves glibc's version breaks login and unlock for every
@@ -102,4 +132,5 @@ if [ "$status" -eq 0 ] && [[ "$warning" == *WARNING* ]]; then
     echo "  back in and \`sudo systemctl restart display-manager\` before anything" >&2
     echo "  locks. Stuck lock screen: \`loginctl unlock-sessions\`." >&2
 fi
+if [ "$status" -eq 0 ]; then ssh_sign_note; fi
 exit "$status"

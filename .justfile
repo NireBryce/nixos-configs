@@ -316,6 +316,7 @@ preflight:
     @python3 flake/scripts/tests/test_comment_wrap.py
     @python3 flake/scripts/tests/test_init_ssh_handle.py
     @python3 flake/scripts/tests/test_retire_old_ssh_sign.py
+    @python3 flake/scripts/tests/test_rebuild_ssh_sign_note.py
     @python3 flake/scripts/tests/test_tailscale_acl_token.py
     @just guards-test
     @just preflight-mirror-test
@@ -343,13 +344,15 @@ boot:
     # stays in the systemd-boot menu as the fallback. Worth preferring over
     # `switch` for anything touching initrd, the bootloader or impermanence.
     # NixOS only -- nix-darwin has no boot generation; rebuild.sh says so.
+    # Also prints the one-time `retire-old-ssh-sign` note while it applies.
     @echo "==> {{host}} will be the boot default on next reboot"
     @{{scripts}}/rebuild.sh boot {{flake}} {{host}}
 
 # Build and activate, applying Home Manager too
 switch:
     # HM is integrated on both classes here, so there is no separate
-    # `nh home switch` on either.
+    # `nh home switch` on either. On NixOS it also prints the one-time
+    # `retire-old-ssh-sign` note while the old signing script is still wired in.
     @echo "==> ACTIVATING {{host}} now, home-manager included"
     @{{scripts}}/rebuild.sh switch {{flake}} {{host}}
 
